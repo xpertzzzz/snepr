@@ -5,6 +5,7 @@ import {
   REAL_SALONS_DATA,
   RealSalon,
 } from "@/lib/real-salons";
+import { ScissorCutAnimation } from "@/components/animations/ScissorCutAnimation";
 
 export const Route = createFileRoute("/_marketing/")({
   head: () => ({
@@ -443,6 +444,11 @@ export function SneprLandingPageExact() {
         </div>
       </section>
 
+      {/* ─── SCISSOR CUT PERFORATION TRANSITION ─── */}
+      <div className="wrap my-2">
+        <ScissorCutAnimation cuttingText="LIVE QUEUEING & REAL-TIME CHAIR UPDATES" />
+      </div>
+
       {/* ─── 2. DISCOVER SECTION ─── */}
       <section className="section discover" id="discover">
         <div className="wrap">
@@ -620,6 +626,12 @@ export function SneprLandingPageExact() {
               <div id="tout">
                 {generatedToken && (
                   <div className="tok">
+                    {/* Perforated Scissor Cut Header */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 10px", opacity: 0.75 }}>
+                      <span style={{ fontSize: "14px", transform: "scaleX(-1)", display: "inline-block" }}>✂</span>
+                      <span style={{ flex: 1, borderTop: "1px dashed rgba(240, 194, 143, 0.6)", margin: "0 8px" }} />
+                      <span style={{ fontSize: "9px", letterSpacing: "1.5px", textTransform: "uppercase", color: "#f0c28f" }}>SNIP TICKET</span>
+                    </div>
                     <div className="note" style={{ color: "#c9b8aa" }}>DEMO TOKEN</div>
                     <div className="tk">{generatedToken.token}</div>
                     <div style={{ fontSize: ".85rem" }}>
@@ -727,6 +739,11 @@ export function SneprLandingPageExact() {
           </div>
         </div>
       </section>
+
+      {/* ─── SCISSOR CUT PERFORATION TRANSITION ─── */}
+      <div className="wrap my-2">
+        <ScissorCutAnimation cuttingText="TRY THE LOOK BEFORE THE CUT" />
+      </div>
 
       {/* ─── 5. AI HAIR STUDIO SECTION ─── */}
       <section className="section ai" id="ai">
