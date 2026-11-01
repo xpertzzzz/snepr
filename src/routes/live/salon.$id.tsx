@@ -530,3 +530,5 @@ function PublicSalonDetailPage() {
     </div>
   );
 }
+
+export default PublicSalonDetailPage;

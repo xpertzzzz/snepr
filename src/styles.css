@@ -468,8 +468,8 @@ h2{font-size:clamp(2.1rem,4vw,3.2rem);max-width:720px;margin-bottom:14px}
 .hidden{display:none!important}
 
 /* header */
-header{position:sticky;top:0;z-index:30;height:80px;display:flex;align-items:center;background:rgba(247,243,237,.82);backdrop-filter:blur(18px);border-bottom:1px solid transparent;transition:border-color .3s,height .3s}
-header.s{border-color:rgba(115,82,59,.12);height:68px}
+header, .snepr-hdr{position:sticky;top:0;z-index:30;height:84px;display:flex;align-items:center;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:1px solid transparent;transition:background .35s cubic-bezier(.16,1,.3,1),backdrop-filter .35s cubic-bezier(.16,1,.3,1),border-color .35s cubic-bezier(.16,1,.3,1),height .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1)}
+header.s, .snepr-hdr.s{background:rgba(247,243,237,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(115,82,59,.12);box-shadow:0 4px 20px -8px rgba(33,25,20,.08);height:68px}
 .nav{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .logo{font-family:var(--head);font-size:2.3rem;font-weight:800;letter-spacing:-.1em;line-height:1}
 .logo i{font-style:normal;color:var(--brown);letter-spacing:-.18em;margin:0 .04em}

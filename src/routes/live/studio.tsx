@@ -421,3 +421,6 @@ function AIStudioPage() {
     </div>
   );
 }
+
+
+export default AIStudioPage;

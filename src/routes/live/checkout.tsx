@@ -56,3 +56,6 @@ function AppCheckout() {
     </div>
   );
 }
+
+
+export default AppCheckout;

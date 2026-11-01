@@ -63,9 +63,9 @@ export function Navbar() {
 
           {/* Desktop Nav Links */}
           <nav className="links" aria-label="Main">
-            <a href={getAnchorHref("#discover")}>Explore</a>
-            <a href={getAnchorHref("#discover")}>Live Queues</a>
-            <a href={getAnchorHref("#ai")}>AI Studio</a>
+            <Link to="/live" className="hover:text-[#8c4d27] transition-colors">Live Queues</Link>
+            <a href={getAnchorHref("#discover")}>Find a Salon</a>
+            <Link to="/live/studio" className="hover:text-[#8c4d27] transition-colors">AI Studio</Link>
             <a href={getAnchorHref("#how")}>How it works</a>
             <a href={getAnchorHref("#salonos")}>For Salons</a>
             <a href={getAnchorHref("#pricing")}>Pricing</a>
@@ -94,9 +94,9 @@ export function Navbar() {
               </Link>
             )}
 
-            <a className="btn btn-dark" href={getAnchorHref("#discover")}>
+            <Link className="btn btn-dark" to="/live">
               Find a Salon
-            </a>
+            </Link>
 
             <button
               className="burger"
@@ -120,9 +120,9 @@ export function Navbar() {
         >
           ✕
         </button>
-        <a href={getAnchorHref("#discover")} onClick={closeMenu}>Explore</a>
-        <a href={getAnchorHref("#discover")} onClick={closeMenu}>Live Queues</a>
-        <a href={getAnchorHref("#ai")} onClick={closeMenu}>AI Studio</a>
+        <Link to="/live" onClick={closeMenu}>Live Queues</Link>
+        <a href={getAnchorHref("#discover")} onClick={closeMenu}>Find a Salon</a>
+        <Link to="/live/studio" onClick={closeMenu}>AI Studio</Link>
         <a href={getAnchorHref("#how")} onClick={closeMenu}>How it works</a>
         <a href={getAnchorHref("#salonos")} onClick={closeMenu}>For Salons</a>
         <a href={getAnchorHref("#pricing")} onClick={closeMenu}>Pricing</a>

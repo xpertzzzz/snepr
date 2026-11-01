@@ -10,8 +10,18 @@ import {
 
 export { Outlet, Navigate };
 
+function getNormalizedParams(): any {
+  const p = (rrUseParams() as Record<string, string>) || {};
+  const res: Record<string, string> = { ...p };
+  Object.keys(p).forEach((k) => {
+    if (k.startsWith("$")) res[k.slice(1)] = p[k];
+    else res[`$${k}`] = p[k];
+  });
+  return res;
+}
+
 export function useParams<T = Record<string, string>>(): T {
-  return rrUseParams() as unknown as T;
+  return getNormalizedParams() as unknown as T;
 }
 
 export function useLocation() {
@@ -73,7 +83,7 @@ export function createFileRoute(path: string) {
     const Component = options.component || (() => null);
     const Wrapped: any = (props: any) => React.createElement(Component, props);
     Wrapped.Route = Wrapped;
-    Wrapped.useParams = () => rrUseParams();
+    Wrapped.useParams = () => getNormalizedParams();
     Wrapped.useSearch = () => {
       const loc = rrUseLocation();
       return Object.fromEntries(new URLSearchParams(loc.search));

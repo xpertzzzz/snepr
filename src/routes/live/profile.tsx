@@ -40,3 +40,6 @@ function AppProfile() {
     </div>
   );
 }
+
+
+export default AppProfile;

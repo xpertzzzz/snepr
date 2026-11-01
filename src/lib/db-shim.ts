@@ -36,3 +36,4 @@ export const db: any = {
 };
 
 export default { connection, db };
+

@@ -203,3 +203,6 @@ function AppQueue() {
     </div>
   );
 }
+
+
+export default AppQueue;

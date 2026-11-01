@@ -268,3 +268,6 @@ function AppActivity() {
     </div>
   );
 }
+
+
+export default AppActivity;

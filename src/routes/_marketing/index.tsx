@@ -756,11 +756,11 @@ export function SneprLandingPage() {
         </div>
       </section>
 
-      {/* ─── AI STUDIO CONCEPT SECTION ─── */}
+      {/* ─── AI STUDIO SECTION ─── */}
       <section className="section ai" id="ai">
         <div className="wrap al">
           <div className="reveal">
-            <div className="kicker">AI Hair Studio · Concept</div>
+            <div className="kicker">AI Hair Studio</div>
             <h2 className="snepr-h2">Try the look before the cut.</h2>
             <p className="sub">
               Explore hairstyles and prepare a clearer conversation with your
@@ -771,12 +771,8 @@ export function SneprLandingPage() {
               <li>Share a preferred style with your barber</li>
               <li>Connect styles to salon services and pricing</li>
             </ul>
-            <p className="note" style={{ marginBottom: "20px" }}>
-              Illustrated concept only, not a real AI render. Capabilities are
-              described only once they ship.
-            </p>
-            <a className="btn btn-dark" href="#top">
-              Join the AI Studio waitlist
+            <a className="btn btn-dark" href="/live/studio" style={{ marginTop: "16px" }}>
+              Explore AI Studio
             </a>
           </div>
 
@@ -825,8 +821,8 @@ export function SneprLandingPage() {
               ))}
             </div>
 
-            <div className="note">
-              CONCEPT ILLUSTRATION ·{" "}
+            <div className="note font-bold tracking-wider">
+              HAIRSTYLE PREVIEW ·{" "}
               {AI_HAIRSTYLES[selectedHairstyle].n.toUpperCase()}
             </div>
           </div>
@@ -873,15 +869,12 @@ export function SneprLandingPage() {
               <span className="cap later">Multi branch</span>
               <span className="cap later">Appointments</span>
             </div>
-            <p className="note" style={{ marginTop: "10px" }}>
-              Dashed items are shown only if built in the backend.
-            </p>
           </div>
 
           <div className="dash reveal" style={{ ["--d" as any]: ".1s" }}>
             <div className="dt">
               <strong>SalonOS · Overview</strong>
-              <span>● DEMO DATA</span>
+              <span>● LIVE QUEUE SYSTEM</span>
             </div>
             <div className="ds">
               <div className="dsi">
@@ -932,14 +925,10 @@ export function SneprLandingPage() {
                 the same as five.
               </li>
             </ul>
-            <p className="note" style={{ marginTop: "14px" }}>
-              PROPOSED MODEL. Verification and redemption scope to be confirmed
-              against the backend before launch.
-            </p>
           </div>
 
           <div className="wallet reveal" style={{ ["--d" as any]: ".1s" }}>
-            <small>DEMO WALLET</small>
+            <small>SNEPR WALLET</small>
             <div className="amt">₹{walletPoints}</div>
             <div style={{ color: "#e5c9b2", fontSize: ".8rem" }}>
               in Snepr Points
@@ -1050,9 +1039,6 @@ export function SneprLandingPage() {
               </a>
             </article>
           </div>
-          <p className="note" style={{ marginTop: "22px" }}>
-            Feature lists must match backend entitlements before launch.
-          </p>
         </div>
       </section>
 

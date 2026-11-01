@@ -613,3 +613,5 @@ function LiveDashboard() {
     </div>
   );
 }
+
+export default LiveDashboard;
