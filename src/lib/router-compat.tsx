@@ -28,6 +28,11 @@ export function useLocation() {
   return rrUseLocation();
 }
 
+export function useSearch() {
+  const loc = rrUseLocation();
+  return Object.fromEntries(new URLSearchParams(loc.search));
+}
+
 export const Link = React.forwardRef<any, any>(({ to, params, search, ...props }, ref) => {
   let target = to;
   if (typeof target === "string" && params && typeof params === "object") {

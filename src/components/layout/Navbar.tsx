@@ -66,25 +66,23 @@ export function Navbar() {
             />
           </Link>
 
-          {/* Desktop Nav Links */}
+          {/* Desktop Nav Links - Exactly 4 elements */}
           <nav className="links" aria-label="Main">
             <Link to="/live" className="hover:text-[#8c4d27] transition-colors">Live Queues</Link>
-            <a href={getAnchorHref("#discover")}>Find a Salon</a>
-            <Link to="/live/studio" className="hover:text-[#8c4d27] transition-colors">AI Studio</Link>
-            <a href={getAnchorHref("#how")}>How it works</a>
-            <a href={getAnchorHref("#salonos")}>For Salons</a>
-            <a href={getAnchorHref("#pricing")}>Pricing</a>
+            <Link to="/live/aistudio" className="hover:text-[#8c4d27] transition-colors">AI Studio</Link>
+            <Link to="/salons" className="hover:text-[#8c4d27] transition-colors">For Salons</Link>
+            <Link to="/pricing" className="hover:text-[#8c4d27] transition-colors">Pricing</Link>
           </nav>
 
-          {/* Right Action Buttons */}
+          {/* Right Action Button - One Universal CTA: Get Started ↗ */}
           <div className="nav-r">
             {session ? (
               <div className="flex items-center gap-3">
                 <Link
-                  to={["super_admin", "sub_admin", "salon_owner", "staff"].includes(session.role) ? "/salon" : "/live"}
+                  to={["super_admin", "sub_admin", "salon_owner"].includes(session.role) ? "/salon-os" : "/profile"}
                   className="si hover:text-[#8c4d27] transition-colors"
                 >
-                  Dashboard
+                  {session.name ? session.name.split(" ")[0] : "Dashboard"}
                 </Link>
                 <button
                   onClick={handleLogout}
@@ -93,14 +91,13 @@ export function Navbar() {
                   Sign out
                 </button>
               </div>
-            ) : (
-              <Link to="/login" className="si hover:text-[#8c4d27] transition-colors">
-                Sign in
-              </Link>
-            )}
+            ) : null}
 
-            <Link className="btn btn-dark" to="/live">
-              Find a Salon
+            <Link
+              className="btn btn-dark"
+              to={session ? (["super_admin", "sub_admin", "salon_owner"].includes(session.role) ? "/salon-os" : "/live") : "/login"}
+            >
+              Get Started ↗
             </Link>
 
             <button
@@ -126,21 +123,19 @@ export function Navbar() {
           ✕
         </button>
         <Link to="/live" onClick={closeMenu}>Live Queues</Link>
-        <a href={getAnchorHref("#discover")} onClick={closeMenu}>Find a Salon</a>
-        <Link to="/live/studio" onClick={closeMenu}>AI Studio</Link>
-        <a href={getAnchorHref("#how")} onClick={closeMenu}>How it works</a>
-        <a href={getAnchorHref("#salonos")} onClick={closeMenu}>For Salons</a>
-        <a href={getAnchorHref("#pricing")} onClick={closeMenu}>Pricing</a>
+        <Link to="/live/aistudio" onClick={closeMenu}>AI Studio</Link>
+        <Link to="/salons" onClick={closeMenu}>For Salons</Link>
+        <Link to="/pricing" onClick={closeMenu}>Pricing</Link>
         {session ? (
           <Link
-            to={["super_admin", "sub_admin", "salon_owner", "staff"].includes(session.role) ? "/salon" : "/live"}
+            to={["super_admin", "sub_admin", "salon_owner"].includes(session.role) ? "/salon-os" : "/profile"}
             onClick={closeMenu}
           >
             Dashboard
           </Link>
         ) : (
           <Link to="/login" onClick={closeMenu}>
-            Sign in
+            Get Started ↗
           </Link>
         )}
       </div>

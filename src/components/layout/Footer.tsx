@@ -13,42 +13,38 @@ export function Footer() {
             <p className="bp">Live salon queues and wait times. Know before you go.</p>
           </div>
           <div>
-            <h5>CUSTOMERS</h5>
+            <h5>EXPLORE</h5>
             <ul>
-              <li><a href="#discover">Explore salons</a></li>
-              <li><a href="#discover">Live queues</a></li>
-              <li><a href="#demo">Join queue</a></li>
-              <li><a href="#ai">AI Studio</a></li>
-              <li><Link to="/live/activity">My bookings</Link></li>
-              <li><a href="#points">Snepr Points</a></li>
+              <li><Link to="/live">Live Queues</Link></li>
+              <li><Link to="/live/aistudio">AI Studio</Link></li>
+              <li><Link to="/live">Find a Salon</Link></li>
             </ul>
           </div>
           <div>
-            <h5>SALON OWNERS</h5>
+            <h5>FOR SALONS</h5>
             <ul>
-              <li><Link to="/claim">List your salon</Link></li>
-              <li><Link to="/claim">Claim your salon</Link></li>
-              <li><a href="#salonos">SalonOS</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><Link to="/terms-of-service">Partner terms</Link></li>
-              <li><Link to="/salon">Partner dashboard</Link></li>
+              <li><Link to="/salon-os">SalonOS</Link></li>
+              <li><Link to="/pricing">Pricing</Link></li>
+              <li><Link to="/partner/register">Register Salon</Link></li>
+              <li><Link to="/partner/claim">Claim Salon</Link></li>
             </ul>
           </div>
           <div>
             <h5>COMPANY</h5>
             <ul>
               <li><Link to="/about">About</Link></li>
+              <li><a href="/#how">How It Works</a></li>
               <li><Link to="/contact">Contact</Link></li>
-              <li><a href="#faq">Help center</a></li>
+              <li><Link to="/help">Help Center</Link></li>
             </ul>
           </div>
           <div>
             <h5>LEGAL</h5>
             <ul>
-              <li><Link to="/terms-of-service">Terms of service</Link></li>
-              <li><Link to="/privacy">Privacy policy</Link></li>
-              <li><Link to="/refund">Refund policy</Link></li>
-              <li><Link to="/pricing">Pricing terms</Link></li>
+              <li><Link to="/terms">Terms</Link></li>
+              <li><Link to="/privacy">Privacy</Link></li>
+              <li><Link to="/refund-policy">Refund Policy</Link></li>
+              <li><Link to="/partner-terms">Partner Terms</Link></li>
             </ul>
           </div>
         </div>

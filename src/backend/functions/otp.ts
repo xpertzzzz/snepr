@@ -5,6 +5,153 @@ import { salons, users } from "../db/schema";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
+// ─── Send Auth Email OTP Server Function ─────────────────────────────────────
+export const sendAuthEmailOtp = createServerFn({ method: "POST" })
+  .validator((d: { email: string }) => d)
+  .handler(async ({ data }) => {
+    if (!data.email || !data.email.includes("@")) {
+      throw new Error("Please enter a valid email address.");
+    }
+    return generateAndSendEmailOTP(data.email);
+  });
+
+// ─── Verify Auth OTP and Login / Register Server Function ───────────────────
+export const verifyAuthOtpAndLogin = createServerFn({ method: "POST" })
+  .validator((d: { email: string; code: string; name?: string; phone?: string }) => d)
+  .handler(async ({ data }) => {
+    const cleanEmail = data.email.trim().toLowerCase();
+    const isValid = await verifyEmailOTP(cleanEmail, data.code);
+    if (!isValid) {
+      throw new Error("Invalid or expired 6-digit verification code. Please check or request a new code.");
+    }
+
+    // Check admin allowlist
+    const ADMIN_EMAILS = [
+      "admin@snepr.in",
+      "xpertenzo.in@gmail.com",
+      "ankit@snepr.in",
+      "support@snepr.in",
+    ];
+    const isAdmin = ADMIN_EMAILS.includes(cleanEmail);
+
+    // Look for existing user
+    let userResult = await db.select().from(users).where(eq(users.email, cleanEmail));
+    let user = userResult[0];
+
+    if (!user) {
+      const username = cleanEmail.split("@")[0].toLowerCase() + "_" + Math.floor(100 + Math.random() * 900);
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          username,
+          password: "otp_authenticated",
+          name: data.name || cleanEmail.split("@")[0],
+          email: cleanEmail,
+          phone: data.phone || null,
+          role: isAdmin ? "super_admin" : "customer",
+        })
+        .returning();
+      user = newUser;
+    } else {
+      // If user exists and is in admin allowlist, ensure role is super_admin
+      if (isAdmin && user.role !== "super_admin") {
+        await db.update(users).set({ role: "super_admin" }).where(eq(users.id, user.id));
+        user.role = "super_admin";
+      }
+      // If name/phone updated in registration form, update it
+      if (data.name && !user.name) {
+        await db.update(users).set({ name: data.name, phone: data.phone || user.phone }).where(eq(users.id, user.id));
+        user.name = data.name;
+        if (data.phone) user.phone = data.phone;
+      }
+    }
+
+    if (user.suspendedAt) {
+      throw new Error("This account has been suspended. Please contact support@snepr.in.");
+    }
+
+    // Check if user owns a salon
+    const ownedSalons = await db.select().from(salons).where(eq(salons.ownerId, user.id));
+    const activeSalon = ownedSalons[0];
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name || cleanEmail.split("@")[0],
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        salonId: activeSalon ? activeSalon.id : user.salonId,
+        approvalStatus: activeSalon ? activeSalon.approvalStatus : null,
+        salonName: activeSalon ? activeSalon.name : null,
+        isAdmin: user.role === "super_admin",
+      },
+    };
+  });
+
+// ─── Google OAuth Login / Register Server Function ──────────────────────────
+export const googleAuthLogin = createServerFn({ method: "POST" })
+  .validator((d: { email: string; name?: string; phone?: string; photoUrl?: string }) => d)
+  .handler(async ({ data }) => {
+    const cleanEmail = data.email.trim().toLowerCase();
+    const ADMIN_EMAILS = [
+      "admin@snepr.in",
+      "xpertenzo.in@gmail.com",
+      "ankit@snepr.in",
+      "support@snepr.in",
+    ];
+    const isAdmin = ADMIN_EMAILS.includes(cleanEmail);
+
+    let userResult = await db.select().from(users).where(eq(users.email, cleanEmail));
+    let user = userResult[0];
+
+    if (!user) {
+      const username = cleanEmail.split("@")[0].toLowerCase() + "_" + Math.floor(100 + Math.random() * 900);
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          username,
+          password: "google_oauth_authenticated",
+          name: data.name || cleanEmail.split("@")[0],
+          email: cleanEmail,
+          phone: data.phone || null,
+          role: isAdmin ? "super_admin" : "customer",
+        })
+        .returning();
+      user = newUser;
+    } else {
+      if (isAdmin && user.role !== "super_admin") {
+        await db.update(users).set({ role: "super_admin" }).where(eq(users.id, user.id));
+        user.role = "super_admin";
+      }
+    }
+
+    if (user.suspendedAt) {
+      throw new Error("This account has been suspended. Please contact support@snepr.in.");
+    }
+
+    const ownedSalons = await db.select().from(salons).where(eq(salons.ownerId, user.id));
+    const activeSalon = ownedSalons[0];
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        name: user.name || cleanEmail.split("@")[0],
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        salonId: activeSalon ? activeSalon.id : user.salonId,
+        approvalStatus: activeSalon ? activeSalon.approvalStatus : null,
+        salonName: activeSalon ? activeSalon.name : null,
+        isAdmin: user.role === "super_admin",
+      },
+    };
+  });
+
 // ─── Send Email OTP Server Function ───────────────────────────────────────────
 export const sendOtp = createServerFn({ method: "POST" })
   .validator((d: { email: string }) => d)

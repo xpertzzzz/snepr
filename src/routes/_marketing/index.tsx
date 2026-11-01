@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useMemo } from "react";
 import {
   BHUBANESWAR_AREAS,
@@ -385,23 +385,23 @@ export function SneprLandingPageExact() {
               Live salon discovery · Bhubaneswar
             </span>
             <h1 className="reveal" style={{ ["--d" as any]: ".08s" }}>
-              Never wait in line
+              Your time. Your style.
               <br />
-              at a salon <em>again.</em>
+              Your <em>salon.</em>
             </h1>
             <p className="lead reveal" style={{ ["--d" as any]: ".16s" }}>
-              Check live chair wait times from home. Save your place remotely and arrive when your barber is ready. Know before you go.
+              Find salons, check live waiting times and join queues before you arrive. Know before you go.
             </p>
             <div className="acts reveal" style={{ ["--d" as any]: ".24s" }}>
-              <a className="btn btn-dark" href="#discover">
-                Find a salon near you
-              </a>
-              <a className="btn btn-out" href="/live">
-                Explore live queues
-              </a>
-              <a className="own" href="#salonos">
+              <Link className="btn btn-dark" to="/live">
+                Explore Live Queues
+              </Link>
+              <Link className="btn btn-out" to="/live/aistudio">
+                Discover AI Studio
+              </Link>
+              <Link className="own" to="/salons">
                 For salon owners ↗
-              </a>
+              </Link>
             </div>
             <div className="loc reveal" style={{ ["--d" as any]: ".32s" }}>
               <span id="hl">{locationLabel}</span>
@@ -699,8 +699,8 @@ export function SneprLandingPageExact() {
           <div className="stp">
             <article className="step reveal">
               <div className="n">01</div>
-              <h3>Check the wait</h3>
-              <p>See live availability and wait estimates before you travel.</p>
+              <h3>Find your salon</h3>
+              <p>Discover nearby salons and check availability before you travel.</p>
               <div className="mini">
                 <div className="r">
                   <span>Lakmé Salon</span>
@@ -715,8 +715,8 @@ export function SneprLandingPageExact() {
 
             <article className="step reveal" style={{ ["--d" as any]: ".12s" }}>
               <div className="n">02</div>
-              <h3>Save your chair</h3>
-              <p>Select a service and join the digital queue from your phone.</p>
+              <h3>Join the queue</h3>
+              <p>Choose your service and reserve your place from your phone.</p>
               <div className="mini">
                 <div className="r">
                   <span>Haircut · 25 min</span>
@@ -727,8 +727,8 @@ export function SneprLandingPageExact() {
 
             <article className="step reveal" style={{ ["--d" as any]: ".24s" }}>
               <div className="n">03</div>
-              <h3>Walk straight in</h3>
-              <p>Follow your token and arrive when your turn is close.</p>
+              <h3>Arrive at your turn</h3>
+              <p>Track your token and avoid unnecessary salon waiting.</p>
               <div className="mini">
                 <div className="r">
                   <span>Your token</span>
@@ -1240,43 +1240,33 @@ export function SneprLandingPageExact() {
         </div>
       </section>
 
-      {/* ─── 12. CTA BANNER ─── */}
-      <section className="cta">
+      {/* ─── 8. CONTACT CTA SECTION ─── */}
+      <section className="cta" id="contact">
         <div className="wrap">
           <div className="reveal">
-            <h2>Know before you go.</h2>
+            <div className="kicker" style={{ color: "#f0c28f", marginBottom: "8px" }}>Get In Touch</div>
+            <h2>Need a hand? We're here.</h2>
             <p>
-              Customers can find a salon and check the queue. Owners can list, claim or explore SalonOS.
+              Questions about finding salons, joining queues or partnering with Snepr in Bhubaneswar?
             </p>
             <div className="acts">
-              <a className="btn" href="#discover">
-                Find a salon near you
-              </a>
-              <a className="btn o" href="/claim">
-                Register your salon
-              </a>
-              <a className="btn o" href="/claim">
-                Claim your salon
-              </a>
+              <Link className="btn" to="/contact">
+                Contact Us ↗
+              </Link>
+              <Link className="btn o" to="/partner/register">
+                Register a salon
+              </Link>
+              <Link className="btn o" to="/partner/claim">
+                Claim a salon
+              </Link>
             </div>
           </div>
           <div className="app reveal" style={{ ["--d" as any]: ".1s" }}>
-            <b>Snepr app</b>
-            <p>A native app with the same live queues. Available on Android and web.</p>
-            <a className="btn" href="/live">
-              Get the app
-            </a>{" "}
-            <a
-              href="#top"
-              style={{
-                fontSize: ".78rem",
-                fontWeight: 700,
-                marginLeft: "10px",
-                textDecoration: "underline",
-              }}
-            >
-              Continue on web
-            </a>
+            <b>Snepr for Salons</b>
+            <p>SalonOS operations desk: digital queues, barber chair management, and 0% haircut commissions.</p>
+            <Link className="btn" to="/salon-os">
+              Open SalonOS ↗
+            </Link>
           </div>
         </div>
       </section>

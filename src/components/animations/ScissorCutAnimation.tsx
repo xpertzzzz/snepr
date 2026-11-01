@@ -128,3 +128,4 @@ export function ScissorCutAnimation({
 }
 
 export default ScissorCutAnimation;
+
