@@ -24,3 +24,4 @@ with open('src/styles.css', 'w', encoding='utf-8') as f:
     f.write(new_css)
 
 print('Successfully appended exact snepr-final CSS to src/styles.css! Total bytes:', len(new_css))
+
