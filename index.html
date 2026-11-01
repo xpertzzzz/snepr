@@ -19,6 +19,7 @@
           isBuffer: function() { return false; },
           from: function(x) {
             if (typeof x === "string") return new TextEncoder().encode(x);
+            if (x instanceof Uint8Array) return x;
             return new Uint8Array(x || []);
           },
           alloc: function(n) { return new Uint8Array(n || 0); },
@@ -33,6 +34,8 @@
           byteLength: function(str) { return new TextEncoder().encode(str || "").length; }
         };
       }
+      globalThis.Buffer = window.Buffer;
+      globalThis.global = window;
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

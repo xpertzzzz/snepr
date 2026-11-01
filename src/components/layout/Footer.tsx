@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { SneprWordmark } from "@/components/SneprWordmark";
 
 export function Footer() {
   return (
@@ -7,11 +8,7 @@ export function Footer() {
         <div className="fg">
           <div>
             <Link to="/" className="inline-block" aria-label="Snepr home">
-              <img
-                src="/snepr-logo.png"
-                alt="sn≡pr"
-                className="h-8 sm:h-9 w-auto object-contain brightness-0 invert opacity-95 hover:opacity-100 transition-opacity"
-              />
+              <SneprWordmark height={32} color="#ffffff" className="opacity-95 hover:opacity-100 transition-opacity" />
             </Link>
             <p className="bp">Live salon queues and wait times. Know before you go.</p>
           </div>
@@ -48,22 +45,16 @@ export function Footer() {
           <div>
             <h5>LEGAL</h5>
             <ul>
-              <li><Link to="/privacy-policy">Privacy policy</Link></li>
               <li><Link to="/terms-of-service">Terms of service</Link></li>
-            </ul>
-            <h5 style={{ marginTop: "22px" }}>SOCIAL</h5>
-            <ul>
-              <li>
-                <a href="https://instagram.com/snepr" target="_blank" rel="noreferrer">
-                  Instagram
-                </a>
-              </li>
+              <li><Link to="/privacy">Privacy policy</Link></li>
+              <li><Link to="/refund">Refund policy</Link></li>
+              <li><Link to="/pricing">Pricing terms</Link></li>
             </ul>
           </div>
         </div>
         <div className="fb">
-          <span>© 2026 Snepr. All rights reserved.</span>
-          <span>Made in Bhubaneswar</span>
+          <div>© 2026 Snepr Technologies Inc. · All rights reserved.</div>
+          <div>Bhubaneswar, Odisha · 0% commission on salon haircuts.</div>
         </div>
       </div>
     </footer>

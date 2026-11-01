@@ -40,13 +40,13 @@ export const LAUNCH_CITY: City = {
 };
 
 export const BHUBANESWAR_AREAS: Area[] = [
-  { id: 1, cityId: 1, name: "Patia", slug: "patia", isActive: true, displayOrder: 1 },
-  { id: 2, cityId: 1, name: "KIIT Road", slug: "kiit-road", isActive: true, displayOrder: 2 },
-  { id: 3, cityId: 1, name: "Saheed Nagar", slug: "saheed-nagar", isActive: true, displayOrder: 3 },
-  { id: 4, cityId: 1, name: "Jaydev Vihar", slug: "jaydev-vihar", isActive: true, displayOrder: 4 },
-  { id: 5, cityId: 1, name: "Chandrasekharpur", slug: "chandrasekharpur", isActive: true, displayOrder: 5 },
-  { id: 6, cityId: 1, name: "Rasulgarh", slug: "rasulgarh", isActive: true, displayOrder: 6 },
-  { id: 7, cityId: 1, name: "Nayapalli", slug: "nayapalli", isActive: true, displayOrder: 7 },
+  { id: 1, cityId: 1, name: "Patia & KIIT Square", slug: "patia", isActive: true, displayOrder: 1 },
+  { id: 2, cityId: 1, name: "Chandrasekharpur & Niladri Vihar", slug: "chandrasekharpur", isActive: true, displayOrder: 2 },
+  { id: 3, cityId: 1, name: "Jayadev Vihar", slug: "jayadev-vihar", isActive: true, displayOrder: 3 },
+  { id: 4, cityId: 1, name: "Gajapati Nagar", slug: "gajapati-nagar", isActive: true, displayOrder: 4 },
+  { id: 5, cityId: 1, name: "Saheed Nagar", slug: "saheed-nagar", isActive: true, displayOrder: 5 },
+  { id: 6, cityId: 1, name: "Nayapalli", slug: "nayapalli", isActive: true, displayOrder: 6 },
+  { id: 7, cityId: 1, name: "Rasulgarh", slug: "rasulgarh", isActive: true, displayOrder: 7 },
   { id: 8, cityId: 1, name: "Khandagiri", slug: "khandagiri", isActive: true, displayOrder: 8 },
 ];
 
@@ -55,9 +55,9 @@ export const DEFAULT_LOCATION: LocationState = {
   cityName: "Bhubaneswar",
   citySlug: "bhubaneswar",
   areaId: 1,
-  areaName: "Patia",
+  areaName: "Patia & KIIT Square",
   areaSlug: "patia",
-  formattedLabel: "Patia, Bhubaneswar",
-  locality: "Patia",
+  formattedLabel: "Patia & KIIT Square, Bhubaneswar",
+  locality: "Patia & KIIT Square",
   city: "Bhubaneswar",
 };

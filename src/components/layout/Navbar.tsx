@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { SneprWordmark } from "@/components/SneprWordmark";
 
 export function Navbar() {
   const navigate = useNavigate();
@@ -52,12 +53,16 @@ export function Navbar() {
     <>
       <header id="hd" className={`snepr-hdr ${isScrolled ? "s" : ""}`}>
         <div className="wrap nav">
-          {/* Brand Original Logo */}
-          <Link to="/" className="flex items-center gap-2 group border-0 bg-transparent shadow-none" aria-label="Snepr home">
-            <img
-              src="/snepr-logo.png"
-              alt="sn≡pr"
-              className="h-11 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105 border-0 bg-transparent shadow-none rounded-none"
+          {/* Brand Original Vector Logo - Big and Borderless */}
+          <Link
+            to="/"
+            className="flex items-center text-[#1B1410] hover:opacity-90 transition-opacity border-0 outline-none bg-transparent shadow-none p-0 m-0 select-none"
+            aria-label="Snepr home"
+          >
+            <SneprWordmark
+              height={38}
+              color="#1B1410"
+              className="transition-transform hover:scale-[1.02] border-0 outline-none shadow-none"
             />
           </Link>
 
@@ -83,7 +88,7 @@ export function Navbar() {
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="text-xs font-semibold text-[#81736a] hover:text-[#211914] transition-colors"
+                  className="text-xs font-semibold text-[#81736a] hover:text-[#211914] transition-colors cursor-pointer"
                 >
                   Sign out
                 </button>
@@ -99,7 +104,7 @@ export function Navbar() {
             </Link>
 
             <button
-              className="burger"
+              className="burger cursor-pointer"
               id="burger"
               aria-label="Open menu"
               onClick={() => setMobileMenuOpen(true)}
@@ -113,7 +118,7 @@ export function Navbar() {
       {/* Mobile Slide-down Menu */}
       <div className={`mmenu ${mobileMenuOpen ? "open" : ""}`} id="mm">
         <button
-          className="mclose"
+          className="mclose cursor-pointer"
           id="mc"
           aria-label="Close menu"
           onClick={closeMenu}

@@ -6,6 +6,7 @@ import { db } from "../backend/db";
 import * as schema from "../backend/db/schema";
 import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { REAL_SALONS_DATA, BHUBANESWAR_AREAS, CITIES } from "../lib/real-salons";
 
 async function seed() {
   console.log("🌱 Seeding & cleaning up Snepr database…\n");
@@ -13,7 +14,6 @@ async function seed() {
   // ── 1. Clean up legacy admin users, keeping only snepr@2026 ─────────────────
   console.log("→ Cleaning up extra admin users…");
 
-  // Delete legacy admin/subadmin test users except snepr@2026
   await db.delete(schema.users)
     .where(
       sql`${schema.users.username} IN ('admin', 'subadmin') AND ${schema.users.username} != 'snepr@2026'`
@@ -47,33 +47,75 @@ async function seed() {
 
   // ── 2. Seed cities ────────────────────────────────────────────────────────
   console.log("\n→ Seeding cities…");
-  const citySeed = [
-    { name: "Bhubaneswar", state: "Odisha" },
-    { name: "Bhubaneswar", state: "Karnataka" },
-    { name: "Delhi", state: "Delhi" },
-    { name: "Mumbai", state: "Maharashtra" },
-  ];
-
-  for (const city of citySeed) {
-    await db.insert(schema.cities).values(city).onConflictDoNothing();
+  for (const city of CITIES) {
+    await db.insert(schema.cities).values({
+      id: city.id,
+      name: city.name,
+      state: city.state,
+      slug: city.slug,
+      isActive: city.isActive,
+    }).onConflictDoNothing();
     console.log(`   ✓ ${city.name}, ${city.state}`);
   }
 
-  // ── 3. Check Salons ───────────────────────────────────────────────────────
-  const existingSalons = await db.select().from(schema.salons);
-  if (existingSalons.length > 0) {
-    console.log(`\n→ ${existingSalons.length} salons in DB.`);
-    for (const salon of existingSalons) {
-      if (!salon.approvalStatus || salon.approvalStatus === "open") {
-        await db.update(schema.salons)
-          .set({ approvalStatus: "pending" })
-          .where(eq(schema.salons.id, salon.id));
-      }
-    }
-    console.log("   ✓ Salons synced.");
+  // ── 3. Seed areas ─────────────────────────────────────────────────────────
+  console.log("\n→ Seeding Bhubaneswar areas…");
+  for (const area of BHUBANESWAR_AREAS) {
+    await db.insert(schema.areas).values({
+      id: area.id,
+      cityId: area.cityId,
+      name: area.name,
+      slug: area.slug,
+      isActive: area.isActive,
+      displayOrder: area.displayOrder,
+    }).onConflictDoNothing();
+    console.log(`   ✓ #${area.displayOrder} ${area.name}`);
   }
 
-  console.log("\n✅ Database clean & synced!\n");
+  // ── 4. Seed verified Salons ───────────────────────────────────────────────
+  console.log("\n→ Seeding 13 verified Bhubaneswar salon leads…");
+  for (const s of REAL_SALONS_DATA) {
+    const existing = await db.select().from(schema.salons).where(eq(schema.salons.id, s.id));
+    if (existing.length > 0) {
+      await db.update(schema.salons).set({
+        name: s.name,
+        slug: s.slug,
+        areaId: s.areaId,
+        cityId: s.cityId,
+        address: s.address,
+        phone: s.phone,
+        email: s.email,
+        category: s.category,
+        rating: s.rating,
+        reviewCount: s.reviewCount,
+        verificationStatus: s.verificationStatus,
+        operationalStatus: s.operationalStatus,
+        status: "open",
+        approvalStatus: "approved",
+      }).where(eq(schema.salons.id, s.id));
+    } else {
+      await db.insert(schema.salons).values({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        areaId: s.areaId,
+        cityId: s.cityId,
+        address: s.address,
+        phone: s.phone,
+        email: s.email,
+        category: s.category,
+        rating: s.rating,
+        reviewCount: s.reviewCount,
+        verificationStatus: s.verificationStatus,
+        operationalStatus: s.operationalStatus,
+        status: "open",
+        approvalStatus: "approved",
+      });
+    }
+    console.log(`   ✓ [${s.areaName}] ${s.name}`);
+  }
+
+  console.log("\n✅ Database clean & synced with verified salon leads!\n");
   console.log("─────────────────────────────────────────");
   console.log("  Portal:   https://snepr.in/admin");
   console.log("  Username: snepr@2026");

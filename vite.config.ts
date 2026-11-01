@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   define: {
     "global": "window",
+    "global.Buffer": "window.Buffer",
+    "Buffer": "window.Buffer",
     "process.env": {},
   },
   resolve: {
@@ -21,6 +23,7 @@ export default defineConfig({
       "google-auth-library": path.resolve(__dirname, "./src/lib/empty-shim.ts"),
       "bcryptjs": path.resolve(__dirname, "./src/lib/empty-shim.ts"),
       "jsonwebtoken": path.resolve(__dirname, "./src/lib/empty-shim.ts"),
+      "buffer": path.resolve(__dirname, "./src/lib/buffer-shim.ts"),
     },
   },
   build: {
