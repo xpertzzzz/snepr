@@ -7,8 +7,6 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   define: {
     "global": "window",
-    "global.Buffer": "window.Buffer",
-    "Buffer": "window.Buffer",
     "process.env": {},
   },
   resolve: {

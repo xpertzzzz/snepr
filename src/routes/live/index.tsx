@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
-import { SneprWordmark } from "@/components/SneprWordmark";
 import { REAL_SALONS_DATA } from "@/lib/real-salons";
 import "@/styles/live-page.css";
 
@@ -13,13 +12,6 @@ export const Route = createFileRoute("/live/")({
         content: "Check the queue before you visit. Join when you're ready. Live wait times and chair availability across Bhubaneswar salons.",
       },
       { name: "theme-color", content: "#FAF7F2" },
-    ],
-    links: [
-      { rel: "canonical", href: "https://snepr.in/live" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap",
-      },
     ],
   }),
   component: LivePageStrict,
@@ -74,8 +66,14 @@ export function LivePageStrict() {
         areaMatches = s.areaId === 2;
       } else if (activeArea === "Jaydev Vihar") {
         areaMatches = s.areaId === 3;
-      } else if (activeArea === "Gajapati Nagar") {
-        areaMatches = s.areaId === 4;
+      } else if (activeArea === "Saheed Nagar") {
+        areaMatches = s.areaName.toLowerCase().includes("saheed");
+      } else if (activeArea === "Nayapalli") {
+        areaMatches = s.areaName.toLowerCase().includes("nayapalli");
+      } else if (activeArea === "Rasulgarh") {
+        areaMatches = s.areaName.toLowerCase().includes("rasulgarh");
+      } else if (activeArea === "Khandagiri") {
+        areaMatches = s.areaName.toLowerCase().includes("khandagiri");
       } else {
         areaMatches = s.areaName.toLowerCase().includes(activeArea.toLowerCase());
       }
@@ -111,7 +109,7 @@ export function LivePageStrict() {
       {/* ─── HEADER ─── */}
       <header>
         <div className="head">
-          <Link to="/" className="logo" aria-label="Snepr home">
+          <Link to="/" className="logo">
             snepr<span>.</span>
           </Link>
           <div className="head-right">
@@ -119,7 +117,7 @@ export function LivePageStrict() {
               <small>YOUR AREA</small>
               <span id="locationText">{activeArea}, Bhubaneswar ▾</span>
             </button>
-            <Link to="/live/profile" className="profile" aria-label="Your profile">
+            <Link to="/profile" className="profile" aria-label="Your profile">
               A
             </Link>
           </div>
@@ -139,7 +137,6 @@ export function LivePageStrict() {
           </div>
         </section>
 
-        {/* Search Row */}
         <div className="search-row">
           <label className="search">
             <span>⌕</span>
@@ -159,7 +156,6 @@ export function LivePageStrict() {
           )}
         </div>
 
-        {/* Choose Your Area */}
         <div className="area-row">
           <h2>Choose your area</h2>
           <span>Bhubaneswar</span>
@@ -176,7 +172,6 @@ export function LivePageStrict() {
           ))}
         </div>
 
-        {/* List Head */}
         <div className="list-head">
           <h2 id="listTitle">Salons in {activeArea}</h2>
           <span id="salonCount">
@@ -184,7 +179,6 @@ export function LivePageStrict() {
           </span>
         </div>
 
-        {/* Salons Grid */}
         <section className="salons" id="salonList">
           {filteredSalons.map((s) => {
             const photoUrl =
@@ -255,7 +249,7 @@ export function LivePageStrict() {
         </div>
       </footer>
 
-      {/* ─── BOTTOM MOBILE NAVIGATION ─── */}
+      {/* ─── BOTTOM NAVIGATION ─── */}
       <nav className="bottom">
         <Link to="/">
           <i>⌂</i>Home
@@ -269,7 +263,7 @@ export function LivePageStrict() {
         <Link to="/live/queue">
           <i>▱</i>My token
         </Link>
-        <Link to="/live/profile">
+        <Link to="/profile">
           <i>♙</i>Profile
         </Link>
       </nav>
@@ -285,7 +279,7 @@ export function LivePageStrict() {
             <h3>Change your area</h3>
             <button
               id="closeModal"
-              style={{ border: 0, background: "none", fontSize: "22px", cursor: "pointer" }}
+              style={{ border: 0, background: "none", fontSize: "22px" }}
               onClick={() => setModalOpen(false)}
             >
               ×

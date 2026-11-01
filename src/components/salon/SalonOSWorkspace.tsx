@@ -1156,3 +1156,4 @@ export function SalonOSWorkspace({ session }: { session: any }) {
 }
 
 export default SalonOSWorkspace;
+

@@ -7,6 +7,13 @@ export const Route = createFileRoute("/_marketing")({
 });
 
 function MarketingLayout() {
+  const location = useLocation();
+  const isHome = location.pathname === "/" || location.pathname === "";
+
+  if (isHome) {
+    return <Outlet />;
+  }
+
   return (
     <>
       <Navbar />

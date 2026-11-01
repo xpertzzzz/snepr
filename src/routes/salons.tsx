@@ -152,3 +152,4 @@ export function ForSalonsPage() {
 }
 
 export default ForSalonsPage;
+

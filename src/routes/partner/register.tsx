@@ -764,3 +764,4 @@ export function SalonRegistrationWizard() {
 }
 
 export default SalonRegistrationWizard;
+

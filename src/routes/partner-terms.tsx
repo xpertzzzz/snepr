@@ -44,3 +44,4 @@ export function PartnerTermsPage() {
 }
 
 export default PartnerTermsPage;
+

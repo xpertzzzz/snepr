@@ -255,3 +255,4 @@ export function PartnerApplicationStatusPage() {
 }
 
 export default PartnerApplicationStatusPage;
+

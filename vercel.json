@@ -4,7 +4,7 @@
   "cleanUrls": false,
   "rewrites": [
     {
-      "source": "/((?!assets/|favicon.*|.*\\.[a-zA-Z0-9]+$).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
