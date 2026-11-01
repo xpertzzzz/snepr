@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snepr Studio — Find Your Look</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#faf7f2;--white:#fffdfa;--ink:#1b1410;--muted:#81776e;--line:#e9e1d7;--brown:#7a4b29;--gold:#c8993e;--soft:#f1e9df;--green:#2d7652}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"DM Sans",sans-serif}button,input{font:inherit}button{cursor:pointer}.topbar{height:68px;border-bottom:1px solid var(--line);background:#fffdfa;display:flex;align-items:center;justify-content:space-between;padding:0 max(5vw,22px);position:sticky;top:0;z-index:10}.brand{font-weight:700;letter-spacing:-.7px;font-size:23px}.brand span{color:var(--brown)}.toplinks{display:flex;align-items:center;gap:26px;font-size:13px}.toplinks a{color:var(--ink);text-decoration:none}.toplinks .live{padding:10px 15px;border:1px solid var(--line);border-radius:9px;font-weight:600}.wrap{max-width:1180px;margin:auto;padding:42px 24px 110px}.eyebrow{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:var(--brown);font-weight:700}.hero{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:30px}.hero h1{font:700 clamp(34px,5vw,52px)/1.08 "Playfair Display",serif;letter-spacing:-1.1px;margin:12px 0 10px}.hero p{margin:0;color:var(--muted);font-size:15px}.hero-note{max-width:230px;padding:15px 17px;background:var(--white);border:1px solid var(--line);border-radius:12px;font-size:12px;line-height:1.55;color:var(--muted)}.hero-note strong{display:block;color:var(--ink);font-size:13px;margin-bottom:4px}.switcher{display:flex;gap:8px;padding:6px;background:#eee7de;border-radius:12px;width:max-content;margin-bottom:24px}.switcher button{border:0;background:transparent;padding:11px 17px;border-radius:8px;color:#74695f;font-size:13px;font-weight:600}.switcher button.active{background:var(--white);color:var(--ink);box-shadow:0 1px 4px #1b141014}.filters{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:17px 18px;margin-bottom:25px}.filterrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.filterrow+.filterrow{margin-top:14px;padding-top:14px;border-top:1px solid #f0ebe4}.filterlabel{width:90px;color:var(--muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}.chip{border:1px solid var(--line);background:white;color:#62584f;padding:8px 13px;border-radius:30px;font-size:12px}.chip.active{background:var(--ink);border-color:var(--ink);color:white}.sectionhead{display:flex;justify-content:space-between;align-items:center;margin:28px 0 15px}.sectionhead h2{font-size:17px;margin:0;letter-spacing:-.3px}.count{font-size:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.look{background:var(--white);border:1px solid var(--line);border-radius:15px;overflow:hidden;transition:transform .18s,border-color .18s}.look:hover{transform:translateY(-3px);border-color:#d6c4af}.photo{height:205px;position:relative;background:#e8dfd5;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover;display:block}.tag{position:absolute;left:12px;top:12px;background:#fffdfaeb;padding:6px 9px;border-radius:5px;font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:700}.length{position:absolute;right:12px;top:12px;background:#1b1410b8;color:white;padding:6px 9px;border-radius:5px;font-size:10px}.lookbody{padding:16px}.look h3{font-size:16px;line-height:1.3;margin:0 0 8px;letter-spacing:-.3px}.desc{font-size:12px;color:var(--muted);line-height:1.55;min-height:38px;margin:0 0 13px}.meta{display:flex;flex-wrap:wrap;gap:7px 12px;font-size:10px;color:#74695f;padding:11px 0;border-top:1px solid #f0ebe4}.meta b{color:#40352d;font-weight:600}.actions{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:7px}.primary,.secondary{border-radius:8px;padding:10px 12px;font-size:11px;font-weight:700}.primary{background:var(--ink);color:white;border:1px solid var(--ink)}.secondary{background:white;color:var(--brown);border:1px solid #d9c8b7}.primary:hover{background:var(--brown);border-color:var(--brown)}.secondary:hover{background:var(--soft)}.empty{display:none;text-align:center;padding:50px 20px;color:var(--muted);border:1px dashed var(--line);border-radius:14px}.bottomnav{display:none}.modalback{position:fixed;inset:0;background:#1b141066;display:none;align-items:center;justify-content:center;padding:20px;z-index:30}.modal{width:min(440px,100%);background:var(--white);border-radius:16px;padding:23px;box-shadow:0 20px 70px #0002}.modal h3{margin:0 0 7px;font-size:19px}.modal p{font-size:13px;line-height:1.55;color:var(--muted);margin:0 0 18px}.modalactions{display:flex;gap:9px;justify-content:flex-end}.close{background:white;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:12px}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;padding:12px 17px;border-radius:9px;font-size:12px;display:none;z-index:40;box-shadow:0 8px 25px #0002}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-note{display:none}}
+@media(max-width:580px){.topbar{height:58px;padding:0 18px}.toplinks{gap:14px}.toplinks a:not(.live){display:none}.wrap{padding:28px 15px 95px}.hero{margin-bottom:23px}.hero h1{font-size:37px}.hero p{font-size:13px;max-width:300px}.switcher{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.switcher button{padding:10px 4px;font-size:11px}.filters{padding:13px}.filterlabel{width:100%;margin-bottom:1px}.filterrow{gap:7px}.filterrow+.filterrow{margin-top:11px;padding-top:11px}.chip{padding:7px 10px;font-size:11px}.grid{grid-template-columns:1fr;gap:13px}.look{display:grid;grid-template-columns:118px 1fr}.photo{height:100%;min-height:215px}.lookbody{padding:13px}.look h3{font-size:14px}.desc{font-size:11px;min-height:0}.meta{font-size:9px;gap:6px 9px}.actions{grid-template-columns:1fr}.secondary{padding:8px}.bottomnav{position:fixed;bottom:0;left:0;right:0;height:65px;background:#fffdfa;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center;z-index:12}.bottomnav a{font-size:10px;color:var(--muted);text-decoration:none;text-align:center}.bottomnav a.active{color:var(--brown);font-weight:700}.bottomnav span{display:block;font-size:17px;margin-bottom:3px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">snepr<span>.</span></div>
+  <nav class="toplinks"><a href="/live">Live Salons</a><a class="live" href="/live">Find a salon</a></nav>
+</header>
+<main class="wrap">
+  <section class="hero">
+    <div><div class="eyebrow">Snepr Studio · AI Style Discovery</div><h1>Know the style<br>before you go.</h1><p>Find a look you love. Then find a nearby salon that can bring it to life.</p></div>
+    <aside class="hero-note"><strong>From inspiration to appointment</strong>Choose a style, preview the look, and discover salons offering the services you need.</aside>
+  </section>
+  <div class="switcher" role="tablist" aria-label="Collection">
+    <button class="active" data-collection="men">Men's</button><button data-collection="women">Women's</button><button data-collection="kids">Kids · Guardian aware</button>
+  </div>
+  <section class="filters">
+    <div class="filterrow"><div class="filterlabel">Length</div><button class="chip active" data-filter="length" data-value="all">All lengths</button><button class="chip" data-filter="length" data-value="buzz">Buzz / Ultra-short</button><button class="chip" data-filter="length" data-value="short">Short</button><button class="chip" data-filter="length" data-value="medium">Medium</button><button class="chip" data-filter="length" data-value="long">Long</button></div>
+    <div class="filterrow"><div class="filterlabel">Style</div><button class="chip active" data-filter="style" data-value="all">All categories</button><button class="chip" data-filter="style" data-value="trend">Trend-led</button><button class="chip" data-filter="style" data-value="classic">Timeless classics</button><button class="chip" data-filter="style" data-value="aesthetic">Aesthetic moods</button><button class="chip" data-filter="style" data-value="colour">Colour & highlights</button></div>
+  </section>
+  <div class="sectionhead"><h2 id="collectionTitle">Men's styles</h2><span class="count" id="count">5 looks</span></div>
+  <section class="grid" id="looks">
+    <article class="look" data-collection="men" data-length="short" data-style="trend">
+      <div class="photo"><img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?auto=format&fit=crop&w=900&q=85" alt="Textured short crop haircut"><span class="tag">Trend</span><span class="length">Short</span></div>
+      <div class="lookbody"><h3>Modern Textured French Crop</h3><p class="desc">Short blunt fringe with textured crown layers and a low drop fade. Effortless styling with matte clay.</p><div class="meta"><span>Aesthetic: <b>Clean / Minimal</b></span><span>Prep: <b>Low · under 5 min</b></span><span><b>Beard match</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Modern Textured French Crop">Find salons for this look</button><button class="secondary" data-action="try" data-look="Modern Textured French Crop">Try on</button></div></div>
+    </article>
+    <article class="look" data-collection="men" data-length="medium" data-style="classic">
+      <div class="photo"><img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=900&q=85" alt="Classic men's quiff haircut"><span class="tag">Classic</span><span class="length">Medium</span></div>
+      <div class="lookbody"><h3>Old Money Executive Quiff</h3><p class="desc">Classic soft-taper sides with natural volume swept back. Polished, distinguished aesthetic.</p><div class="meta"><span>Aesthetic: <b>Quiet luxury</b></span><span>Prep: <b>Medium · 10–15 min</b></span><span><b>Beard match</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Old Money Executive Quiff">Find salons for this look</button><button class="secondary" data-action="try" data-look="Old Money Executive Quiff">Try on</button></div></div>
+    </article>
+    <article class="look" data-collection="men" data-length="medium" data-style="trend">
+      <div class="photo"><img src="https://images.unsplash.com/photo-1593702295094-aea8c5f2f1a6?auto=format&fit=crop&w=900&q=85" alt="Layered shag haircut"><span class="tag">Trend</span><span class="length">Medium</span></div>
+      <div class="lookbody"><h3>Urban Shaggy Wolf Cut</h3><p class="desc">Choppy layers combining a shag and mullet silhouette, with soft curtains and face framing.</p><div class="meta"><span>Aesthetic: <b>Celebrity / Rugged</b></span><span>Prep: <b>Medium · 10–15 min</b></span><span><b>Beard match</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Urban Shaggy Wolf Cut">Find salons for this look</button><button class="secondary" data-action="try" data-look="Urban Shaggy Wolf Cut">Try on</button></div></div>
+    </article>
+    <article class="look" data-collection="men" data-length="short" data-style="classic">
+      <div class="photo"><img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=85" alt="Sharp taper fade haircut"><span class="tag">Classic</span><span class="length">Short</span></div>
+      <div class="lookbody"><h3>Sharp Taper Fade + Sculpted Beard</h3><p class="desc">Close taper at the temples and neckline, blended into a precise line-up beard.</p><div class="meta"><span>Aesthetic: <b>Rugged / Refined</b></span><span>Prep: <b>Low · under 5 min</b></span><span><b>Beard match</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Sharp Taper Fade + Sculpted Beard">Find salons for this look</button><button class="secondary" data-action="try" data-look="Sharp Taper Fade + Sculpted Beard">Try on</button></div></div>
+    </article>
+    <article class="look" data-collection="men" data-length="buzz" data-style="classic">
+      <div class="photo"><img src="https://images.unsplash.com/photo-1622287162716-f311baa1a2b8?auto=format&fit=crop&w=900&q=85" alt="Short buzz fade haircut"><span class="tag">Classic</span><span class="length">Buzz</span></div>
+      <div class="lookbody"><h3>Military Precision Buzz Fade</h3><p class="desc">Ultra-short uniform top with a sharp high-and-tight skin fade. Minimal daily maintenance.</p><div class="meta"><span>Aesthetic: <b>Clean / Minimal</b></span><span>Prep: <b>Low · under 5 min</b></span><span><b>Beard match</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Military Precision Buzz Fade">Find salons for this look</button><button class="secondary" data-action="try" data-look="Military Precision Buzz Fade">Try on</button></div></div>
+    </article>
+    <article class="look" data-collection="women" data-length="long" data-style="trend" hidden><div class="photo"><img src="https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?auto=format&fit=crop&w=900&q=85" alt="Long layered hairstyle"><span class="tag">Trend</span><span class="length">Long</span></div><div class="lookbody"><h3>Soft Butterfly Layers</h3><p class="desc">Face-framing layers with airy movement and volume through the lengths.</p><div class="meta"><span>Aesthetic: <b>Soft / Modern</b></span><span>Prep: <b>Medium</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Soft Butterfly Layers">Find salons for this look</button><button class="secondary" data-action="try" data-look="Soft Butterfly Layers">Try on</button></div></div></article>
+    <article class="look" data-collection="women" data-length="medium" data-style="classic" hidden><div class="photo"><img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?auto=format&fit=crop&w=900&q=85" alt="Shoulder length bob hairstyle"><span class="tag">Classic</span><span class="length">Medium</span></div><div class="lookbody"><h3>Polished Italian Bob</h3><p class="desc">A clean, softly rounded bob with a precise silhouette and natural finish.</p><div class="meta"><span>Aesthetic: <b>Timeless / Chic</b></span><span>Prep: <b>Low</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Polished Italian Bob">Find salons for this look</button><button class="secondary" data-action="try" data-look="Polished Italian Bob">Try on</button></div></div></article>
+    <article class="look" data-collection="kids" data-length="short" data-style="classic" hidden><div class="photo"><img src="https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&w=900&q=85" alt="Child with neat short haircut"><span class="tag">Classic</span><span class="length">Short</span></div><div class="lookbody"><h3>Easy School-Day Crop</h3><p class="desc">A neat, comfortable short cut designed to stay tidy with minimal styling.</p><div class="meta"><span>Aesthetic: <b>Simple / Neat</b></span><span>Prep: <b>Low</b></span><span><b>Guardian booking</b></span></div><div class="actions"><button class="primary" data-action="salons" data-look="Easy School-Day Crop">Find salons for this look</button><button class="secondary" data-action="try" data-look="Easy School-Day Crop">Try on</button></div></div></article>
+  </section>
+  <div class="empty" id="empty">No styles match these filters. Try another length or category.</div>
+</main>
+<nav class="bottomnav"><a href="/live"><span>⌕</span>Explore</a><a class="active" href="/live/studio"><span>✦</span>AI Studio</a><a href="/live/queue"><span>▣</span>My Token</a><a href="/profile"><span>○</span>Profile</a></nav>
+<div class="modalback" id="modal"><div class="modal"><h3 id="modalTitle">Find salons for this look</h3><p id="modalText"></p><div class="modalactions"><button class="close" id="dismiss">Close</button><button class="primary" id="continue">Continue</button></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const state={collection:"men",length:"all",style:"all",look:""};
+const cards=[...document.querySelectorAll(".look")];
+const title=document.getElementById("collectionTitle");
+function update(){
+ let shown=0;
+ cards.forEach(card=>{
+  const match=card.dataset.collection===state.collection&&(state.length==="all"||card.dataset.length===state.length)&&(state.style==="all"||card.dataset.style===state.style);
+  card.hidden=!match;if(match)shown++;
+ });
+ title.textContent=({men:"Men's styles",women:"Women's styles",kids:"Kids' styles"})[state.collection];
+ document.getElementById("count").textContent=shown+" "+(shown===1?"look":"looks");
+ document.getElementById("empty").style.display=shown?"none":"block";
+}
+document.querySelectorAll("[data-collection].switcher button").forEach(()=>{});
+document.querySelectorAll(".switcher button").forEach(btn=>btn.addEventListener("click",()=>{
+ document.querySelectorAll(".switcher button").forEach(b=>b.classList.toggle("active",b===btn));
+ state.collection=btn.dataset.collection;state.length="all";state.style="all";
+ document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("active",c.dataset.value==="all"));
+ update();
+}));
+document.querySelectorAll(".chip").forEach(btn=>btn.addEventListener("click",()=>{
+ state[btn.dataset.filter]=btn.dataset.value;
+ document.querySelectorAll(`.chip[data-filter="${btn.dataset.filter}"]`).forEach(c=>c.classList.toggle("active",c===btn));
+ update();
+}));
+const modal=document.getElementById("modal"),modalText=document.getElementById("modalText"),modalTitle=document.getElementById("modalTitle");
+document.querySelectorAll("[data-action]").forEach(btn=>btn.addEventListener("click",()=>{
+ state.look=btn.dataset.look;
+ if(btn.dataset.action==="salons"){modalTitle.textContent="Find salons for this look";modalText.textContent=`We'll use “${state.look}” to find salons offering the right service in your selected area. Salon matching will work once style tags and service coverage are connected to verified salon profiles.`;document.getElementById("continue").textContent="Browse live salons";}
+ else{modalTitle.textContent="Try on this look";modalText.textContent=`AI try-on for “${state.look}” needs the photo upload and image generation service to be connected. The style catalogue is ready for that integration.`;document.getElementById("continue").textContent="Got it";}
+ modal.style.display="flex";
+}));
+document.getElementById("dismiss").onclick=()=>modal.style.display="none";
+document.getElementById("continue").onclick=()=>{if(modalTitle.textContent.startsWith("Find"))location.href="/live?style="+encodeURIComponent(state.look);else modal.style.display="none";};
+modal.addEventListener("click",e=>{if(e.target===modal)modal.style.display="none"});
+update();
+</script>
+</body></html>
