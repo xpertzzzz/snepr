@@ -11,6 +11,29 @@
       content="Check live salon wait times, save your chair and walk straight in. SalonOS for salons, with no haircut commissions."
     />
     <link rel="icon" type="image/png" href="/snepr-logo.png" />
+    <!-- Global & Buffer browser polyfill -->
+    <script>
+      window.global = window;
+      if (typeof window.Buffer === "undefined") {
+        window.Buffer = {
+          isBuffer: function() { return false; },
+          from: function(x) {
+            if (typeof x === "string") return new TextEncoder().encode(x);
+            return new Uint8Array(x || []);
+          },
+          alloc: function(n) { return new Uint8Array(n || 0); },
+          allocUnsafe: function(n) { return new Uint8Array(n || 0); },
+          concat: function(arr) {
+            var total = (arr || []).reduce(function(acc, a) { return acc + (a ? a.length : 0); }, 0);
+            var res = new Uint8Array(total);
+            var off = 0;
+            (arr || []).forEach(function(a) { if (a) { res.set(a, off); off += a.length; } });
+            return res;
+          },
+          byteLength: function(str) { return new TextEncoder().encode(str || "").length; }
+        };
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
