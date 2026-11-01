@@ -1,0 +1,615 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { getSalons } from "../../backend/functions/salons";
+import { useEffect, useState } from "react";
+import {
+  Search, MapPin, Zap, CheckCircle2, Clock, Navigation, X, Smartphone, Sparkles, ArrowRight
+} from "lucide-react";
+import { SneprWordmark } from "@/components/SneprWordmark";
+import { cn } from "@/lib/utils";
+import { DockNavbar } from "@/components/layout/DockNavbar";
+import { ContextualAppCTA } from "@/components/promo/ContextualAppCTA";
+import { LocationSelectorModal } from "@/components/location/LocationSelectorModal";
+import { useLocation } from "@/hooks/useLocation";
+import { toast } from "sonner";
+import { auth, googleProvider } from "@/config/firebase";
+import { signInWithPopup } from "firebase/auth";
+import { loginWithGoogleServer } from "@/backend/functions/auth";
+
+export const Route = createFileRoute("/live/")({
+  head: () => ({
+    meta: [
+      { title: "Live Salons Near You | Snepr" },
+      { name: "description", content: "See live wait times at salons near you. Join the queue from your phone and walk straight in." },
+    ],
+    links: [{ rel: "canonical", href: "https://snepr.in/live" }],
+  }),
+  component: LiveDashboard,
+});
+
+type QueueStatus = "available" | "finishing" | "busy";
+type FilterOption = "all" | "available" | "shortest";
+
+interface Salon {
+  id: number;
+  name: string;
+  address: string | null;
+  category: string | null;
+  rating: string | null;
+  reviewCount: number | null;
+  queueStatus: QueueStatus;
+  waitTime: number;
+  waitingCount?: number;
+  latitude: string | null;
+  longitude: string | null;
+  distanceKm?: number;
+  formattedDistance?: string;
+}
+
+function formatDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)} m away`;
+  return `${km.toFixed(1)} km away`;
+}
+
+function LiveDashboard() {
+  const { location, loading: locating, requestGpsLocation, setManualLocation } = useLocation();
+  const selectedLocality = location.formattedLabel || "Patia, Bhubaneswar";
+  const [salons, setSalons] = useState<Salon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
+  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [search, setSearch] = useState("");
+  const [selectedSalon, setSelectedSalon] = useState<Salon | null>(null);
+  const [activeQueue, setActiveQueue] = useState<any | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
+  const [session, setSession] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  useEffect(() => {
+    try {
+      const data = localStorage.getItem("snepr_session");
+      if (data) setSession(JSON.parse(data));
+    } catch {}
+  }, []);
+
+  const loadSalons = async () => {
+    try {
+      const fallback = await getSalons({ data: {} });
+      if (fallback && Array.isArray(fallback)) {
+        setSalons(fallback);
+      }
+    } catch (err) {
+      console.error("Failed to load salons", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSalons();
+    const interval = setInterval(loadSalons, 10000);
+    return () => clearInterval(interval);
+  }, [location.latitude, location.longitude]);
+
+  const categories = [
+    { id: 'all', name: 'All Salons' },
+    { id: 'haircut', name: '0-Wait Now' },
+    { id: 'beard', name: "Men's Grooming" },
+    { id: 'facial', name: 'Facial & Spa' },
+    { id: 'styling', name: 'Signature Styling' },
+  ];
+
+  const handleGoogleLogin = async () => {
+    setAuthLoading(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const idToken = result.user ? await result.user.getIdToken() : null;
+      if (!idToken) {
+        toast.error("Could not retrieve Google ID token.");
+        setAuthLoading(false);
+        return;
+      }
+      
+      const res = await loginWithGoogleServer({ data: { idToken } });
+      try {
+        localStorage.setItem("snepr_session", JSON.stringify(res));
+      } catch {}
+      setSession(res);
+      toast.success("Successfully logged in!");
+      setShowAuthModal(false);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Google sign-in failed.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleJoinQueue = (salon: Salon) => {
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
+    setActiveQueue({
+      salonName: salon.name,
+      position: (salon.waitingCount || 0) + 1,
+      waitTime: (salon.waitingCount || 0) * 15 + 5,
+    });
+    setSelectedSalon(null);
+    toast.success(`Joined queue at ${salon.name}!`);
+  };
+
+  const filteredSalons = salons.filter(s => {
+    if (search) {
+      return (
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.category && s.category.toLowerCase().includes(search.toLowerCase())) ||
+        (s.address && s.address.toLowerCase().includes(search.toLowerCase()))
+      );
+    }
+    if (
+      activeCategory !== 'All' &&
+      s.category &&
+      !s.category.toLowerCase().includes(activeCategory.toLowerCase()) &&
+      !s.name.toLowerCase().includes(activeCategory.toLowerCase())
+    ) {
+      return false;
+    }
+    if (activeFilter === "available") return s.queueStatus === "available";
+    if (activeFilter === "shortest") return s.waitTime <= 15;
+    return true;
+  });
+
+  filteredSalons.sort((a, b) => {
+    if (a.distanceKm !== undefined && b.distanceKm !== undefined) return a.distanceKm - b.distanceKm;
+    return a.waitTime - b.waitTime;
+  });
+
+  const shortestSalons = [...salons].sort((a, b) => a.waitTime - b.waitTime).slice(0, 4);
+
+  return (
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1C1613] font-sans pb-24">
+      {/* ─── Top Brand Navbar ─── */}
+      <header className="sticky top-0 z-30 bg-white border-b border-[#E8E2D9] px-4 py-3 sm:px-8">
+        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2">
+            <SneprWordmark height={30} className="text-[#1C1613]" />
+          </Link>
+
+          {/* Location Delivery Selector Pill */}
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="flex items-center gap-2.5 bg-[#FAF7F2] hover:bg-[#FAF2EA] border border-[#E8E2D9] px-3.5 py-1.5 rounded-full text-xs font-bold text-[#1C1613] shadow-xs cursor-pointer transition-colors"
+          >
+            <MapPin className="w-3.5 h-3.5 text-[#7A4B29]" />
+            <span className="truncate max-w-[140px] sm:max-w-[220px]">{selectedLocality}</span>
+            <span className="text-[10px] text-[#7A4B29] bg-[#7A4B29]/10 px-2 py-0.5 rounded-full font-black uppercase">Change</span>
+          </button>
+
+          <div className="flex items-center gap-3">
+            {session ? (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#E8E2D9] bg-[#FAF7F2] text-xs font-bold text-[#7A4B29]">
+                👤 {session.name || "Customer"}
+              </span>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="text-xs font-black uppercase tracking-wider text-[#7A4B29] hover:underline cursor-pointer px-3 py-1.5"
+              >
+                Login
+              </button>
+            )}
+            <div className="hidden sm:flex items-center gap-2 bg-[#7A4B29] text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold tracking-wide">
+              <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+              <span>LIVE QUEUES</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 pt-6 sm:px-8">
+        {/* ─── Search Bar ─── */}
+        <div className="relative mb-4">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9C948D]" />
+          <input
+            type="text"
+            placeholder="Search salons, services, categories..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full h-12 pl-11 pr-4 bg-white rounded-2xl border border-[#E8E2D9] shadow-xs text-sm text-[#1C1613] placeholder-[#9C948D] focus:outline-none focus:ring-2 focus:ring-[#7A4B29]"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#9C948D] hover:text-[#1C1613]"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* ─── AI Snepr Studio Promotion Card (Pillar 3) ─── */}
+        <Link
+          to="/live/studio"
+          className="mb-6 block p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#2A1D15] via-[#1A1714] to-[#3B2519] border border-[#7A4B29]/40 text-white shadow-sm hover:shadow-md transition-all group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-[#D4A373]/20 border border-[#D4A373]/40 flex items-center justify-center text-[#D4A373] text-lg shrink-0">
+                <Sparkles className="w-5 h-5 text-[#D4A373]" />
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                  <span>AI Snepr Studio Catalogue</span>
+                  <span className="text-[9px] uppercase font-mono px-2 py-0.5 rounded-full bg-[#D4A373]/20 text-[#D4A373] border border-[#D4A373]/30">
+                    New
+                  </span>
+                </h3>
+                <p className="text-xs text-[#A69F96] mt-0.5">
+                  Browse trending styles for men, women &amp; kids. Match looks directly to salons with live queues.
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#D4A373] group-hover:translate-x-1 transition-transform shrink-0">
+              <span>Explore Looks</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+
+        {/* ─── Live Status Ticker Banner ─── */}
+        <div className="flex items-center gap-2.5 bg-[#FAF2EA] border border-[#E8D6C5] px-4 py-2.5 rounded-2xl mb-4 text-xs text-[#1C1613]">
+          <span className="w-2 h-2 rounded-full bg-[#7A4B29] animate-pulse" />
+          <span>
+            <strong className="font-extrabold text-[#7A4B29]">Real-time chair updates</strong> • {selectedLocality}
+          </span>
+        </div>
+
+        {/* ─── Contextual Mobile App Promotion ─── */}
+        <ContextualAppCTA
+          message="Track your turn live in the Snepr app"
+          className="mb-6"
+        />
+
+        {/* ─── Quick Category Grid ─── */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.name)}
+              className={cn(
+                "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
+                activeCategory === cat.name
+                  ? "bg-[#7A4B29] text-white border-[#7A4B29] shadow-sm"
+                  : "bg-white text-[#6E6761] border-[#E8E2D9] hover:bg-[#FAF7F2]"
+              )}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* ─── Filter Chips ─── */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
+          <button
+            onClick={() => setActiveFilter("all")}
+            className={cn(
+              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
+              activeFilter === "all"
+                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
+                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
+            )}
+          >
+            All Salons ({salons.length})
+          </button>
+          <button
+            onClick={() => setActiveFilter("shortest")}
+            className={cn(
+              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
+              activeFilter === "shortest"
+                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
+                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
+            )}
+          >
+            Shortest Wait (&le;15 min)
+          </button>
+          <button
+            onClick={() => setActiveFilter("available")}
+            className={cn(
+              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
+              activeFilter === "available"
+                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
+                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
+            )}
+          >
+            Available Now
+          </button>
+        </div>
+
+        {/* ─── Section: SHORTEST WAIT NEAR YOU ─── */}
+        {shortestSalons.length > 0 && (
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#9C948D]">
+                  Shortest Wait Near You
+                </h2>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {shortestSalons.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-2xl p-4 border border-[#E8E2D9] shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="w-9 h-9 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-sm">
+                        {item.name[0]}
+                      </div>
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FAF2EA] text-[#7A4B29]">
+                        {item.queueStatus}
+                      </span>
+                    </div>
+
+                    <div className="text-3xl font-black text-[#1C1613] leading-none mb-1">
+                      {item.waitTime} <span className="text-xs font-bold text-[#9C948D]">min</span>
+                    </div>
+                    <div className="text-[11px] text-[#9C948D] mb-3">
+                      {item.distanceKm ? formatDistance(item.distanceKm) : 'Nearby'}
+                    </div>
+
+                    <h3 className="text-sm font-extrabold text-[#1C1613] truncate mb-1" title={item.name}>
+                      {item.name}
+                    </h3>
+                    <div className="text-xs text-[#6E6761] mb-3">
+                      ⭐ {item.rating || '4.8'} • {item.category || 'Salon'}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleJoinQueue(item)}
+                    className="w-full py-2 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-xs rounded-xl transition-all"
+                  >
+                    JOIN QUEUE
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ─── Section: ALL SALONS NEAR YOU ─── */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xs font-black uppercase tracking-wider text-[#9C948D]">
+              All Salons Near You ({filteredSalons.length})
+            </h2>
+          </div>
+
+          {loading ? (
+            <div className="py-20 text-center text-[#9C948D]">Loading live salons from database...</div>
+          ) : filteredSalons.length === 0 ? (
+            <div className="py-20 text-center text-[#9C948D]">No salons found matching your search.</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredSalons.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-2xl p-5 border border-[#E8E2D9] shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-base shrink-0">
+                          {item.name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-[#1C1613] leading-snug">{item.name}</h3>
+                          <p className="text-xs text-[#9C948D]">
+                            {item.category || 'Salon'} • {item.distanceKm ? formatDistance(item.distanceKm) : 'Nearby'}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs font-bold text-[#7A4B29] bg-[#FAF2EA] px-2.5 py-1 rounded-full shrink-0">
+                        ⭐ {item.rating || '4.8'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between bg-[#FAF7F2] p-3 rounded-xl mb-4">
+                      <div>
+                        <div className="text-[10px] font-bold text-[#9C948D] uppercase">Est. Wait</div>
+                        <div className="text-lg font-black text-[#1C1613]">{item.waitTime} mins</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[10px] font-bold text-[#9C948D] uppercase">Live Queue</div>
+                        <div className="text-sm font-extrabold text-[#7A4B29]">{item.waitingCount} in line</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedSalon(item)}
+                      className="flex-1 py-2.5 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1C1613] font-bold text-xs rounded-xl transition-all"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => handleJoinQueue(item)}
+                      className="flex-1 py-2.5 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-xs rounded-xl transition-all"
+                    >
+                      Join Queue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
+
+      {/* ─── Persistent Active Queue Bar ─── */}
+      {activeQueue && (
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:w-96 bg-[#1C1613] text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 z-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#7A4B29] flex items-center justify-center text-lg">
+              ⏱️
+            </div>
+            <div>
+              <div className="font-extrabold text-xs text-amber-400">Queue Confirmed</div>
+              <div className="font-bold text-sm truncate max-w-[180px]">{activeQueue.salonName}</div>
+              <div className="text-[11px] text-white/70">Pos #{activeQueue.position} • ~{activeQueue.waitTime} mins left</div>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveQueue(null)}
+            className="text-xs font-bold text-white/60 hover:text-white px-2.5 py-1 rounded-lg bg-white/10"
+          >
+            Close
+          </button>
+        </div>
+      )}
+
+      {/* ─── Detail Modal ─── */}
+      {selectedSalon && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl relative">
+            <button
+              onClick={() => setSelectedSalon(null)}
+              className="absolute top-4 right-4 p-2 text-[#9C948D] hover:text-[#1C1613]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-12 h-12 rounded-2xl bg-[#FAF2EA] text-[#7A4B29] font-black text-xl flex items-center justify-center mb-3">
+              {selectedSalon.name[0]}
+            </div>
+
+            <h3 className="text-xl font-extrabold text-[#1C1613]">{selectedSalon.name}</h3>
+            <p className="text-xs text-[#9C948D] mt-1 mb-4">{selectedSalon.address || 'Patia, Bhubaneswar'}</p>
+
+            <div className="grid grid-cols-3 gap-2 bg-[#FAF7F2] p-3 rounded-2xl mb-6 text-center">
+              <div>
+                <div className="text-[10px] font-bold text-[#9C948D]">Est. Wait</div>
+                <div className="text-base font-black text-[#1C1613]">{selectedSalon.waitTime} min</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-[#9C948D]">In Queue</div>
+                <div className="text-base font-black text-[#7A4B29]">{selectedSalon.waitingCount}</div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-[#9C948D]">Rating</div>
+                <div className="text-base font-black text-[#1C1613]">⭐ {selectedSalon.rating || '4.8'}</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handleJoinQueue(selectedSalon)}
+              className="w-full py-3.5 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-sm rounded-2xl transition-all shadow-md"
+            >
+              Join Live Queue Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      <LocationSelectorModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        currentLocation={location}
+        onUseGps={requestGpsLocation}
+        onSelectManual={setManualLocation}
+        isLocating={locating}
+      />
+
+      {/* Dismissible Customer Login Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowAuthModal(false)} />
+          
+          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border border-[#EFE7DC] bg-[#FAF8F5] p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 p-2 text-[#9C948D] hover:text-[#1C1613]"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#D4A373]/40 bg-[#D4A373]/10 px-3.5 py-1.5 text-[10px] font-bold tracking-widest text-[#7A4B29] uppercase">
+                Verification Required
+              </div>
+              <SneprWordmark height={28} color="#7A4B29" />
+              <h2 className="text-2xl font-serif font-bold text-[#1C1613] tracking-tight mt-2">
+                Join Salon Live Queue
+              </h2>
+              <p className="text-xs text-[#6E6761] leading-relaxed max-w-sm">
+                To reserve your spot, please quickly sign in with Google or continue using our Android app.
+              </p>
+            </div>
+
+            <div className="mt-8 space-y-4">
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={authLoading}
+                className="w-full flex items-center justify-center gap-3 h-14 bg-[#7A4B29] hover:bg-[#60391F] text-white font-bold text-xs uppercase tracking-widest rounded-2xl shadow-lg shadow-[#7A4B29]/20 transition-all disabled:opacity-60 cursor-pointer"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path
+                    fill="#FFFFFF"
+                    d="M21.35 11.1H12v2.7h5.38c-.24 1.28-.96 2.37-2.05 3.1l3.12 2.42c1.82-1.68 2.87-4.15 2.87-7.07 0-.73-.07-1.42-.17-2.15z"
+                  />
+                  <path
+                    fill="#FFFFFF"
+                    d="M12 21c2.43 0 4.47-.8 5.96-2.2l-3.12-2.42c-.86.58-1.97.92-3.12.92-2.4 0-4.43-1.62-5.15-3.8L3.33 15.3c1.48 2.94 4.53 5.7 8.67 5.7z"
+                  />
+                  <path
+                    fill="#FFFFFF"
+                    d="M6.85 13.5c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72L3.33 7.8A8.99 8.99 0 0 0 2 12c0 1.57.41 3.05 1.13 4.34l3.72-2.84z"
+                  />
+                  <path
+                    fill="#FFFFFF"
+                    d="M12 5.7c1.3 0 2.47.45 3.39 1.33l2.54-2.54C16.4 3.09 14.39 2.3 12 2.3c-4.14 0-7.19 2.76-8.67 5.7l3.52 2.7c.72-2.18 2.75-3.8 5.15-3.8z"
+                  />
+                </svg>
+                {authLoading ? "Connecting..." : "Sign In with Google"}
+              </button>
+
+              <div className="relative flex items-center justify-center py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#E5E0D8]" />
+                </div>
+                <span className="relative px-3 bg-[#FAF8F5] text-[9px] font-bold text-[#9C948D] uppercase tracking-widest">
+                  Best Experience
+                </span>
+              </div>
+
+              <a
+                href="/Snepr-v1.0.4.aab"
+                download
+                className="w-full flex items-center justify-center gap-3 h-14 bg-white hover:bg-[#FAF7F2] text-[#1C1613] font-bold text-xs uppercase tracking-widest rounded-2xl border border-[#E5E0D8] transition-all shadow-xs"
+              >
+                <Smartphone className="w-5 h-5 text-[#7A4B29]" />
+                Download Android App
+              </a>
+            </div>
+
+            <p className="mt-6 text-[10px] text-center text-[#9C948D] leading-relaxed">
+              By continuing, you agree to our Privacy Policy and Terms of Service.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Dock-styled bottom navigation */}
+      <div className="h-24" />
+      <DockNavbar activeTab="explore" />
+    </div>
+  );
+}

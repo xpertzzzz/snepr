@@ -1,0 +1,443 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/* Lock color scheme to light only — block dark mode extensions & media queries */
+:root,
+html,
+body {
+  color-scheme: light !important;
+  forced-color-adjust: none !important;
+}
+
+/* Custom Thin Warm Brown Scrollbar (Vertical Only) */
+::-webkit-scrollbar {
+  width: 6px !important;
+  height: 0px !important;
+}
+::-webkit-scrollbar:horizontal {
+  display: none !important;
+  height: 0px !important;
+}
+::-webkit-scrollbar-track {
+  background: #FAF7F2 !important;
+}
+::-webkit-scrollbar-thumb {
+  background: #7A4B29 !important;
+  border-radius: 9999px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #5C371D !important;
+}
+
+@theme inline {
+  --font-sans:
+    "Space Grotesk", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-4xl: 40px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-[#7A4B29]: oklch(0.5 0.1 50);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-status-available: var(--status-available);
+  --color-status-finishing: var(--status-finishing);
+  --color-status-busy: var(--status-busy);
+
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+
+  --shadow-card:
+    0 1px 2px oklch(0 0 0 / 0.04), 0 8px 24px -8px oklch(0 0 0 / 0.08);
+  --shadow-elevated:
+    0 2px 4px oklch(0 0 0 / 0.04), 0 24px 48px -16px oklch(0 0 0 / 0.16);
+  --shadow-brown:
+    0 8px 24px -6px oklch(0.5 0.1 50 / 0.45);
+}
+
+:root {
+  --background: oklch(1 0 0); /* White */
+  --foreground: oklch(0.2 0.02 45); /* Deep brown ink */
+  --ink: oklch(0.2 0.02 45);
+  --ink-soft: oklch(0.4 0.02 45);
+  --surface: oklch(0.98 0.01 70); /* Cream */
+  --surface-2: oklch(0.95 0.01 70);
+
+  --card: oklch(1 0 0);
+  --card-foreground: var(--ink);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--ink);
+
+  /* Primary App Brown/Gold */
+  --primary: oklch(0.5 0.1 50); /* Premium Brown */
+  --primary-foreground: oklch(1 0 0);
+  --primary-hover: oklch(0.45 0.1 50);
+
+  --secondary: oklch(0.95 0.01 70);
+  --secondary-foreground: var(--ink);
+  --muted: oklch(0.96 0.01 70);
+  --muted-foreground: oklch(0.5 0.02 45);
+  --accent: oklch(0.96 0.01 70);
+  --accent-foreground: var(--ink);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.90 0.01 70);
+  --input: oklch(0.90 0.01 70);
+  --ring: oklch(0.5 0.1 50);
+
+  /* Status colors — only for live queue elements */
+  --status-available: oklch(0.5 0.1 50); /* Brown/Gold — Available */
+  --status-finishing: oklch(0.78 0.16 75); /* amber ~ #F5A623 */
+  --status-busy: oklch(0.62 0.22 25); /* red ~ #E4433D */
+
+  --radius: 16px;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    color-scheme: light !important;
+  }
+
+  body {
+    background-color: var(--color-background) !important;
+    color: var(--color-foreground) !important;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    color-scheme: light !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+  }
+
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* Force light color scheme on dark mode extensions */
+@media (prefers-color-scheme: dark) {
+  :root, html, body {
+    color-scheme: light !important;
+    background-color: #FAF8F5 !important;
+    color: #1C1613 !important;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+@utility font-mono-tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+@utility press {
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+@utility press-active {
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@keyframes snepr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.85);
+  }
+}
+@keyframes snepr-pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes snepr-tick {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+@keyframes snepr-rise {
+  0% {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@utility live-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-status-available);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 999px;
+    border: 2px solid var(--color-status-available);
+    animation: snepr-pulse-ring 1.6s ease-out infinite;
+  }
+}
+
+@utility rise-in {
+  animation: snepr-rise 480ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+@utility tick-in {
+  animation: snepr-tick 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+
+/* ================= 3D, PARALLAX & HOVER ANIMATION SUITE ================= */
+@keyframes snepr-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+@keyframes snepr-float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(12px) rotate(-1.5deg);
+  }
+}
+
+@keyframes snepr-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes snepr-pulse-soft {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes snepr-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-2000 {
+  perspective: 2000px;
+}
+
+.transform-3d {
+  transform-style: preserve-3d;
+}
+
+/* Premium 3D Card Hover Lift & Shadow Expansion */
+.card-3d-hover {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-3d-hover:hover {
+  transform: translateY(-6px) scale(1.012) rotateX(1.5deg);
+  box-shadow: 0 20px 40px -15px rgba(27, 20, 16, 0.12), 0 0 25px -5px rgba(138, 76, 36, 0.1);
+  border-color: rgba(138, 76, 36, 0.45);
+}
+
+/* Interactive Shimmer Sheen */
+.shimmer-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-hover::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 70%
+  );
+  transform: rotate(30deg) translateY(-100%);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.shimmer-hover:hover::after {
+  transform: rotate(30deg) translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+
+/* ================= 3D ON-SCROLL CARD REVEAL SYSTEM ================= */
+.card-reveal {
+  opacity: 0;
+  transform: perspective(1200px) translateY(44px) rotateX(7deg) scale(0.96);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s ease,
+              border-color 0.4s ease;
+  transition-delay: var(--delay, 0s);
+  will-change: opacity, transform;
+  position: relative;
+}
+
+.card-reveal.in {
+  opacity: 1;
+  transform: perspective(1200px) translateY(0) rotateX(0deg) scale(1);
+}
+
+.card-reveal-left {
+  transform: perspective(1200px) translateX(-44px) rotateY(-8deg) scale(0.96);
+}
+.card-reveal-left.in {
+  transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+}
+
+.card-reveal-right {
+  transform: perspective(1200px) translateX(44px) rotateY(8deg) scale(0.96);
+}
+.card-reveal-right.in {
+  transform: perspective(1200px) translateX(0) rotateY(0deg) scale(1);
+}
+
+.card-reveal-scale {
+  transform: perspective(1200px) translateY(24px) scale(0.92);
+}
+.card-reveal-scale.in {
+  transform: perspective(1200px) translateY(0) scale(1);
+}
+
+/* Card Entrance Shimmer Light Beam */
+.card-reveal::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -160%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(110deg, transparent 20%, rgba(200, 153, 62, 0.14) 42%, rgba(255, 255, 255, 0.4) 50%, rgba(200, 153, 62, 0.14) 58%, transparent 80%);
+  transform: skewX(-22deg);
+  pointer-events: none;
+  z-index: 6;
+}
+.card-reveal.in::after {
+  animation: cardShimmerSweep 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--delay, 0s) + 0.3s);
+}
+
+@keyframes cardShimmerSweep {
+  0% { left: -160%; }
+  100% { left: 190%; }
+}
