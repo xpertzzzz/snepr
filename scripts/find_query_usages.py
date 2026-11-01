@@ -13,3 +13,4 @@ for root, dirs, files in os.walk('src'):
 print(f"Found {len(query_files)} files using query in src:")
 for p in query_files:
     print(" -", p)
+

@@ -1,123 +1,73 @@
 import { Link } from "@tanstack/react-router";
-import { SneprWordmark } from "@/components/SneprWordmark";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border bg-background py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col gap-4">
+    <footer className="snepr-ftr">
+      <div className="wrap">
+        <div className="fg">
+          <div>
             <Link to="/" className="inline-block" aria-label="Snepr home">
-              <img src="/snepr-logo.png" alt="Snepr" className="h-12 w-auto object-contain border-0 bg-transparent shadow-none" />
+              <img
+                src="/snepr-logo.png"
+                alt="sn≡pr"
+                className="h-8 sm:h-9 w-auto object-contain brightness-0 invert opacity-95 hover:opacity-100 transition-opacity"
+              />
             </Link>
-            <p className="text-[14px] text-ink-soft">
-              Live salon queues and wait times. Join from your phone and walk straight in.
-            </p>
+            <p className="bp">Live salon queues and wait times. Know before you go.</p>
           </div>
-          
           <div>
-            <h3 className="mb-4 text-[14px] font-bold uppercase tracking-wider text-ink">
-              Customers
-            </h3>
-            <ul className="flex flex-col gap-3 text-[14px] text-ink-soft">
-              <li>
-                <Link to="/live" className="transition hover:text-ink">
-                  Find Salons
-                </Link>
-              </li>
-              <li>
-                <Link to="/live" className="transition hover:text-ink">
-                  Join Live Queue
-                </Link>
-              </li>
-              <li>
-                <Link to="/live" className="transition hover:text-ink">
-                  Book Appointment
-                </Link>
-              </li>
-              <li>
-                <Link to="/live/activity" className="transition hover:text-ink">
-                  My Bookings
-                </Link>
-              </li>
+            <h5>CUSTOMERS</h5>
+            <ul>
+              <li><a href="#discover">Explore salons</a></li>
+              <li><a href="#discover">Live queues</a></li>
+              <li><a href="#demo">Join queue</a></li>
+              <li><a href="#ai">AI Studio</a></li>
+              <li><Link to="/live/activity">My bookings</Link></li>
+              <li><a href="#points">Snepr Points</a></li>
             </ul>
           </div>
-          
           <div>
-            <h3 className="mb-4 text-[14px] font-bold uppercase tracking-wider text-ink">
-              Businesses
-            </h3>
-            <ul className="flex flex-col gap-3 text-[14px] text-ink-soft">
-              <li>
-                <Link to={"/list-salon" as any} className="transition hover:text-ink">
-                  List Your Salon
-                </Link>
-              </li>
-              <li>
-                <Link to={"/claim" as any} className="transition font-semibold text-primary hover:text-primary-hover">
-                  Claim Your Salon
-                </Link>
-              </li>
-              <li>
-                <Link to={"/partner-dashboard" as any} className="transition hover:text-ink">
-                  Partner Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/pricing" className="transition hover:text-ink">
-                  SalonOS Pricing
-                </Link>
-              </li>
-              <li>
-                <Link to={"/partner-terms" as any} className="transition hover:text-ink">
-                  Partner Terms
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="transition hover:text-ink">
-                  Help Center
-                </Link>
-              </li>
+            <h5>SALON OWNERS</h5>
+            <ul>
+              <li><Link to="/claim">List your salon</Link></li>
+              <li><Link to="/claim">Claim your salon</Link></li>
+              <li><a href="#salonos">SalonOS</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><Link to="/terms-of-service">Partner terms</Link></li>
+              <li><Link to="/salon">Partner dashboard</Link></li>
             </ul>
           </div>
-          
           <div>
-            <h3 className="mb-4 text-[14px] font-bold uppercase tracking-wider text-ink">
-              Company & Legal
-            </h3>
-            <ul className="flex flex-col gap-3 text-[14px] text-ink-soft">
+            <h5>COMPANY</h5>
+            <ul>
+              <li><Link to="/about">About</Link></li>
+              <li><Link to="/contact">Contact</Link></li>
+              <li><a href="#faq">Help center</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5>LEGAL</h5>
+            <ul>
+              <li><Link to="/privacy-policy">Privacy policy</Link></li>
+              <li><Link to="/terms-of-service">Terms of service</Link></li>
+            </ul>
+            <h5 style={{ marginTop: "22px" }}>SOCIAL</h5>
+            <ul>
               <li>
-                <Link to="/about" className="transition hover:text-ink">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="transition hover:text-ink">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy-policy" className="transition hover:text-ink">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms-of-service" className="transition hover:text-ink">
-                  Terms of Service
-                </Link>
+                <a href="https://instagram.com/snepr" target="_blank" rel="noreferrer">
+                  Instagram
+                </a>
               </li>
             </ul>
           </div>
         </div>
-        
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 text-[13px] text-ink-soft sm:flex-row">
-          <p>© {new Date().getFullYear()} Snepr. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="transition hover:text-ink" aria-label="Twitter">Twitter</a>
-            <a href="#" className="transition hover:text-ink" aria-label="Instagram">Instagram</a>
-          </div>
+        <div className="fb">
+          <span>© 2026 Snepr. All rights reserved.</span>
+          <span>Made in Bhubaneswar</span>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;

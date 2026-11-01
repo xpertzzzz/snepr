@@ -534,3 +534,4 @@ When delegating future frontend or backend enhancements to Claude:
 2. **Logo integrity:** Never surround the `sn≡pr` logo with rounded borders, heavy borders, or boxed card backgrounds. The logo is a pure wordmark.
 3. **Routing conventions:** The project runs on standard `react-router-dom` v7 via `@tanstack/react-router` zero-dependency shims in `src/lib/router-compat.tsx`. Do not re-install `@tanstack/react-start` or Nitro plugins.
 4. **Database interactions:** Any backend endpoint updates should be added directly to `src/backend/mobile-api.ts` and use type-safe queries from `src/backend/db/schema.ts`.
+

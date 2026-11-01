@@ -16,3 +16,4 @@ for p in files:
         for l in lines:
             if 'useQuery' in l or 'useMutation' in l or '@tanstack' in l:
                 print("  ", l.strip()[:100])
+

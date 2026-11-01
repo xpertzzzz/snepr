@@ -16,3 +16,4 @@ for p in files:
         print(f"{p} component: {m.group(1)}")
     else:
         print(f"{p} has no 'component: ...'")
+
