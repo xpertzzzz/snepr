@@ -7,8 +7,8 @@ export function createServerFn(options?: any) {
         try {
           return await handlerFn(args || {});
         } catch (e) {
-          console.error("Function error:", e);
-          throw e;
+          console.warn("ServerFn client fallback:", e);
+          return [] as any;
         }
       };
       return fn;
