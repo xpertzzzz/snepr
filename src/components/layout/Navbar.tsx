@@ -57,7 +57,7 @@ export function Navbar() {
             <img
               src="/snepr-logo.png"
               alt="sn≡pr"
-              className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105 border-0 bg-transparent shadow-none rounded-none"
+              className="h-11 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105 border-0 bg-transparent shadow-none rounded-none"
             />
           </Link>
 

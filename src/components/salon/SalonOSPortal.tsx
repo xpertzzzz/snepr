@@ -5,7 +5,7 @@ import {
   UserCheck, Star, Building2, Tag, DollarSign, BarChart3, Bell, Package,
   CreditCard, ShieldCheck, GitBranch, Share2, FileText, Settings, Plus,
   CheckCircle2, Clock, Play, Pause, UserPlus, Search, Filter, Download,
-  TrendingUp, Award, MapPin, Phone, Mail, Sparkles, Check, X, AlertTriangle
+  TrendingUp, Award, MapPin, Phone, Mail, Sparkles, Check, X, AlertTriangle, Armchair
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ const updateQueueTokenAction = async ({ data }: { data: any }): Promise<any> => 
 export type SalonOSTab =
   | "Dashboard"
   | "Live Queue"
+  | "Chairs & Stations"
   | "Services"
   | "Staff & Barbers"
   | "Reviews & Trust"
@@ -58,6 +59,7 @@ export type SalonOSTab =
 export const SALON_OS_NAV: { name: SalonOSTab; icon: any; category: string; isExclusive?: boolean; tier?: "Base" | "Intermediate" | "Pro" }[] = [
   { name: "Dashboard", icon: LayoutDashboard, category: "Core", tier: "Base" },
   { name: "Live Queue", icon: Zap, category: "Core", isExclusive: true, tier: "Base" },
+  { name: "Chairs & Stations", icon: Armchair, category: "Core", tier: "Base" },
   { name: "Services", icon: Scissors, category: "Profile & Menu", tier: "Base" },
   { name: "Staff & Barbers", icon: Users, category: "Profile & Menu", tier: "Base" },
   { name: "Reviews & Trust", icon: Star, category: "Reputation", tier: "Base" },
@@ -187,6 +189,30 @@ export function SalonOSPortal({ session, onLogout }: { session: any; onLogout: (
       queryClient.invalidateQueries({ queryKey: ["salon-os-portal"] });
     },
   });
+
+  
+  const [salonChairs, setSalonChairs] = useState([
+    { id: 1, name: "Station 1", barber: "Sameer Mohanty", status: "occupied", token: "#A-102", customer: "Debabrata Dash", service: "Signature Haircut & Wash", estRemainingMins: 12 },
+    { id: 2, name: "Station 2", barber: "Rahul Sen", status: "available", token: null, customer: null, service: null, estRemainingMins: 0 },
+    { id: 3, name: "Station 3", barber: "Sunita Jena", status: "finishing", token: "#A-103", customer: "Sneha Priyadarshini", service: "Deep Hair Spa", estRemainingMins: 3 },
+    { id: 4, name: "Station 4", barber: "Deepak Dash", status: "break", token: null, customer: null, service: null, estRemainingMins: 10 },
+  ]);
+
+  const updateChairStatus = (chairId: number, newStatus: string) => {
+    setSalonChairs(prev => prev.map(c => {
+      if (c.id !== chairId) return c;
+      if (newStatus === "available") {
+        return { ...c, status: "available", token: null, customer: null, service: null, estRemainingMins: 0 };
+      }
+      if (newStatus === "break") {
+        return { ...c, status: "break", token: null, customer: null, service: null, estRemainingMins: 15 };
+      }
+      if (newStatus === "occupied") {
+        return { ...c, status: "occupied", token: "#A-105", customer: "Walk-in Customer", service: "Classic Haircut", estRemainingMins: 25 };
+      }
+      return { ...c, status: newStatus as any };
+    }));
+  };
 
   const [isQueuePaused, setIsQueuePaused] = useState(false);
   const [walkinModal, setWalkinModal] = useState(false);
@@ -513,6 +539,225 @@ export function SalonOSPortal({ session, onLogout }: { session: any; onLogout: (
                     <p className="font-bold text-white">#98 • Rajesh Kumar</p>
                     <p className="text-[11px] text-[#8E867E]">Haircut & Beard • Completed at 11:45 AM</p>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          
+          {/* TAB: CHAIRS & STATIONS MANAGEMENT (Section 6) */}
+          {activeTab === "Chairs & Stations" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#1A1714] border border-[#2D2824] p-5 rounded-2xl">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#7A4B29]/20 text-[#D4A373] text-[10px] font-bold uppercase tracking-wider mb-1">
+                    <Armchair className="w-3 h-3" />
+                    SalonOS Chair Management System
+                  </div>
+                  <h3 className="font-bold text-white text-lg">Chairs & Station Command</h3>
+                  <p className="text-xs text-[#8E867E]">
+                    Live chair occupancy directly synchronizes with customer wait-times across Bhubaneswar.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setWalkinModal(true)} className="px-4 py-2 bg-[#D4A373] hover:bg-[#c49363] text-[#141210] text-xs font-bold rounded-xl shadow transition-all">
+                    + Seat Walk-In
+                  </button>
+                  <button onClick={handleCallNext} className="px-4 py-2 bg-[#7A4B29] hover:bg-[#8F5A33] text-white text-xs font-bold rounded-xl shadow transition-all">
+                    Call Next Token
+                  </button>
+                </div>
+              </div>
+
+              {/* Visual Chair Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {salonChairs.map((chair) => {
+                  const isAvailable = chair.status === "available";
+                  const isOccupied = chair.status === "occupied";
+                  const isFinishing = chair.status === "finishing";
+                  const isBreak = chair.status === "break";
+
+                  return (
+                    <div
+                      key={chair.id}
+                      className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${
+                        isAvailable
+                          ? "bg-[#141A16] border-[#2E7D4F]/40 shadow-sm"
+                          : isOccupied
+                          ? "bg-[#1D1714] border-[#7A4B29]/50 shadow-md"
+                          : isFinishing
+                          ? "bg-[#1E1B14] border-[#C8993E]/40"
+                          : "bg-[#171615] border-[#3D352E]/50 opacity-80"
+                      }`}
+                    >
+                      <div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-mono text-xs font-bold text-white bg-[#25211D] px-2.5 py-1 rounded-lg border border-[#3D352E]">
+                            {chair.name}
+                          </span>
+                          <span
+                            className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                              isAvailable
+                                ? "bg-[#2E7D4F]/20 text-[#2E7D4F]"
+                                : isOccupied
+                                ? "bg-[#DC2626]/20 text-red-400"
+                                : isFinishing
+                                ? "bg-[#C8993E]/20 text-[#C8993E]"
+                                : "bg-zinc-700/30 text-zinc-400"
+                            }`}
+                          >
+                            ● {chair.status}
+                          </span>
+                        </div>
+
+                        {/* Barber Name */}
+                        <div className="text-xs font-bold text-white mb-2 flex items-center gap-1.5">
+                          <Users className="w-3.5 h-3.5 text-[#D4A373]" />
+                          {chair.barber}
+                        </div>
+
+                        {/* Customer / Service */}
+                        {chair.customer ? (
+                          <div className="p-3 bg-[#141210] rounded-xl border border-[#2D2824] space-y-1 mb-3">
+                            <div className="flex items-center justify-between text-xs font-bold text-white">
+                              <span>{chair.customer}</span>
+                              <span className="text-[#D4A373] font-mono">{chair.token}</span>
+                            </div>
+                            <p className="text-[11px] text-[#8E867E] truncate">{chair.service}</p>
+                            <div className="text-[10px] text-amber-400/90 font-medium pt-1 border-t border-[#25211D]">
+                              Est. remaining: ~{chair.estRemainingMins} mins
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-[#141210]/60 rounded-xl border border-[#2D2824] text-center mb-3">
+                            <p className="text-xs font-bold text-[#2E7D4F]">
+                              {isBreak ? "Barber on 15m Break" : "Chair Free & Ready"}
+                            </p>
+                            <p className="text-[10px] text-[#6E6761] mt-0.5">
+                              {isBreak ? "Available at 12:15 PM" : "Ready for next token"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="space-y-1.5 pt-2 border-t border-[#2D2824]">
+                        {isAvailable && (
+                          <button
+                            onClick={() => updateChairStatus(chair.id, "occupied")}
+                            className="w-full py-2 bg-[#2E7D4F] hover:bg-[#25633e] text-white font-bold text-xs rounded-xl transition-all shadow-xs"
+                          >
+                            Assign Next Token
+                          </button>
+                        )}
+
+                        {isOccupied && (
+                          <div className="grid grid-cols-2 gap-1.5">
+                            <button
+                              onClick={() => updateChairStatus(chair.id, "finishing")}
+                              className="py-1.5 bg-[#C8993E] hover:bg-[#b08432] text-[#141210] font-bold text-[11px] rounded-lg"
+                            >
+                              Finishing
+                            </button>
+                            <button
+                              onClick={() => updateChairStatus(chair.id, "available")}
+                              className="py-1.5 bg-[#2E7D4F] hover:bg-[#25633e] text-white font-bold text-[11px] rounded-lg"
+                            >
+                              Complete
+                            </button>
+                          </div>
+                        )}
+
+                        {isFinishing && (
+                          <button
+                            onClick={() => updateChairStatus(chair.id, "available")}
+                            className="w-full py-2 bg-[#2E7D4F] hover:bg-[#25633e] text-white font-bold text-xs rounded-xl"
+                          >
+                            Finish & Free Chair
+                          </button>
+                        )}
+
+                        {isBreak && (
+                          <button
+                            onClick={() => updateChairStatus(chair.id, "available")}
+                            className="w-full py-2 bg-[#7A4B29] hover:bg-[#8F5A33] text-white font-bold text-xs rounded-xl"
+                          >
+                            End Break / Set Ready
+                          </button>
+                        )}
+
+                        {!isBreak && !isOccupied && (
+                          <button
+                            onClick={() => updateChairStatus(chair.id, "break")}
+                            className="w-full py-1 text-[10px] text-[#8E867E] hover:text-white transition-colors"
+                          >
+                            Put Station on Break
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Active Queue Table & Operational Actions */}
+              <div className="bg-[#1A1714] border border-[#2D2824] p-5 rounded-2xl">
+                <div className="flex items-center justify-between pb-3 border-b border-[#2D2824] mb-4">
+                  <h4 className="font-bold text-white text-sm">Live Token Queue Management</h4>
+                  <span className="text-xs text-[#8E867E]">
+                    {queueTokens.length} active customer{queueTokens.length === 1 ? "" : "s"} in queue
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs text-[#A69F96]">
+                    <thead className="bg-[#141210] text-[#D4A373] uppercase tracking-wider text-[10px]">
+                      <tr>
+                        <th className="p-3">Token</th>
+                        <th className="p-3">Customer</th>
+                        <th className="p-3">Service</th>
+                        <th className="p-3">Est. Wait</th>
+                        <th className="p-3">Status</th>
+                        <th className="p-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#2D2824]">
+                      {queueTokens.map((item: any) => (
+                        <tr key={item.id} className="hover:bg-[#25211D]/50 transition-colors">
+                          <td className="p-3 font-mono font-bold text-white">#{item.token}</td>
+                          <td className="p-3 font-semibold text-white">{item.name}</td>
+                          <td className="p-3">{item.service}</td>
+                          <td className="p-3 text-amber-400 font-bold">{item.waitMins}m</td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded-full bg-[#7A4B29]/20 text-[#D4A373] text-[10px] font-bold uppercase">
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="p-3 text-right space-x-1.5">
+                            <button
+                              onClick={() => queueActionMutation.mutate({ queueId: item.id, action: "in-progress" })}
+                              className="px-2.5 py-1 bg-[#2E7D4F] hover:bg-[#25633e] text-white text-[10px] font-bold rounded-lg"
+                            >
+                              Seat
+                            </button>
+                            <button
+                              onClick={() => queueActionMutation.mutate({ queueId: item.id, action: "completed" })}
+                              className="px-2.5 py-1 bg-[#7A4B29] hover:bg-[#8F5A33] text-white text-[10px] font-bold rounded-lg"
+                            >
+                              Complete
+                            </button>
+                            <button
+                              onClick={() => queueActionMutation.mutate({ queueId: item.id, action: "no_show" })}
+                              className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white text-[10px] font-bold rounded-lg"
+                            >
+                              No-Show
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

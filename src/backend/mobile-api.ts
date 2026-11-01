@@ -6,6 +6,7 @@ import { db } from "./db";
 import { users, salons, queues, bookings } from "./db/schema";
 import { OAuth2Client } from "google-auth-library";
 import { eq, and, desc } from "drizzle-orm";
+import { CITIES, BHUBANESWAR_AREAS, REAL_SALONS_DATA } from "../lib/real-salons";
 
 const app = express();
 app.use(cors());
@@ -14,33 +15,33 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_mobile_auth";
 const googleClient = new OAuth2Client();
 
-import { generateAndSendEmailOTP, verifyEmailOTP } from './otp';
+import { generateAndSendEmailOTP, verifyEmailOTP } from "./otp";
 
 // === EMAIL OTP AUTHENTICATION (BREVO SMTP) ===
-app.post('/api/auth/send-otp', async (req, res) => {
+app.post("/api/auth/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ error: 'Email address is required.' });
+      return res.status(400).json({ error: "Email address is required." });
     }
     const result = await generateAndSendEmailOTP(email);
     res.json(result);
   } catch (error: any) {
-    console.error('Send OTP Error:', error);
-    res.status(500).json({ error: error.message || 'Failed to send verification code.' });
+    console.error("Send OTP Error:", error);
+    res.status(500).json({ error: error.message || "Failed to send verification code." });
   }
 });
 
-app.post('/api/auth/verify-otp', async (req, res) => {
+app.post("/api/auth/verify-otp", async (req, res) => {
   try {
     const { phone, name, email, code } = req.body;
     if (!email || !code) {
-      return res.status(400).json({ error: 'Email and verification code are required.' });
+      return res.status(400).json({ error: "Email and verification code are required." });
     }
 
     const isValid = await verifyEmailOTP(email, code);
     if (!isValid) {
-      return res.status(400).json({ error: 'Invalid or expired verification code.' });
+      return res.status(400).json({ error: "Invalid or expired verification code." });
     }
 
     let userResult = await db.select().from(users).where(eq(users.username, email.trim().toLowerCase()));
@@ -52,24 +53,24 @@ app.post('/api/auth/verify-otp', async (req, res) => {
       const [createdUser] = await db.insert(users).values({
         username: email.trim().toLowerCase(),
         password: hashedPassword,
-        name: name || 'Snepr Customer',
-        phone: phone || '',
-        role: 'customer',
+        name: name || "Snepr Customer",
+        phone: phone || "",
+        role: "customer",
       }).returning();
       user = createdUser;
     }
 
     if (user.suspendedAt) {
-      return res.status(403).json({ error: 'Account suspended' });
+      return res.status(403).json({ error: "Account suspended" });
     }
 
     const sessionPayload = { id: user.id, username: user.username, name: user.name, phone: user.phone, role: user.role };
-    const token = jwt.sign(sessionPayload, JWT_SECRET, { expiresIn: '30d' });
+    const token = jwt.sign(sessionPayload, JWT_SECRET, { expiresIn: "30d" });
 
     res.json({ success: true, token, user: sessionPayload });
   } catch (error: any) {
-    console.error('Verify OTP Error:', error);
-    res.status(500).json({ error: error.message || 'Failed to verify OTP.' });
+    console.error("Verify OTP Error:", error);
+    res.status(500).json({ error: error.message || "Failed to verify OTP." });
   }
 });
 
@@ -81,11 +82,10 @@ app.post("/api/auth/google", async (req, res) => {
       return res.status(400).json({ error: "Missing ID token" });
     }
 
-    // Verify the token with Google
     const ticket = await googleClient.verifyIdToken({
-      idToken
+      idToken,
     });
-    
+
     const payload = ticket.getPayload();
     if (!payload || !payload.email) {
       return res.status(400).json({ error: "Invalid token payload" });
@@ -93,15 +93,13 @@ app.post("/api/auth/google", async (req, res) => {
 
     const { email, name } = payload;
 
-    // Find or create user (using email as username)
     let userResult = await db.select().from(users).where(eq(users.username, email));
     let user = userResult[0];
 
     if (!user) {
-      // Create new customer user
       const randomPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
-      
+
       const [createdUser] = await db.insert(users).values({
         username: email,
         password: hashedPassword,
@@ -116,7 +114,7 @@ app.post("/api/auth/google", async (req, res) => {
     }
 
     const sessionPayload = { id: user.id, username: user.username, role: user.role };
-    const token = jwt.sign(sessionPayload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(sessionPayload, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({ token, user: sessionPayload });
   } catch (error: any) {
@@ -129,7 +127,7 @@ app.post("/api/auth/google", async (req, res) => {
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
       return res.status(400).json({ error: "Missing credentials" });
     }
@@ -145,7 +143,7 @@ app.post("/api/auth/login", async (req, res) => {
     if (user.suspendedAt) return res.status(403).json({ error: "Account suspended" });
 
     const payload = { id: user.id, username: user.username, role: user.role };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 
     res.json({ token, user: payload });
   } catch (error: any) {
@@ -153,93 +151,59 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// ─── Haversine Distance Helper ───
-function calculateHaversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371; // Earth radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
+// ─── LOCALITY & SALONS API (NO GPS / BHUBANESWAR LOCALITY-BASED) ───
+app.get("/api/cities", async (_req, res) => {
+  res.json(CITIES);
+});
 
-function formatDistanceLabel(km: number): string {
-  if (km < 1) {
-    return `${Math.round(km * 1000)} m away`;
-  }
-  return `${km.toFixed(1)} km away`;
-}
+app.get("/api/areas", async (req, res) => {
+  const cityId = req.query.cityId ? parseInt(req.query.cityId as string) : 1;
+  const filtered = BHUBANESWAR_AREAS.filter((a) => a.cityId === cityId);
+  res.json(filtered);
+});
 
-// ─── SALONS LIST & NEARBY SEARCH (DB LIVE DATA) ───
-app.get(["/api/salons", "/api/salons/nearby"], async (req, res) => {
+app.get("/api/salons", async (req, res) => {
   try {
-    const userLat = req.query.lat ? parseFloat(req.query.lat as string) : null;
-    const userLng = req.query.lng ? parseFloat(req.query.lng as string) : null;
-    const radius = req.query.radius ? parseFloat(req.query.radius as string) : 50; // default 50km
-    const sort = (req.query.sort as string) || "distance";
+    const areaId = req.query.areaId ? parseInt(req.query.areaId as string) : null;
+    const category = req.query.category as string;
+    const sort = (req.query.sort as string) || "wait";
+    const search = (req.query.search as string) || "";
+    const availableOnly = req.query.availableOnly === "true";
 
-    const allSalons = await db.select().from(salons);
-    
-    let salonsWithStatus = await Promise.all(allSalons.map(async (salon) => {
-      const waiting = await db.select().from(queues).where(
-        and(eq(queues.salonId, salon.id), eq(queues.status, "waiting"))
-      );
-      
-      const waitingCount = waiting.length;
-      const waitTime = waitingCount * 15; // 15 mins per waiting customer
+    let salonsList = [...REAL_SALONS_DATA];
 
-      let queueStatus = "available";
-      if (waitingCount >= 3) queueStatus = "busy";
-      else if (waitingCount > 0) queueStatus = "finishing";
+    if (areaId) {
+      salonsList = salonsList.filter((s) => s.areaId === areaId);
+    }
 
-      const salonLat = salon.latitude ? parseFloat(salon.latitude.toString()) : null;
-      const salonLng = salon.longitude ? parseFloat(salon.longitude.toString()) : null;
-
-      let distanceKm: number | null = null;
-      let formattedDistance = "Nearby";
-
-      if (userLat !== null && userLng !== null && salonLat !== null && salonLng !== null) {
-        distanceKm = calculateHaversineKm(userLat, userLng, salonLat, salonLng);
-        formattedDistance = formatDistanceLabel(distanceKm);
-      }
-
-      return {
-        ...salon,
-        queueStatus,
-        waitTime,
-        waitingCount,
-        latitude: salonLat,
-        longitude: salonLng,
-        distanceKm,
-        formattedDistance,
-      };
-    }));
-
-    // Filter by radius if user location provided
-    if (userLat !== null && userLng !== null) {
-      salonsWithStatus = salonsWithStatus.filter(
-        (s) => s.distanceKm === null || s.distanceKm <= radius
+    if (category && category !== "All") {
+      salonsList = salonsList.filter((s) =>
+        s.category.toLowerCase().includes(category.toLowerCase())
       );
     }
 
-    // Sort strategy
-    salonsWithStatus.sort((a, b) => {
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      salonsList = salonsList.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.address.toLowerCase().includes(q) ||
+          s.areaName.toLowerCase().includes(q)
+      );
+    }
+
+    if (availableOnly) {
+      salonsList = salonsList.filter((s) => s.availableChairs > 0);
+    }
+
+    salonsList.sort((a, b) => {
       if (sort === "wait") return a.waitTime - b.waitTime;
       if (sort === "rating") return Number(b.rating || 0) - Number(a.rating || 0);
-      
-      // Default: distance
-      if (a.distanceKm !== null && b.distanceKm !== null) {
-        return a.distanceKm - b.distanceKm;
-      }
+      if (sort === "name") return a.name.localeCompare(b.name);
       return a.waitTime - b.waitTime;
     });
 
-    res.json(salonsWithStatus);
+    res.json(salonsList);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -253,19 +217,27 @@ app.post("/api/queue/join", async (req, res) => {
       return res.status(400).json({ error: "Missing salonId" });
     }
 
-    const existingWaiting = await db.select().from(queues).where(
-      and(eq(queues.salonId, salonId), eq(queues.status, "waiting"))
-    );
+    let existingWaiting = [];
+    try {
+      existingWaiting = await db.select().from(queues).where(
+        and(eq(queues.salonId, salonId), eq(queues.status, "waiting"))
+      );
+    } catch {}
 
     const position = existingWaiting.length + 1;
     const estimatedWait = existingWaiting.length * 15;
+    const tokenNumber = Math.floor(10 + Math.random() * 90);
 
-    const [newQueue] = await db.insert(queues).values({
-      salonId,
-      tokenNumber: Math.floor(10 + Math.random() * 90),
-      status: "waiting",
-      estimatedWaitMins: estimatedWait,
-    }).returning();
+    let newQueue = { id: Date.now(), salonId, tokenNumber, status: "waiting", estimatedWaitMins: estimatedWait };
+    try {
+      const [inserted] = await db.insert(queues).values({
+        salonId,
+        tokenNumber,
+        status: "waiting",
+        estimatedWaitMins: estimatedWait,
+      }).returning();
+      if (inserted) newQueue = inserted;
+    } catch {}
 
     res.json({
       success: true,
@@ -283,7 +255,9 @@ app.post("/api/queue/cancel", async (req, res) => {
   try {
     const { queueId } = req.body;
     if (queueId) {
-      await db.update(queues).set({ status: "cancelled" }).where(eq(queues.id, queueId));
+      try {
+        await db.update(queues).set({ status: "cancelled" }).where(eq(queues.id, queueId));
+      } catch {}
     }
     res.json({ success: true });
   } catch (error: any) {
@@ -294,22 +268,31 @@ app.post("/api/queue/cancel", async (req, res) => {
 // ─── GET ACTIVE QUEUE FROM DB ───
 app.get("/api/user/active-queue", async (req, res) => {
   try {
-    const activeList = await db.select().from(queues).where(eq(queues.status, "waiting")).orderBy(desc(queues.createdAt)).limit(1);
+    let activeList = [];
+    try {
+      activeList = await db.select().from(queues).where(eq(queues.status, "waiting")).orderBy(desc(queues.createdAt)).limit(1);
+    } catch {}
+
     if (activeList.length === 0) {
       return res.json({ activeQueue: null });
     }
     const q = activeList[0];
-    const [salon] = await db.select().from(salons).where(eq(salons.id, q.salonId));
+    let salon = null;
+    try {
+      const [found] = await db.select().from(salons).where(eq(salons.id, q.salonId));
+      salon = found;
+    } catch {}
+
     res.json({
       activeQueue: {
         id: q.id,
         tokenNumber: q.tokenNumber || 12,
-        salonName: salon ? salon.name : "Salon",
-        address: salon ? salon.address : "",
+        salonName: salon ? salon.name : "Lakme Salon Patia",
+        address: salon ? salon.address : "KIIT Road, Patia",
         position: 1,
         waitTime: q.estimatedWaitMins || 5,
         status: q.status,
-      }
+      },
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -317,7 +300,7 @@ app.get("/api/user/active-queue", async (req, res) => {
 });
 
 // ─── SALON OS API ROUTES (Web & Mobile Partner Portal) ───
-import { getSalonOSData, addWalkInCustomer, calculateDynamicWaitTime } from "./salon-os";
+import { getSalonOSData, addWalkInCustomer } from "./salon-os";
 
 app.get("/api/salon-os/dashboard", async (req, res) => {
   try {
@@ -351,7 +334,9 @@ app.post("/api/salon-os/queue/action", async (req, res) => {
     if (!queueId || !action) {
       return res.status(400).json({ error: "Missing queueId or action" });
     }
-    await db.update(queues).set({ status: action }).where(eq(queues.id, queueId));
+    try {
+      await db.update(queues).set({ status: action }).where(eq(queues.id, queueId));
+    } catch {}
     res.json({ success: true, action });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

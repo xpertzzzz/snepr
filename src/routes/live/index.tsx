@@ -2,12 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { getSalons } from "../../backend/functions/salons";
 import { useEffect, useState } from "react";
 import {
-  Search, MapPin, Zap, CheckCircle2, Clock, Navigation, X, Smartphone, Sparkles, ArrowRight
+  Search, MapPin, Zap, CheckCircle2, Clock, X, Smartphone, Sparkles, ArrowRight, ShieldCheck, Armchair
 } from "lucide-react";
 import { SneprWordmark } from "@/components/SneprWordmark";
 import { cn } from "@/lib/utils";
 import { DockNavbar } from "@/components/layout/DockNavbar";
-import { ContextualAppCTA } from "@/components/promo/ContextualAppCTA";
 import { LocationSelectorModal } from "@/components/location/LocationSelectorModal";
 import { useLocation } from "@/hooks/useLocation";
 import { toast } from "sonner";
@@ -18,8 +17,8 @@ import { loginWithGoogleServer } from "@/backend/functions/auth";
 export const Route = createFileRoute("/live/")({
   head: () => ({
     meta: [
-      { title: "Live Salons Near You | Snepr" },
-      { name: "description", content: "See live wait times at salons near you. Join the queue from your phone and walk straight in." },
+      { title: "Live Salons in Bhubaneswar | Snepr" },
+      { name: "description", content: "See live wait times and chair availability at verified Bhubaneswar salons. Join the queue from your phone and walk straight in." },
     ],
     links: [{ rel: "canonical", href: "https://snepr.in/live" }],
   }),
@@ -32,6 +31,7 @@ type FilterOption = "all" | "available" | "shortest";
 interface Salon {
   id: number;
   name: string;
+  slug?: string;
   address: string | null;
   category: string | null;
   rating: string | null;
@@ -39,20 +39,16 @@ interface Salon {
   queueStatus: QueueStatus;
   waitTime: number;
   waitingCount?: number;
-  latitude: string | null;
-  longitude: string | null;
-  distanceKm?: number;
-  formattedDistance?: string;
-}
-
-function formatDistance(km: number): string {
-  if (km < 1) return `${Math.round(km * 1000)} m away`;
-  return `${km.toFixed(1)} km away`;
+  totalChairs?: number;
+  availableChairs?: number;
+  areaId?: number;
+  areaName?: string;
+  verificationStatus?: "verified" | "unverified";
 }
 
 function LiveDashboard() {
-  const { location, loading: locating, requestGpsLocation, setManualLocation } = useLocation();
-  const selectedLocality = location.formattedLabel || "Patia, Bhubaneswar";
+  const { location, setLocality, areas } = useLocation();
+  const selectedLocalityLabel = location.formattedLabel || "Patia, Bhubaneswar";
   const [salons, setSalons] = useState<Salon[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterOption>("all");
@@ -75,9 +71,15 @@ function LiveDashboard() {
 
   const loadSalons = async () => {
     try {
-      const fallback = await getSalons({ data: {} });
-      if (fallback && Array.isArray(fallback)) {
-        setSalons(fallback);
+      const result = await getSalons({
+        data: {
+          areaId: location.areaId,
+          category: activeCategory !== "All" ? activeCategory : undefined,
+          search: search.trim() || undefined,
+        },
+      });
+      if (result && Array.isArray(result)) {
+        setSalons(result);
       }
     } catch (err) {
       console.error("Failed to load salons", err);
@@ -90,14 +92,14 @@ function LiveDashboard() {
     loadSalons();
     const interval = setInterval(loadSalons, 10000);
     return () => clearInterval(interval);
-  }, [location.latitude, location.longitude]);
+  }, [location.areaId, activeCategory]);
 
   const categories = [
-    { id: 'all', name: 'All Salons' },
-    { id: 'haircut', name: '0-Wait Now' },
-    { id: 'beard', name: "Men's Grooming" },
-    { id: 'facial', name: 'Facial & Spa' },
-    { id: 'styling', name: 'Signature Styling' },
+    { id: "All", name: "All Neighborhood Salons" },
+    { id: "Beauty", name: "Beauty & Unisex" },
+    { id: "Men", name: "Men's Grooming" },
+    { id: "Spa", name: "Hair Spa & Wellness" },
+    { id: "Luxury", name: "Luxury Salons" },
   ];
 
   const handleGoogleLogin = async () => {
@@ -110,7 +112,7 @@ function LiveDashboard() {
         setAuthLoading(false);
         return;
       }
-      
+
       const res = await loginWithGoogleServer({ data: { idToken } });
       try {
         localStorage.setItem("snepr_session", JSON.stringify(res));
@@ -140,56 +142,56 @@ function LiveDashboard() {
     toast.success(`Joined queue at ${salon.name}!`);
   };
 
-  const filteredSalons = salons.filter(s => {
+  const filteredSalons = salons.filter((s) => {
     if (search) {
-      return (
-        s.name.toLowerCase().includes(search.toLowerCase()) ||
-        (s.category && s.category.toLowerCase().includes(search.toLowerCase())) ||
-        (s.address && s.address.toLowerCase().includes(search.toLowerCase()))
-      );
+      const q = search.toLowerCase();
+      const matchesSearch =
+        s.name.toLowerCase().includes(q) ||
+        (s.category && s.category.toLowerCase().includes(q)) ||
+        (s.address && s.address.toLowerCase().includes(q)) ||
+        (s.areaName && s.areaName.toLowerCase().includes(q));
+      if (!matchesSearch) return false;
     }
-    if (
-      activeCategory !== 'All' &&
-      s.category &&
-      !s.category.toLowerCase().includes(activeCategory.toLowerCase()) &&
-      !s.name.toLowerCase().includes(activeCategory.toLowerCase())
-    ) {
-      return false;
+    if (activeFilter === "available") {
+      return (s.availableChairs ?? 0) > 0 || s.queueStatus === "available";
     }
-    if (activeFilter === "available") return s.queueStatus === "available";
-    if (activeFilter === "shortest") return s.waitTime <= 15;
+    if (activeFilter === "shortest") {
+      return s.waitTime <= 15;
+    }
     return true;
   });
 
   filteredSalons.sort((a, b) => {
-    if (a.distanceKm !== undefined && b.distanceKm !== undefined) return a.distanceKm - b.distanceKm;
-    return a.waitTime - b.waitTime;
+    if (activeFilter === "shortest") return a.waitTime - b.waitTime;
+    return (b.availableChairs || 0) - (a.availableChairs || 0) || a.waitTime - b.waitTime;
   });
 
-  const shortestSalons = [...salons].sort((a, b) => a.waitTime - b.waitTime).slice(0, 4);
+  const availableNowSalons = salons.filter((s) => s.waitTime === 0 || (s.availableChairs && s.availableChairs > 0)).slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1C1613] font-sans pb-24">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] font-sans pb-24">
       {/* ─── Top Brand Navbar ─── */}
-      <header className="sticky top-0 z-30 bg-white border-b border-[#E8E2D9] px-4 py-3 sm:px-8">
+      <header className="sticky top-0 z-30 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E8E1D7] px-4 py-3 sm:px-8">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2">
-            <SneprWordmark height={30} className="text-[#1C1613]" />
+            <SneprWordmark height={32} className="text-[#1B1410]" />
           </Link>
 
-          {/* Location Delivery Selector Pill */}
+          {/* Locality Selector Pill */}
           <button
             onClick={() => setShowLocationModal(true)}
-            className="flex items-center gap-2.5 bg-[#FAF7F2] hover:bg-[#FAF2EA] border border-[#E8E2D9] px-3.5 py-1.5 rounded-full text-xs font-bold text-[#1C1613] shadow-xs cursor-pointer transition-colors"
+            className="flex items-center gap-2 bg-white hover:bg-[#FAF2EA] border border-[#E8E1D7] px-4 py-1.5 rounded-full text-xs font-bold text-[#1B1410] shadow-xs cursor-pointer transition-all hover:border-[#7A4B29]"
           >
             <MapPin className="w-3.5 h-3.5 text-[#7A4B29]" />
-            <span className="truncate max-w-[140px] sm:max-w-[220px]">{selectedLocality}</span>
-            <span className="text-[10px] text-[#7A4B29] bg-[#7A4B29]/10 px-2 py-0.5 rounded-full font-black uppercase">Change</span>
+            <span className="truncate max-w-[140px] sm:max-w-[220px]">{selectedLocalityLabel}</span>
+            <span className="text-[10px] text-[#7A4B29] bg-[#7A4B29]/10 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+              Change
+            </span>
           </button>
 
           <div className="flex items-center gap-3">
             {session ? (
-              <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#E8E2D9] bg-[#FAF7F2] text-xs font-bold text-[#7A4B29]">
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#E8E1D7] bg-white text-xs font-bold text-[#7A4B29]">
                 👤 {session.name || "Customer"}
               </span>
             ) : (
@@ -200,182 +202,140 @@ function LiveDashboard() {
                 Login
               </button>
             )}
-            <div className="hidden sm:flex items-center gap-2 bg-[#7A4B29] text-white px-3.5 py-1.5 rounded-full text-xs font-extrabold tracking-wide">
-              <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
-              <span>LIVE QUEUES</span>
-            </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 pt-6 sm:px-8">
-        {/* ─── Search Bar ─── */}
-        <div className="relative mb-4">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9C948D]" />
+      {/* ─── Main Content ─── */}
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-8 space-y-8">
+        {/* Locality Headline */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#E8E1D7]">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#7A4B29]/10 text-[#7A4B29] text-[11px] font-bold tracking-wide uppercase mb-1">
+              <Sparkles className="w-3 h-3 text-[#C8993E]" />
+              Bhubaneswar Live Queues
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#1B1410] tracking-tight">
+              Salons in {location.areaName || "Patia"}
+            </h1>
+            <p className="text-xs text-[#6B5E55] mt-1">
+              Real-time chair occupancy and queue tokens. Know wait times before stepping out.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveFilter("all")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeFilter === "all"
+                  ? "bg-[#7A4B29] text-white shadow-xs"
+                  : "bg-white text-[#1B1410] border border-[#E8E1D7] hover:border-[#7A4B29]"
+              }`}
+            >
+              All ({salons.length})
+            </button>
+            <button
+              onClick={() => setActiveFilter("available")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeFilter === "available"
+                  ? "bg-[#2E7D4F] text-white shadow-xs"
+                  : "bg-white text-[#1B1410] border border-[#E8E1D7] hover:border-[#2E7D4F]"
+              }`}
+            >
+              0-Wait / Free Chair
+            </button>
+            <button
+              onClick={() => setActiveFilter("shortest")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeFilter === "shortest"
+                  ? "bg-[#C8993E] text-white shadow-xs"
+                  : "bg-white text-[#1B1410] border border-[#E8E1D7] hover:border-[#C8993E]"
+              }`}
+            >
+              Under 15 Mins
+            </button>
+          </div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9C9086]" />
           <input
             type="text"
-            placeholder="Search salons, services, categories..."
+            placeholder={`Search salons, stylists, or grooming services in ${location.areaName}...`}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full h-12 pl-11 pr-4 bg-white rounded-2xl border border-[#E8E2D9] shadow-xs text-sm text-[#1C1613] placeholder-[#9C948D] focus:outline-none focus:ring-2 focus:ring-[#7A4B29]"
+            className="w-full h-12 pl-11 pr-4 bg-white rounded-2xl border border-[#E8E1D7] text-sm text-[#1B1410] placeholder-[#9C9086] focus:outline-none focus:ring-2 focus:ring-[#7A4B29] shadow-xs"
           />
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#9C948D] hover:text-[#1C1613]"
-            >
-              Clear
-            </button>
-          )}
         </div>
 
-        {/* ─── AI Snepr Studio Promotion Card (Pillar 3) ─── */}
-        <Link
-          to="/live/studio"
-          className="mb-6 block p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-[#2A1D15] via-[#1A1714] to-[#3B2519] border border-[#7A4B29]/40 text-white shadow-sm hover:shadow-md transition-all group"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-[#D4A373]/20 border border-[#D4A373]/40 flex items-center justify-center text-[#D4A373] text-lg shrink-0">
-                <Sparkles className="w-5 h-5 text-[#D4A373]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-sm text-white flex items-center gap-2">
-                  <span>AI Snepr Studio Catalogue</span>
-                  <span className="text-[9px] uppercase font-mono px-2 py-0.5 rounded-full bg-[#D4A373]/20 text-[#D4A373] border border-[#D4A373]/30">
-                    New
-                  </span>
-                </h3>
-                <p className="text-xs text-[#A69F96] mt-0.5">
-                  Browse trending styles for men, women &amp; kids. Match looks directly to salons with live queues.
-                </p>
-              </div>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-1 text-xs font-bold text-[#D4A373] group-hover:translate-x-1 transition-transform shrink-0">
-              <span>Explore Looks</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-        </Link>
-
-        {/* ─── Live Status Ticker Banner ─── */}
-        <div className="flex items-center gap-2.5 bg-[#FAF2EA] border border-[#E8D6C5] px-4 py-2.5 rounded-2xl mb-4 text-xs text-[#1C1613]">
-          <span className="w-2 h-2 rounded-full bg-[#7A4B29] animate-pulse" />
-          <span>
-            <strong className="font-extrabold text-[#7A4B29]">Real-time chair updates</strong> • {selectedLocality}
-          </span>
-        </div>
-
-        {/* ─── Contextual Mobile App Promotion ─── */}
-        <ContextualAppCTA
-          message="Track your turn live in the Snepr app"
-          className="mb-6"
-        />
-
-        {/* ─── Quick Category Grid ─── */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
+        {/* Categories Bar */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.name)}
-              className={cn(
-                "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
-                activeCategory === cat.name
-                  ? "bg-[#7A4B29] text-white border-[#7A4B29] shadow-sm"
-                  : "bg-white text-[#6E6761] border-[#E8E2D9] hover:bg-[#FAF7F2]"
-              )}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                activeCategory === cat.id
+                  ? "bg-[#1B1410] text-white shadow-xs"
+                  : "bg-white text-[#6B5E55] border border-[#E8E1D7] hover:border-[#1B1410] hover:text-[#1B1410]"
+              }`}
             >
               {cat.name}
             </button>
           ))}
         </div>
 
-        {/* ─── Filter Chips ─── */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar">
-          <button
-            onClick={() => setActiveFilter("all")}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
-              activeFilter === "all"
-                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
-                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
-            )}
-          >
-            All Salons ({salons.length})
-          </button>
-          <button
-            onClick={() => setActiveFilter("shortest")}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
-              activeFilter === "shortest"
-                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
-                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
-            )}
-          >
-            Shortest Wait (&le;15 min)
-          </button>
-          <button
-            onClick={() => setActiveFilter("available")}
-            className={cn(
-              "px-4 py-2 rounded-full text-xs font-extrabold border transition-all shrink-0",
-              activeFilter === "available"
-                ? "bg-[#7A4B29] text-white border-[#7A4B29]"
-                : "bg-white text-[#1C1613] border-[#E8E2D9] hover:bg-[#FAF7F2]"
-            )}
-          >
-            Available Now
-          </button>
-        </div>
-
-        {/* ─── Section: SHORTEST WAIT NEAR YOU ─── */}
-        {shortestSalons.length > 0 && (
-          <section className="mb-10">
-            <div className="flex items-center justify-between mb-4">
+        {/* ─── Section: ZERO WAIT / READY NOW CHAIRS ─── */}
+        {availableNowSalons.length > 0 && !search && activeFilter === "all" && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <h2 className="text-xs font-black uppercase tracking-wider text-[#9C948D]">
-                  Shortest Wait Near You
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D4F] animate-pulse" />
+                <h2 className="text-xs font-black uppercase tracking-wider text-[#2E7D4F]">
+                  Ready Now in {location.areaName} (Walk Right In)
                 </h2>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {shortestSalons.map((item) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {availableNowSalons.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl p-4 border border-[#E8E2D9] shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
+                  className="bg-white rounded-2xl p-4 border border-[#E8E1D7] shadow-xs flex flex-col justify-between hover:shadow-md transition-all hover:border-[#2E7D4F]"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <div className="w-9 h-9 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-sm">
+                      <div className="w-8 h-8 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-xs">
                         {item.name[0]}
                       </div>
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FAF2EA] text-[#7A4B29]">
-                        {item.queueStatus}
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#2E7D4F]/10 text-[#2E7D4F] flex items-center gap-1">
+                        <Armchair className="w-3 h-3" />
+                        {item.availableChairs ?? 1} Free Chair{(item.availableChairs ?? 1) > 1 ? "s" : ""}
                       </span>
                     </div>
 
-                    <div className="text-3xl font-black text-[#1C1613] leading-none mb-1">
-                      {item.waitTime} <span className="text-xs font-bold text-[#9C948D]">min</span>
+                    <div className="text-2xl font-black text-[#2E7D4F] leading-none mb-1">
+                      0 <span className="text-xs font-bold text-[#6B5E55]">min wait</span>
                     </div>
-                    <div className="text-[11px] text-[#9C948D] mb-3">
-                      {item.distanceKm ? formatDistance(item.distanceKm) : 'Nearby'}
+                    <div className="text-[11px] text-[#8F8177] mb-2 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-[#7A4B29]" />
+                      {item.areaName || location.areaName}, Bhubaneswar
                     </div>
 
-                    <h3 className="text-sm font-extrabold text-[#1C1613] truncate mb-1" title={item.name}>
+                    <h3 className="text-sm font-extrabold text-[#1B1410] truncate mb-1" title={item.name}>
                       {item.name}
                     </h3>
-                    <div className="text-xs text-[#6E6761] mb-3">
-                      ⭐ {item.rating || '4.8'} • {item.category || 'Salon'}
+                    <div className="text-xs text-[#6B5E55] mb-3">
+                      ⭐ {item.rating || "4.8"} • {item.category || "Unisex Salon"}
                     </div>
                   </div>
 
                   <button
                     onClick={() => handleJoinQueue(item)}
-                    className="w-full py-2 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-xs rounded-xl transition-all"
+                    className="w-full py-2 bg-[#2E7D4F] hover:bg-[#23603c] text-white font-extrabold text-xs rounded-xl transition-all shadow-xs"
                   >
-                    JOIN QUEUE
+                    WALK IN / JOIN
                   </button>
                 </div>
               ))}
@@ -383,51 +343,71 @@ function LiveDashboard() {
           </section>
         )}
 
-        {/* ─── Section: ALL SALONS NEAR YOU ─── */}
+        {/* ─── Section: ALL SALONS IN SELECTED LOCALITY ─── */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-black uppercase tracking-wider text-[#9C948D]">
-              All Salons Near You ({filteredSalons.length})
+            <h2 className="text-xs font-black uppercase tracking-wider text-[#7A4B29]">
+              Verified Salons in {location.areaName} ({filteredSalons.length})
             </h2>
           </div>
 
           {loading ? (
-            <div className="py-20 text-center text-[#9C948D]">Loading live salons from database...</div>
+            <div className="py-20 text-center text-[#8F8177]">Loading salons in {location.areaName}...</div>
           ) : filteredSalons.length === 0 ? (
-            <div className="py-20 text-center text-[#9C948D]">No salons found matching your search.</div>
+            <div className="py-20 text-center text-[#8F8177] bg-white rounded-3xl border border-[#E8E1D7] p-8">
+              <p className="font-bold text-[#1B1410]">No salons match your search in {location.areaName}.</p>
+              <p className="text-xs text-[#8F8177] mt-1">Try switching to another Bhubaneswar neighborhood like KIIT Road or Saheed Nagar.</p>
+              <button
+                onClick={() => setShowLocationModal(true)}
+                className="mt-4 px-4 py-2 rounded-xl bg-[#7A4B29] text-white text-xs font-bold"
+              >
+                Change Locality
+              </button>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredSalons.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl p-5 border border-[#E8E2D9] shadow-xs flex flex-col justify-between hover:shadow-md transition-all"
+                  className="bg-white rounded-2xl p-5 border border-[#E8E1D7] shadow-xs flex flex-col justify-between hover:shadow-md transition-all hover:border-[#7A4B29]"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-base shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] text-[#7A4B29] font-black flex items-center justify-center text-base shrink-0 border border-[#E8E1D7]">
                           {item.name[0]}
                         </div>
                         <div>
-                          <h3 className="font-extrabold text-sm text-[#1C1613] leading-snug">{item.name}</h3>
-                          <p className="text-xs text-[#9C948D]">
-                            {item.category || 'Salon'} • {item.distanceKm ? formatDistance(item.distanceKm) : 'Nearby'}
+                          <div className="flex items-center gap-1.5">
+                            <h3 className="font-extrabold text-sm text-[#1B1410] leading-snug">{item.name}</h3>
+                            <ShieldCheck className="w-3.5 h-3.5 text-[#2E7D4F]" />
+                          </div>
+                          <p className="text-xs text-[#8F8177] flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-[#7A4B29]" />
+                            {item.areaName || location.areaName} • {item.category || "Salon"}
                           </p>
                         </div>
                       </div>
                       <span className="text-xs font-bold text-[#7A4B29] bg-[#FAF2EA] px-2.5 py-1 rounded-full shrink-0">
-                        ⭐ {item.rating || '4.8'}
+                        ⭐ {item.rating || "4.8"}
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between bg-[#FAF7F2] p-3 rounded-xl mb-4">
+                    {/* Chair & Queue Status Box */}
+                    <div className="flex items-center justify-between bg-[#FAF7F2] p-3 rounded-xl mb-4 border border-[#E8E1D7]">
                       <div>
-                        <div className="text-[10px] font-bold text-[#9C948D] uppercase">Est. Wait</div>
-                        <div className="text-lg font-black text-[#1C1613]">{item.waitTime} mins</div>
+                        <div className="text-[10px] font-bold text-[#8F8177] uppercase">Est. Wait</div>
+                        <div className="text-lg font-black text-[#1B1410]">{item.waitTime} mins</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-[10px] font-bold text-[#8F8177] uppercase">Chairs</div>
+                        <div className="text-xs font-black text-[#2E7D4F]">
+                          {item.availableChairs ?? 1}/{item.totalChairs ?? 4} Free
+                        </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-[10px] font-bold text-[#9C948D] uppercase">Live Queue</div>
-                        <div className="text-sm font-extrabold text-[#7A4B29]">{item.waitingCount} in line</div>
+                        <div className="text-[10px] font-bold text-[#8F8177] uppercase">Live Queue</div>
+                        <div className="text-sm font-extrabold text-[#7A4B29]">{item.waitingCount || 0} in line</div>
                       </div>
                     </div>
                   </div>
@@ -435,13 +415,13 @@ function LiveDashboard() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedSalon(item)}
-                      className="flex-1 py-2.5 border border-[#E8E2D9] hover:bg-[#FAF7F2] text-[#1C1613] font-bold text-xs rounded-xl transition-all"
+                      className="flex-1 py-2.5 border border-[#E8E1D7] hover:bg-[#FAF7F2] text-[#1B1410] font-bold text-xs rounded-xl transition-all"
                     >
                       View Details
                     </button>
                     <button
                       onClick={() => handleJoinQueue(item)}
-                      className="flex-1 py-2.5 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-xs rounded-xl transition-all"
+                      className="flex-1 py-2.5 bg-[#7A4B29] hover:bg-[#5C371D] text-white font-extrabold text-xs rounded-xl transition-all shadow-xs"
                     >
                       Join Queue
                     </button>
@@ -455,13 +435,13 @@ function LiveDashboard() {
 
       {/* ─── Persistent Active Queue Bar ─── */}
       {activeQueue && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:w-96 bg-[#1C1613] text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 z-50">
+        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-8 sm:w-96 bg-[#1B1410] text-white p-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 z-50 border border-[#E8E1D7]/20">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#7A4B29] flex items-center justify-center text-lg">
               ⏱️
             </div>
             <div>
-              <div className="font-extrabold text-xs text-amber-400">Queue Confirmed</div>
+              <div className="font-extrabold text-xs text-[#C8993E]">Live Token Active</div>
               <div className="font-bold text-sm truncate max-w-[180px]">{activeQueue.salonName}</div>
               <div className="text-[11px] text-white/70">Pos #{activeQueue.position} • ~{activeQueue.waitTime} mins left</div>
             </div>
@@ -477,34 +457,34 @@ function LiveDashboard() {
 
       {/* ─── Detail Modal ─── */}
       {selectedSalon && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl relative">
+        <div className="fixed inset-0 z-50 bg-[#1B1410]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] rounded-3xl p-6 max-w-md w-full shadow-2xl relative border border-[#E8E1D7]">
             <button
               onClick={() => setSelectedSalon(null)}
-              className="absolute top-4 right-4 p-2 text-[#9C948D] hover:text-[#1C1613]"
+              className="absolute top-4 right-4 p-2 text-[#8F8177] hover:text-[#1B1410]"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <div className="w-12 h-12 rounded-2xl bg-[#FAF2EA] text-[#7A4B29] font-black text-xl flex items-center justify-center mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-[#7A4B29]/10 text-[#7A4B29] font-black text-xl flex items-center justify-center mb-3">
               {selectedSalon.name[0]}
             </div>
 
-            <h3 className="text-xl font-extrabold text-[#1C1613]">{selectedSalon.name}</h3>
-            <p className="text-xs text-[#9C948D] mt-1 mb-4">{selectedSalon.address || 'Patia, Bhubaneswar'}</p>
+            <h3 className="text-xl font-extrabold text-[#1B1410]">{selectedSalon.name}</h3>
+            <p className="text-xs text-[#8F8177] mt-1 mb-4">{selectedSalon.address || `${location.areaName}, Bhubaneswar`}</p>
 
-            <div className="grid grid-cols-3 gap-2 bg-[#FAF7F2] p-3 rounded-2xl mb-6 text-center">
+            <div className="grid grid-cols-3 gap-2 bg-white p-3 rounded-2xl mb-6 text-center border border-[#E8E1D7]">
               <div>
-                <div className="text-[10px] font-bold text-[#9C948D]">Est. Wait</div>
-                <div className="text-base font-black text-[#1C1613]">{selectedSalon.waitTime} min</div>
+                <div className="text-[10px] font-bold text-[#8F8177]">Est. Wait</div>
+                <div className="text-base font-black text-[#1B1410]">{selectedSalon.waitTime} min</div>
               </div>
               <div>
-                <div className="text-[10px] font-bold text-[#9C948D]">In Queue</div>
-                <div className="text-base font-black text-[#7A4B29]">{selectedSalon.waitingCount}</div>
+                <div className="text-[10px] font-bold text-[#8F8177]">Chairs Free</div>
+                <div className="text-base font-black text-[#2E7D4F]">{selectedSalon.availableChairs ?? 1}</div>
               </div>
               <div>
-                <div className="text-[10px] font-bold text-[#9C948D]">Rating</div>
-                <div className="text-base font-black text-[#1C1613]">⭐ {selectedSalon.rating || '4.8'}</div>
+                <div className="text-[10px] font-bold text-[#8F8177]">In Queue</div>
+                <div className="text-base font-black text-[#7A4B29]">{selectedSalon.waitingCount || 0}</div>
               </div>
             </div>
 
@@ -518,38 +498,38 @@ function LiveDashboard() {
         </div>
       )}
 
+      {/* Locality Selector Modal */}
       <LocationSelectorModal
         isOpen={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         currentLocation={location}
-        onUseGps={requestGpsLocation}
-        onSelectManual={setManualLocation}
-        isLocating={locating}
+        selectedAreaId={location.areaId}
+        onSelectArea={(area) => setLocality(area)}
       />
 
-      {/* Dismissible Customer Login Modal */}
+      {/* Customer Login Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowAuthModal(false)} />
-          
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border border-[#EFE7DC] bg-[#FAF8F5] p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div className="absolute inset-0 bg-[#1B1410]/60 backdrop-blur-md" onClick={() => setShowAuthModal(false)} />
+
+          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-[28px] border border-[#E8E1D7] bg-[#FAF7F2] p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 p-2 text-[#9C948D] hover:text-[#1C1613]"
+              className="absolute top-4 right-4 p-2 text-[#8F8177] hover:text-[#1B1410]"
             >
               <X className="w-5 h-5" />
             </button>
 
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#D4A373]/40 bg-[#D4A373]/10 px-3.5 py-1.5 text-[10px] font-bold tracking-widest text-[#7A4B29] uppercase">
-                Verification Required
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#7A4B29]/20 bg-[#7A4B29]/10 px-3.5 py-1.5 text-[10px] font-bold tracking-widest text-[#7A4B29] uppercase">
+                Customer Verification
               </div>
-              <SneprWordmark height={28} color="#7A4B29" />
-              <h2 className="text-2xl font-serif font-bold text-[#1C1613] tracking-tight mt-2">
+              <SneprWordmark height={30} className="text-[#1B1410]" />
+              <h2 className="text-2xl font-serif font-bold text-[#1B1410] tracking-tight mt-2">
                 Join Salon Live Queue
               </h2>
-              <p className="text-xs text-[#6E6761] leading-relaxed max-w-sm">
-                To reserve your spot, please quickly sign in with Google or continue using our Android app.
+              <p className="text-xs text-[#6B5E55] leading-relaxed max-w-sm">
+                Sign in to secure your live token and track queue position in real-time.
               </p>
             </div>
 
@@ -583,31 +563,27 @@ function LiveDashboard() {
 
               <div className="relative flex items-center justify-center py-2">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#E5E0D8]" />
+                  <div className="w-full border-t border-[#E8E1D7]" />
                 </div>
-                <span className="relative px-3 bg-[#FAF8F5] text-[9px] font-bold text-[#9C948D] uppercase tracking-widest">
-                  Best Experience
+                <span className="relative px-3 bg-[#FAF7F2] text-[9px] font-bold text-[#8F8177] uppercase tracking-widest">
+                  Or use Mobile App
                 </span>
               </div>
 
               <a
                 href="/Snepr-v1.0.4.aab"
                 download
-                className="w-full flex items-center justify-center gap-3 h-14 bg-white hover:bg-[#FAF7F2] text-[#1C1613] font-bold text-xs uppercase tracking-widest rounded-2xl border border-[#E5E0D8] transition-all shadow-xs"
+                className="w-full flex items-center justify-center gap-3 h-14 bg-white hover:bg-[#FAF7F2] text-[#1B1410] font-bold text-xs uppercase tracking-widest rounded-2xl border border-[#E8E1D7] transition-all shadow-xs"
               >
                 <Smartphone className="w-5 h-5 text-[#7A4B29]" />
                 Download Android App
               </a>
             </div>
-
-            <p className="mt-6 text-[10px] text-center text-[#9C948D] leading-relaxed">
-              By continuing, you agree to our Privacy Policy and Terms of Service.
-            </p>
           </div>
         </div>
       )}
 
-      {/* Dock-styled bottom navigation */}
+      {/* Dock navigation */}
       <div className="h-24" />
       <DockNavbar activeTab="explore" />
     </div>

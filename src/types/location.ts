@@ -1,29 +1,63 @@
-// Unified Location Architecture Types for Snepr Website & Mobile App
+// Unified Locality Architecture for Snepr (Bhubaneswar Launch)
+// Zero GPS detection, zero location permissions, pure locality-based discovery
 
-export interface LocationState {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
-  locality: string;
-  city: string;
-  formattedLabel: string;
-  source: 'gps' | 'manual';
+export interface City {
+  id: number;
+  name: string;
+  state: string;
+  slug: string;
+  isActive: boolean;
 }
 
-export const DEFAULT_LOCATION: LocationState = {
-  latitude: 20.3533,
-  longitude: 85.8266,
-  locality: 'Patia',
-  city: 'Bhubaneswar',
-  formattedLabel: 'Patia, Bhubaneswar',
-  source: 'manual',
+export interface Area {
+  id: number;
+  cityId: number;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export interface LocationState {
+  cityId: number;
+  cityName: string;
+  citySlug: string;
+  areaId: number;
+  areaName: string;
+  areaSlug: string;
+  formattedLabel: string;
+  // Backward compatibility alias for legacy components
+  locality: string;
+  city: string;
+}
+
+export const LAUNCH_CITY: City = {
+  id: 1,
+  name: "Bhubaneswar",
+  state: "Odisha",
+  slug: "bhubaneswar",
+  isActive: true,
 };
 
-export const PRESET_LOCALITIES: Array<{ name: string; lat: number; lng: number }> = [
-  { name: 'Patia, Bhubaneswar', lat: 20.3533, lng: 85.8266 },
-  { name: 'Silicon Institute, Bhubaneswar', lat: 20.3705, lng: 85.8115 },
-  { name: 'KIIT Square, Bhubaneswar', lat: 20.3548, lng: 85.8170 },
-  { name: 'Saheed Nagar, Bhubaneswar', lat: 20.2885, lng: 85.8427 },
-  { name: 'Jaydev Vihar, Bhubaneswar', lat: 20.3010, lng: 85.8250 },
-  { name: 'Janpath, Bhubaneswar', lat: 20.2700, lng: 85.8333 },
+export const BHUBANESWAR_AREAS: Area[] = [
+  { id: 1, cityId: 1, name: "Patia", slug: "patia", isActive: true, displayOrder: 1 },
+  { id: 2, cityId: 1, name: "KIIT Road", slug: "kiit-road", isActive: true, displayOrder: 2 },
+  { id: 3, cityId: 1, name: "Saheed Nagar", slug: "saheed-nagar", isActive: true, displayOrder: 3 },
+  { id: 4, cityId: 1, name: "Jaydev Vihar", slug: "jaydev-vihar", isActive: true, displayOrder: 4 },
+  { id: 5, cityId: 1, name: "Chandrasekharpur", slug: "chandrasekharpur", isActive: true, displayOrder: 5 },
+  { id: 6, cityId: 1, name: "Rasulgarh", slug: "rasulgarh", isActive: true, displayOrder: 6 },
+  { id: 7, cityId: 1, name: "Nayapalli", slug: "nayapalli", isActive: true, displayOrder: 7 },
+  { id: 8, cityId: 1, name: "Khandagiri", slug: "khandagiri", isActive: true, displayOrder: 8 },
 ];
+
+export const DEFAULT_LOCATION: LocationState = {
+  cityId: 1,
+  cityName: "Bhubaneswar",
+  citySlug: "bhubaneswar",
+  areaId: 1,
+  areaName: "Patia",
+  areaSlug: "patia",
+  formattedLabel: "Patia, Bhubaneswar",
+  locality: "Patia",
+  city: "Bhubaneswar",
+};

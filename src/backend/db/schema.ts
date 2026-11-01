@@ -17,8 +17,20 @@ export const cities = pgTable("cities", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   state: text("state").notNull(),
+  slug: text("slug").default("bhubaneswar").notNull(),
   country: text("country").default("India").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ─── Areas / Localities (Bhubaneswar Hierarchy) ──────────────────────────────
+export const areas = pgTable("areas", {
+  id: serial("id").primaryKey(),
+  cityId: integer("city_id").references(() => cities.id).notNull(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  displayOrder: integer("display_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -46,6 +58,8 @@ export const users = pgTable("users", {
 export const salons = pgTable("salons", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  slug: text("slug"),
+  areaId: integer("area_id").references(() => areas.id),
   address: text("address"),
   cityId: integer("city_id").references(() => cities.id),
   phone: text("phone"),
@@ -54,6 +68,9 @@ export const salons = pgTable("salons", {
   rating: text("rating"),
   reviewCount: integer("review_count").default(0),
   ownerId: integer("owner_id").references(() => users.id),
+  // Verification and Operational
+  verificationStatus: text("verification_status").default("verified").notNull(), // verified | unverified
+  operationalStatus: text("operational_status").default("active").notNull(), // active | inactive | paused
   // Approval flow: pending | approved | rejected | suspended
   approvalStatus: text("approval_status").default("pending").notNull(),
   approvedById: integer("approved_by_id").references(() => users.id),
@@ -65,7 +82,7 @@ export const salons = pgTable("salons", {
   openingHours: json("opening_hours"),                // { mon: { open: "09:00", close: "21:00" }, ... }
   location: text("location"),
   amenities: json("amenities"),
-  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("10.00"),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("0.00"),
   latitude: decimal("latitude", { precision: 10, scale: 7 }),
   longitude: decimal("longitude", { precision: 10, scale: 7 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -80,6 +97,35 @@ export const staff = pgTable("staff", {
   workingHours: json("working_hours"),
   breakMode: boolean("break_mode").default(false).notNull(),
   leaveAt: timestamp("leave_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ─── Chairs (SalonOS Chair Entity) ──────────────────────────────────────────
+export const chairs = pgTable("chairs", {
+  id: serial("id").primaryKey(),
+  salonId: integer("salon_id").references(() => salons.id).notNull(),
+  chairNumber: integer("chair_number").notNull(),
+  name: text("name").notNull(),
+  assignedStaffId: integer("assigned_staff_id").references(() => staff.id),
+  currentCustomerId: integer("current_customer_id").references(() => users.id),
+  currentQueueId: integer("current_queue_id"),
+  currentServiceId: integer("current_service_id"),
+  status: text("status").default("available").notNull(), // available | occupied | finishing | break | offline | maintenance
+  serviceStartedAt: timestamp("service_started_at"),
+  estimatedEndAt: timestamp("estimated_end_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ─── Queue Events & Transitions Audit ───────────────────────────────────────
+export const queueEvents = pgTable("queue_events", {
+  id: serial("id").primaryKey(),
+  queueId: integer("queue_id").references(() => queues.id).notNull(),
+  salonId: integer("salon_id").references(() => salons.id).notNull(),
+  fromStatus: text("from_status"),
+  toStatus: text("to_status").notNull(),
+  actorId: integer("actor_id").references(() => users.id),
+  actorRole: text("actor_role").notNull(), // customer | barber | owner | system
+  note: text("note"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

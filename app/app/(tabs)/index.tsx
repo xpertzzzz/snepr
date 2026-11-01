@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Svg, { Path, Circle, Rect, Polygon, G, Defs, LinearGradient, Stop } from 'react-native-svg';
-import * as Location from 'expo-location';
+// Zero GPS - Locality-based discovery for Bhubaneswar launch
 
 const { width } = Dimensions.get('window');
 
@@ -51,8 +51,19 @@ const SNEPR_LOGO_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAr4AAAFaCA
 export default function SneprApp() {
   const [tab, setTab] = useState<'explore' | 'studio' | 'pass' | 'points' | 'desk'>('explore');
   const [search, setSearch] = useState('');
-  const [userLocation, setUserLocation] = useState('Saheed Nagar, Bhubaneswar');
-  const [isGpsLive, setIsGpsLive] = useState(false);
+  const [selectedArea, setSelectedArea] = useState('Patia');
+  const [localityModalVisible, setLocalityModalVisible] = useState(false);
+  const BHUBANESWAR_LOCALITIES = [
+    'Patia',
+    'KIIT Road',
+    'Saheed Nagar',
+    'Jaydev Vihar',
+    'Chandrasekharpur',
+    'Rasulgarh',
+    'Nayapalli',
+    'Khandagiri',
+  ];
+
 
   // Authentication State (Brevo SMTP Email OTP)
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -86,35 +97,8 @@ export default function SneprApp() {
   const [detectedFaceShape, setDetectedFaceShape] = useState<string | null>(null);
   const [specModalCut, setSpecModalCut] = useState<any | null>(null);
 
-  // Live Accurate GPS Tracker (Bhubaneswar Exclusive)
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === 'granted' && isMounted) {
-          setIsGpsLive(true);
-          const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-          if (loc && loc.coords && isMounted) {
-            try {
-              const [place] = await Location.reverseGeocodeAsync({
-                latitude: loc.coords.latitude,
-                longitude: loc.coords.longitude,
-              });
-              if (place && isMounted) {
-                setUserLocation(`${place.street || place.district || 'Saheed Nagar'}, Bhubaneswar`);
-              }
-            } catch (geoErr) {
-              // Geocode error handled gracefully
-            }
-          }
-        }
-      } catch (e) {
-        // Safe fallback - no crash
-      }
-    })();
-    return () => { isMounted = false; };
-  }, []);
+  // Bhubaneswar Predefined Locality Discovery (Zero GPS)
+  useEffect(() => {}, []);
 
   // OTP Countdown
   useEffect(() => {
@@ -204,8 +188,7 @@ export default function SneprApp() {
       id: 1,
       name: 'Urban Blade Grooming Co.',
       locality: 'KIIT Square, Patia, Bhubaneswar',
-      distance: '450m away',
-      wait: '11 mins',
+            wait: '11 mins',
       ahead: 1,
       price: 'Rs. 350',
       rating: '4.9 (420)',
@@ -219,8 +202,7 @@ export default function SneprApp() {
       id: 2,
       name: 'The Royal Shave Atelier',
       locality: 'Saheed Nagar, Bhubaneswar',
-      distance: '1.2 km away',
-      wait: '18 mins',
+            wait: '18 mins',
       ahead: 2,
       price: 'Rs. 450',
       rating: '4.8 (310)',
@@ -233,8 +215,7 @@ export default function SneprApp() {
       id: 3,
       name: 'Kalinga Executive Lounge',
       locality: 'Master Canteen, Bhubaneswar',
-      distance: '2.8 km away',
-      wait: '24 mins',
+            wait: '24 mins',
       ahead: 3,
       price: 'Rs. 280',
       rating: '4.7 (195)',
@@ -288,12 +269,16 @@ export default function SneprApp() {
       <View style={s.header}>
         <View style={s.headerLeft}>
           <Image source={{ uri: SNEPR_LOGO_URI }} style={s.logoImg} resizeMode="contain" />
-          <View style={s.gpsPill}>
+          <TouchableOpacity
+            style={s.gpsPill}
+            onPress={() => setLocalityModalVisible(true)}
+            activeOpacity={0.8}
+          >
             <View style={s.gpsDot} />
             <Text style={s.gpsText} numberOfLines={1}>
-              {isGpsLive ? 'GPS: ' : ''}{userLocation}
+              {selectedArea}, Bhubaneswar ▼
             </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={s.headerRight}>
@@ -377,7 +362,7 @@ export default function SneprApp() {
                 <View style={s.cardTop}>
                   <View style={{ flex: 1 }}>
                     <Text style={s.salonName}>{item.name}</Text>
-                    <Text style={s.salonLoc}>{item.locality} • {item.distance}</Text>
+                    <Text style={s.salonLoc}>{item.locality}</Text>
                   </View>
                   <View style={s.waitPill}>
                     <Text style={s.waitNum}>{item.wait}</Text>
@@ -779,6 +764,70 @@ export default function SneprApp() {
             >
               <Text style={s.submitReviewBtnText}>Claim +10 Snepr Points</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      
+      {/* Locality Selection Modal (Bhubaneswar Launch) */}
+      <Modal visible={localityModalVisible} transparent animationType="fade">
+        <View style={s.modalBackdrop}>
+          <View style={[s.authCard, { maxHeight: '80%' }]}>
+            <View style={s.authHeaderRow}>
+              <View>
+                <Text style={{ fontSize: 10, fontWeight: '800', color: C.cognac, textTransform: 'uppercase', letterSpacing: 1 }}>
+                  Bhubaneswar Launch
+                </Text>
+                <Text style={s.authTitle}>Select Your Locality</Text>
+              </View>
+              <TouchableOpacity onPress={() => setLocalityModalVisible(false)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={{ color: C.mute, fontSize: 20 }}>✕</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={{ fontSize: 12, color: C.text2, marginBottom: 14 }}>
+              Salons and live chair availability will filter to your selected neighborhood.
+            </Text>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {BHUBANESWAR_LOCALITIES.map((loc) => {
+                const isSelected = selectedArea === loc;
+                return (
+                  <TouchableOpacity
+                    key={loc}
+                    onPress={() => {
+                      setSelectedArea(loc);
+                      setLocalityModalVisible(false);
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      paddingVertical: 14,
+                      paddingHorizontal: 16,
+                      borderRadius: 14,
+                      marginBottom: 8,
+                      backgroundColor: isSelected ? C.cognacSoft : C.paper,
+                      borderWidth: 1,
+                      borderColor: isSelected ? C.cognac : C.line,
+                    }}
+                  >
+                    <View>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: isSelected ? C.cognac : C.espresso }}>
+                        {loc}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: isSelected ? C.cognac : C.mute }}>
+                        Bhubaneswar, Odisha
+                      </Text>
+                    </View>
+                    {isSelected && (
+                      <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: C.cognac, alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: '#FFF', fontSize: 12, fontWeight: 'bold' }}>✓</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
           </View>
         </View>
       </Modal>

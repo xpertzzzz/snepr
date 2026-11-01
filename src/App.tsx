@@ -31,6 +31,9 @@ import { Route as SalonDetailPage } from "./routes/live/salon.$id";
 import { Route as LoginPage } from "./routes/login";
 import { Route as SalonDashboard } from "./routes/salon/index";
 
+// Admin Console
+import { AdminConsole } from "./routes/admin/index";
+
 const queryClient = new QueryClient();
 
 function NotFoundPage() {
@@ -64,32 +67,53 @@ export function App() {
           <Route element={<MarketingLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/for-salons" element={<PricingPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/claim" element={<ClaimPage />} />
+            <Route path="/claim-salon" element={<ClaimPage />} />
+            <Route path="/register-salon" element={<ClaimPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/terms-of-service" element={<TermsPage />} />
             <Route path="/delete-account" element={<DeleteAccountPage />} />
           </Route>
 
-          {/* Live App Routes */}
+          {/* Live App Routes & Locality-Based Discovery */}
           <Route path="/live" element={<LiveExplorePage />} />
+          <Route path="/explore" element={<LiveExplorePage />} />
+          <Route path="/live-queues" element={<LiveExplorePage />} />
+          <Route path="/salons/:citySlug/:areaSlug" element={<LiveExplorePage />} />
+          <Route path="/salon/:id" element={<SalonDetailPage />} />
+          <Route path="/live/salon/:id" element={<SalonDetailPage />} />
           <Route path="/live/studio" element={<StudioPage />} />
+          <Route path="/ai-studio" element={<StudioPage />} />
           <Route path="/live/queue" element={<QueuePage />} />
+          <Route path="/queue/:id" element={<QueuePage />} />
+          <Route path="/my-queue" element={<QueuePage />} />
           <Route path="/live/activity" element={<ActivityPage />} />
+          <Route path="/my-bookings" element={<ActivityPage />} />
+          <Route path="/dashboard" element={<ActivityPage />} />
           <Route path="/live/checkout" element={<CheckoutPage />} />
           <Route path="/live/profile" element={<ProfilePage />} />
-          <Route path="/live/salon/:id" element={<SalonDetailPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/my-points" element={<ProfilePage />} />
+          <Route path="/saved-salons" element={<LiveExplorePage />} />
 
           {/* Alias /app to /live for mobile web continuity */}
           <Route path="/app/*" element={<Navigate to="/live" replace />} />
 
-          {/* SalonOS & Auth */}
+          {/* SalonOS & Partner Auth */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/salon/login" element={<LoginPage />} />
           <Route path="/salon" element={<SalonDashboard />} />
           <Route path="/salon/*" element={<SalonDashboard />} />
+
+          {/* Admin Console */}
+          <Route path="/admin" element={<AdminConsole />} />
+          <Route path="/admin/*" element={<AdminConsole />} />
 
           {/* Fallback 404 */}
           <Route path="*" element={<NotFoundPage />} />
@@ -101,4 +125,3 @@ export function App() {
 }
 
 export default App;
-

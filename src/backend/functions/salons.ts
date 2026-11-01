@@ -8,8 +8,8 @@ import { REAL_SALONS_DATA, DEFAULT_SERVICES, DEFAULT_BARBERS } from "@/lib/real-
 // ─── Salon CRUD ───────────────────────────────────────────────────────────────
 
 export const getSalons = createServerFn({ method: "GET" })
-  .validator((d: { callerRole?: string; cityId?: number }) => d)
-  .handler(async ({ data }) => {
+  .validator((d?: { callerRole?: string; cityId?: number; areaId?: number; category?: string; sort?: string; search?: string }) => d)
+  .handler(async ({ data = {} }) => {
     let allSalons = [];
     try {
       allSalons = await db.select().from(salons);
@@ -18,15 +18,37 @@ export const getSalons = createServerFn({ method: "GET" })
     }
     
     if (!allSalons || allSalons.length === 0) {
-      return REAL_SALONS_DATA;
+      let result = [...REAL_SALONS_DATA];
+      if (data.areaId) {
+        result = result.filter(s => s.areaId === Number(data.areaId));
+      }
+      if (data.category && data.category !== "All") {
+        result = result.filter(s => s.category?.toLowerCase().includes(data.category!.toLowerCase()));
+      }
+      if (data.search) {
+        const q = data.search.toLowerCase();
+        result = result.filter(s => s.name.toLowerCase().includes(q) || s.address?.toLowerCase().includes(q) || s.areaName.toLowerCase().includes(q));
+      }
+      if (data.sort === "wait") {
+        result.sort((a, b) => a.waitTime - b.waitTime);
+      } else if (data.sort === "rating") {
+        result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+      } else if (data.sort === "name") {
+        result.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return result;
     }
 
     if (data.callerRole === "sub_admin" && data.cityId) {
       allSalons = allSalons.filter(s => s.cityId === data.cityId);
     }
 
+    if (data.areaId) {
+      allSalons = allSalons.filter(s => s.areaId === data.areaId);
+    }
+
     // Calculate live wait time based on actual queues
-    const salonsWithStatus = await Promise.all(allSalons.map(async (salon) => {
+    let salonsWithStatus = await Promise.all(allSalons.map(async (salon) => {
       const waiting = await db.select().from(queues).where(
         and(eq(queues.salonId, salon.id), eq(queues.status, "waiting"))
       );
@@ -45,6 +67,23 @@ export const getSalons = createServerFn({ method: "GET" })
         waitingCount
       };
     }));
+
+    if (data.category && data.category !== "All") {
+      salonsWithStatus = salonsWithStatus.filter(s => s.category?.toLowerCase().includes(data.category!.toLowerCase()));
+    }
+
+    if (data.search) {
+      const q = data.search.toLowerCase();
+      salonsWithStatus = salonsWithStatus.filter(s => s.name.toLowerCase().includes(q) || s.address?.toLowerCase().includes(q));
+    }
+
+    if (data.sort === "wait") {
+      salonsWithStatus.sort((a, b) => a.waitTime - b.waitTime);
+    } else if (data.sort === "rating") {
+      salonsWithStatus.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    } else if (data.sort === "name") {
+      salonsWithStatus.sort((a, b) => a.name.localeCompare(b.name));
+    }
 
     return salonsWithStatus;
   });

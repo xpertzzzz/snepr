@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
-import { Capacitor } from "@capacitor/core";
-import { Geolocation } from "@capacitor/geolocation";
-import { LocationState, DEFAULT_LOCATION } from "@/types/location";
+import {
+  LocationState,
+  DEFAULT_LOCATION,
+  BHUBANESWAR_AREAS,
+  LAUNCH_CITY,
+  Area,
+} from "@/types/location";
 
-const STORAGE_KEY = "snepr_user_location";
+const STORAGE_KEY = "snepr_user_locality";
+const HAS_SELECTED_KEY = "snepr_has_selected_locality";
 
 export function useLocation() {
   const [location, setLocation] = useState<LocationState>(() => {
@@ -11,128 +16,87 @@ export function useLocation() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.areaName) {
+            return parsed;
+          }
         } catch {}
       }
     }
     return DEFAULT_LOCATION;
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const saveLocation = (newLoc: LocationState) => {
-    setLocation(newLoc);
+  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newLoc));
+      return !localStorage.getItem(HAS_SELECTED_KEY);
     }
-  };
+    return false;
+  });
 
-  const reverseGeocode = async (lat: number, lng: number): Promise<{ locality: string; city: string }> => {
-    try {
-      const res = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
-      );
-      const data = await res.json();
-      const locality = data.locality || data.city || data.principalSubdivision || "Patia";
-      const city = data.city || data.principalSubdivision || "Bhubaneswar";
-      return { locality, city };
-    } catch {
-      return { locality: "Patia", city: "Bhubaneswar" };
-    }
-  };
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
-  const requestGpsLocation = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (Capacitor.isNativePlatform()) {
-        const permissions = await Geolocation.checkPermissions();
-        if (permissions.location !== "granted") {
-          await Geolocation.requestPermissions();
-        }
-
-        const pos = await Geolocation.getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 10000,
-        });
-
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const geo = await reverseGeocode(lat, lng);
-
-        const newLoc: LocationState = {
-          latitude: lat,
-          longitude: lng,
-          accuracy: pos.coords.accuracy,
-          locality: geo.locality,
-          city: geo.city,
-          formattedLabel: `${geo.locality}, ${geo.city}`,
-          source: "gps",
-        };
-
-        saveLocation(newLoc);
-      } else {
-        if (typeof navigator !== "undefined" && navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              const lat = pos.coords.latitude;
-              const lng = pos.coords.longitude;
-              const geo = await reverseGeocode(lat, lng);
-
-              const newLoc: LocationState = {
-                latitude: lat,
-                longitude: lng,
-                accuracy: pos.coords.accuracy,
-                locality: geo.locality,
-                city: geo.city,
-                formattedLabel: `${geo.locality}, ${geo.city}`,
-                source: "gps",
-              };
-
-              saveLocation(newLoc);
-              setLoading(false);
-            },
-            (err) => {
-              setError("Location access denied or unavailable. Please select location manually.");
-              setLoading(false);
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-          );
-        } else {
-          setError("Geolocation is not supported by your browser.");
-          setLoading(false);
-        }
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to acquire GPS location.");
-      setLoading(false);
-    }
-  };
-
-  const setManualLocation = (formattedLabel: string, latitude: number, longitude: number) => {
-    const parts = formattedLabel.split(",");
-    const locality = parts[0]?.trim() || "Patia";
-    const city = parts[1]?.trim() || "Bhubaneswar";
-
-    const newLoc: LocationState = {
-      latitude,
-      longitude,
-      locality,
-      city,
-      formattedLabel,
-      source: "manual",
+  const saveLocality = (area: Area) => {
+    const newState: LocationState = {
+      cityId: LAUNCH_CITY.id,
+      cityName: LAUNCH_CITY.name,
+      citySlug: LAUNCH_CITY.slug,
+      areaId: area.id,
+      areaName: area.name,
+      areaSlug: area.slug,
+      formattedLabel: `${area.name}, ${LAUNCH_CITY.name}`,
+      locality: area.name,
+      city: LAUNCH_CITY.name,
     };
+    setLocation(newState);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+      localStorage.setItem(HAS_SELECTED_KEY, "true");
+    }
+    setIsFirstVisit(false);
+  };
 
-    saveLocation(newLoc);
+  const selectAreaById = (areaId: number) => {
+    const area = BHUBANESWAR_AREAS.find((a) => a.id === areaId) || BHUBANESWAR_AREAS[0];
+    saveLocality(area);
+  };
+
+  const selectAreaBySlug = (slug: string) => {
+    const area =
+      BHUBANESWAR_AREAS.find((a) => a.slug.toLowerCase() === slug.toLowerCase()) ||
+      BHUBANESWAR_AREAS[0];
+    saveLocality(area);
+  };
+
+  // Backwards compatibility for previous callers
+  const setManualLocation = (label: string) => {
+    const matched = BHUBANESWAR_AREAS.find((a) =>
+      label.toLowerCase().includes(a.name.toLowerCase())
+    );
+    if (matched) {
+      saveLocality(matched);
+    } else {
+      selectAreaById(1);
+    }
+  };
+
+  const requestGpsLocation = () => {
+    // Zero GPS popups - open locality picker instead
+    setIsSelectorOpen(true);
   };
 
   return {
     location,
-    loading,
-    error,
-    requestGpsLocation,
+    areas: BHUBANESWAR_AREAS,
+    city: LAUNCH_CITY,
+    isFirstVisit,
+    isSelectorOpen,
+    setIsSelectorOpen,
+    selectAreaById,
+    selectAreaBySlug,
+    setLocality: saveLocality,
     setManualLocation,
+    requestGpsLocation,
+    loading: false,
+    error: null,
   };
 }

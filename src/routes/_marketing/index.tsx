@@ -1,215 +1,71 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import {
+  BHUBANESWAR_AREAS,
+  REAL_SALONS_DATA,
+  RealSalon,
+} from "@/lib/real-salons";
 
 export const Route = createFileRoute("/_marketing/")({
   head: () => ({
-    title: "Snepr | Know before you go",
+    title: "Snepr | Know before you go · Live Salon Queues in Bhubaneswar",
     meta: [
       {
         name: "description",
         content:
-          "Check live salon wait times, save your chair and walk straight in. SalonOS for salons, with no haircut commissions.",
+          "Check live salon wait times and chair availability across Bhubaneswar. Reserve your chair remotely and walk straight in. 0% haircut commissions for salons.",
       },
-      { name: "theme-color", content: "#f7f3ed" },
+      { name: "theme-color", content: "#FAF7F2" },
     ],
   }),
   component: SneprLandingPage,
 });
 
-/* ─── SALON SAMPLE DATA ─── */
-interface SalonItem {
-  n: string;
-  a: string;
-  t: string;
-  r: number;
-  w: number;
-  c: string;
-  q: number;
-}
-
-const SAMPLE_SALONS: SalonItem[] = [
-  {
-    n: "The Scissors Edge",
-    a: "Saheed Nagar",
-    t: "Unisex",
-    r: 4.8,
-    w: 5,
-    c: "2 of 3 chairs free",
-    q: 1,
-  },
-  {
-    n: "Urban Look Salon",
-    a: "Jaydev Vihar",
-    t: "Men's",
-    r: 4.6,
-    w: 10,
-    c: "1 of 2 chairs free",
-    q: 3,
-  },
-  {
-    n: "Style Studio by Jawed Habib",
-    a: "Patia",
-    t: "Premium",
-    r: 4.7,
-    w: 15,
-    c: "All chairs busy",
-    q: 5,
-  },
-];
-
-const col = (w: number) =>
-  w <= 5 ? "var(--green)" : w <= 10 ? "var(--amber)" : "var(--red)";
-
-/* ─── DEMO SERVICES ─── */
-const DEMO_SERVICES = [
-  { n: "Haircut", m: 25, p: 150 },
-  { n: "Beard trim", m: 15, p: 80 },
-  { n: "Haircut + Beard", m: 40, p: 200 },
-  { n: "Facial", m: 35, p: 350 },
-];
-
-/* ─── AI HAIRSTYLES ─── */
-const AI_HAIRSTYLES = [
-  {
-    n: "Textured crop",
-    d: "M70 120 Q72 60 120 58 Q168 60 170 120 Q150 92 120 92 Q90 92 70 120Z",
-  },
-  {
-    n: "Quiff",
-    d: "M66 130 Q60 50 130 40 Q184 40 174 128 Q150 80 118 84 Q90 86 66 130Z",
-  },
-  {
-    n: "Long layers",
-    d: "M62 190 Q46 52 120 52 Q194 52 178 190 L166 190 Q168 100 120 92 Q72 100 74 190Z",
-  },
-];
-
-/* ─── SALONOS WORKFLOW STAGES ─── */
-const SALONOS_FLOW = [
-  {
-    title: "Customer joins",
-    desc: "A customer picks a service on Snepr and joins the queue for a chair.",
-    waiting: 3,
-    next: "A06",
-    chairs: [
-      { tok: "A05", label: "Chair 1 · In service", hl: false },
-      { tok: "A06", label: "Next", hl: false },
-      { tok: "A07", label: "Just joined", hl: true },
-    ],
-  },
-  {
-    title: "Token appears",
-    desc: "The salon desk shows the new token with its service and estimated duration.",
-    waiting: 3,
-    next: "A06",
-    chairs: [
-      { tok: "A05", label: "Chair 1 · In service", hl: false },
-      { tok: "A06", label: "Next", hl: false },
-      { tok: "A07", label: "Token created · waiting", hl: true },
-    ],
-  },
-  {
-    title: "Barber calls next",
-    desc: "The barber taps Call Next and the token moves to their chair.",
-    waiting: 2,
-    next: "A07",
-    chairs: [
-      { tok: "A05", label: "Chair 1 · Finishing", hl: false },
-      { tok: "A06", label: "Chair 2 · Called", hl: true },
-      { tok: "A07", label: "Next", hl: false },
-    ],
-  },
-  {
-    title: "Customer notified",
-    desc: "The customer is alerted that their turn is close. Channels depend on what is enabled.",
-    waiting: 2,
-    next: "A07",
-    chairs: [
-      { tok: "A05", label: "Chair 1 · Finishing", hl: false },
-      { tok: "A06", label: "Chair 2 · In service", hl: false },
-      { tok: "A07", label: "Notified · turn is close", hl: true },
-    ],
-  },
-  {
-    title: "Service completes",
-    desc: "The barber marks the service done and the chair becomes free.",
-    waiting: 1,
-    next: "A07",
-    chairs: [
-      { tok: "A05", label: "Done", hl: false },
-      { tok: "A06", label: "Done · chair free", hl: true },
-      { tok: "A07", label: "Next", hl: false },
-    ],
-  },
-  {
-    title: "Review and points",
-    desc: "An eligible completed customer can review and earn Snepr Points under the stated rules.",
-    waiting: 1,
-    next: "A07",
-    chairs: [
-      { tok: "A05", label: "Done", hl: false },
-      { tok: "A06", label: "Eligible to review", hl: true },
-      { tok: "A07", label: "Next", hl: false },
-    ],
-  },
-];
-
-/* ─── FAQ QUESTIONS ─── */
 const FAQ_DATA: Record<string, [string, string][]> = {
   Customers: [
     [
-      "Do I need to download an app?",
-      "No. Snepr works directly in the browser. A native app also exists if you prefer it.",
+      "Do I pay anything extra to join the queue or book?",
+      "No. Snepr is 100% free for customers. You pay the salon's standard service price directly at the salon or online without any markup or hidden booking fees.",
     ],
     [
-      "How do I join a live queue?",
-      "Open a salon, choose a service and join. You get a live token with real-time countdown.",
+      "How do live queues work?",
+      "Salons update their active chair status in real time. When you take a token on Snepr, you receive an estimated wait time and live queue position. You only need to arrive a few minutes before your turn.",
     ],
     [
-      "How are wait times calculated?",
-      "Wait times are calculated dynamically based on active chair status and current queue length.",
+      "How do Snepr Points work?",
+      "Whenever you complete a service at a partner salon and leave a verified review, you earn 10 Snepr Points. 1 point = ₹1. You can redeem points for up to 20% off your next salon bill.",
     ],
     [
-      "Can I cancel my token?",
-      "Yes, you can cancel your token anytime from the digital pass with a single tap.",
-    ],
-    [
-      "How do I redeem Snepr Points?",
-      "As a direct service discount, up to 20% of the bill under our loyalty model. 1 Point = ₹1.",
+      "Can I choose a specific barber?",
+      "Yes! When viewing a salon profile, you can view the active barbers, their specialties, and their current chair availability before queuing.",
     ],
   ],
-  "Salon owners": [
+  "Salon Owners": [
     [
-      "How do salon owners update queues?",
-      "From the SalonOS desk with Call Next, chair toggles, and manual walk-in entry buttons.",
+      "Do you charge commissions on haircuts or services?",
+      "Never. Snepr operates on a flat, transparent subscription model (₹199/mo for Base, ₹400/mo for Intermediate, ₹449/mo for Pro). We take 0% cut from your hard-earned haircut revenue.",
     ],
     [
-      "Can one salon manage multiple chairs?",
-      "Yes. Intermediate covers up to three chairs and Pro covers unlimited chairs.",
+      "Can I manage walk-in customers alongside online tokens?",
+      "Yes. SalonOS has a built-in walk-in manager. When a customer walks in without an appointment, simply add them from your desk in one tap and SalonOS dynamically syncs the queue across all screens.",
     ],
     [
-      "How quickly can a salon start?",
-      "A salon can onboard and begin issuing digital tokens in under 5 minutes.",
+      "What hardware do I need to run SalonOS?",
+      "Any standard tablet, smartphone, or laptop with a web browser. No proprietary POS hardware or expensive terminals required.",
     ],
     [
-      "What happens if a salon closes?",
-      "The queue automatically pauses and informs waiting customers of reopening hours.",
-    ],
-  ],
-  Pricing: [
-    [
-      "Are there monthly commissions?",
-      "No percentage is deducted from service revenue under the stated plans. You pay a transparent fixed monthly subscription.",
-    ],
-    [
-      "How does Snepr make money?",
-      "From transparent salon software subscriptions. Customers use the service 100% free.",
+      "How quickly can my Bhubaneswar salon get listed?",
+      "Partner registration takes less than 5 minutes. Once your salon details and chair count are submitted, our local Bhubaneswar verification team approves your listing within 24 hours.",
     ],
   ],
   "AI Studio": [
     [
-      "What can AI Studio do?",
-      "It lets you preview curated hairstyles, explore cuts before sitting in the chair, and share the exact reference with your stylist.",
+      "What is the AI Hair Studio?",
+      "It is an interactive grooming lookbook and style consultation tool. You can explore curated men's haircuts, beard fades, and hair textures to show your barber exactly what you want.",
+    ],
+    [
+      "Can I share references with my stylist before arriving?",
+      "Yes. When joining the queue or booking a service, you can attach your selected AI Studio style reference directly to your ticket.",
     ],
   ],
 };
@@ -236,107 +92,57 @@ export function SneprLandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  /* ─── LOCATION DETECTION STATE ─── */
-  const [locText, setLocText] = useState("Set your area to see salons");
-  const [selectedArea, setSelectedArea] = useState("Patia, Bhubaneswar");
+  /* ─── LOCALITY STATE (BHUBANESWAR LAUNCH) ─── */
+  const [selectedAreaId, setSelectedAreaId] = useState<number>(1); // Patia default
+  const selectedArea = BHUBANESWAR_AREAS.find((a) => a.id === selectedAreaId) || BHUBANESWAR_AREAS[0];
 
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      setLocText("Location unsupported. Pick an area below.");
-      return;
-    }
-    setLocText("Finding you...");
-    navigator.geolocation.getCurrentPosition(
-      () => {
-        setLocText("Location detected. Distances will show here.");
-      },
-      () => {
-        setLocText("Permission denied. Select an area manually.");
-      },
-      { timeout: 8000 }
-    );
-  };
-
-  /* ─── SALON FILTERS & SKELETON LOADER ─── */
+  /* ─── SALON FILTERS ─── */
   const [activeFilter, setActiveFilter] = useState("all");
-  const [filteredSalons, setFilteredSalons] = useState<SalonItem[]>(SAMPLE_SALONS);
+  const [filteredSalons, setFilteredSalons] = useState<RealSalon[]>([]);
   const [isFilterLoading, setIsFilterLoading] = useState(false);
 
   useEffect(() => {
     setIsFilterLoading(true);
     const timer = setTimeout(() => {
-      let list = [...SAMPLE_SALONS];
+      let list = REAL_SALONS_DATA.filter((s) => s.areaId === selectedAreaId);
       if (activeFilter === "short") {
-        list.sort((a, b) => a.w - b.w);
+        list.sort((a, b) => a.waitTime - b.waitTime);
       } else if (activeFilter === "now") {
-        list = list.filter((s) => s.w <= 10);
+        list = list.filter((s) => s.availableChairs > 0 || s.waitTime === 0);
       } else if (activeFilter === "rated") {
-        list.sort((a, b) => b.r - a.r);
-      } else if (activeFilter !== "all") {
-        list = list.filter((s) => s.t === activeFilter);
+        list.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+      } else if (activeFilter === "Men's") {
+        list = list.filter((s) => s.category.toLowerCase().includes("men"));
+      } else if (activeFilter === "Unisex") {
+        list = list.filter((s) => s.category.toLowerCase().includes("unisex"));
+      } else if (activeFilter === "Premium") {
+        list = list.filter((s) => s.category.toLowerCase().includes("luxury") || s.category.toLowerCase().includes("unisex"));
       }
       setFilteredSalons(list);
       setIsFilterLoading(false);
-    }, 280);
+    }, 180);
 
     return () => clearTimeout(timer);
-  }, [activeFilter]);
+  }, [selectedAreaId, activeFilter]);
 
-  /* ─── DEMO SECTION STATE ─── */
-  const [demoTab, setDemoTab] = useState<"c" | "s">("c");
-  const [selectedService, setSelectedService] = useState<number | null>(null);
-  const [demoTokenGenerated, setDemoTokenGenerated] = useState(false);
-
-  // SalonOS Desk Demo state
-  const [deskChairs, setDeskChairs] = useState<({ tok: string | null })[]>([
-    { tok: "A04" },
-    { tok: "Free" },
-    { tok: "A05" },
-  ]);
-  const [deskQueue, setDeskQueue] = useState<string[]>(["A06", "A07", "A08"]);
-  const nextTokenNum = useRef(9);
-
-  const handleCallNext = () => {
-    if (deskQueue.length === 0) return;
-    const nextToken = deskQueue[0];
-    setDeskQueue((prev) => prev.slice(1));
-    setDeskChairs((prev) => {
-      const freeIdx = prev.findIndex((c) => c.tok === "Free" || !c.tok);
-      const targetIdx = freeIdx >= 0 ? freeIdx : 0;
-      return prev.map((c, i) => (i === targetIdx ? { tok: nextToken } : c));
-    });
-  };
-
-  const handleAddWalkIn = () => {
-    const token = `A${String(nextTokenNum.current++).padStart(2, "0")}`;
-    setDeskQueue((prev) => [...prev, token]);
-  };
-
-  /* ─── AI STUDIO STATE ─── */
+  /* ─── AI STUDIO LOOKBOOK ─── */
   const [selectedHairstyle, setSelectedHairstyle] = useState(0);
-  const [splitSlider, setSplitSlider] = useState(50);
+  const hairstyles = [
+    { name: "Textured Crop Fade", tag: "Popular for Men", desc: "Short textured top with a clean low skin fade on sides." },
+    { name: "Modern Quiff", tag: "Classic Professional", desc: "Voluminous swept-back front with defined scissor-cut sides." },
+    { name: "Beard Sculpt & Razor Fade", tag: "Sharp Grooming", desc: "Angular cheek lines, blended sideburns and hot-towel finish." },
+    { name: "Layered Texture Cut", tag: "Versatile", desc: "Medium-length flow with soft layered ends and effortless movement." },
+  ];
 
-  /* ─── SALONOS FLOW STATE ─── */
-  const [flowIndex, setFlowIndex] = useState(0);
+  /* ─── WALLET & LOYALTY DEMO ─── */
+  const [walletPoints, setWalletPoints] = useState(30);
+  const [reviewed, setReviewed] = useState(false);
 
-  /* ─── DEMO WALLET & REVIEWS STATE ─── */
-  const [userRating, setUserRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [walletPoints, setWalletPoints] = useState(0);
-  const [reviewNote, setReviewNote] = useState(
-    "Choose any rating. You earn 10 points either way."
-  );
-
-  const handleSubmitReview = () => {
-    if (!userRating) {
-      setReviewNote("Choose a rating first.");
-      return;
+  const handleSimulateReview = () => {
+    if (!reviewed) {
+      setWalletPoints((prev) => prev + 10);
+      setReviewed(true);
     }
-    setWalletPoints((prev) => prev + 10);
-    setReviewNote(
-      `${userRating} star review submitted. +10 points, same as any rating.`
-    );
-    setUserRating(0);
   };
 
   /* ─── SALON ECONOMICS CALCULATOR ─── */
@@ -363,121 +169,150 @@ export function SneprLandingPage() {
     }));
   };
 
-  const shortestWaitSalon = [...SAMPLE_SALONS].sort((a, b) => a.w - b.w)[0];
+  const currentAreaSalons = REAL_SALONS_DATA.filter((s) => s.areaId === selectedAreaId);
+  const heroHighlightSalon = currentAreaSalons[0] || REAL_SALONS_DATA[0];
 
   return (
     <main id="top" className="snepr-body">
-      {/* ─── HERO SECTION ─── */}
+      {/* ─── 1. HERO SECTION ─── */}
       <section className="hero">
         <div className="wrap">
           <div>
             <span className="pill reveal">
               <i className="dot" />
-              Live salon discovery · Bhubaneswar
+              Initial Launch · Bhubaneswar, Odisha
             </span>
             <h1 className="reveal" style={{ ["--d" as any]: ".08s" }}>
-              Never wait in line
+              Skip the waiting room.
               <br />
-              at a salon <em>again.</em>
+              Track salon chairs <em>in real time.</em>
             </h1>
             <p className="lead reveal" style={{ ["--d" as any]: ".16s" }}>
-              Check live chair wait times from home. Save your place remotely and
-              arrive when your barber is ready. Know before you go.
+              Check live chair wait times across Bhubaneswar. Save your place remotely and arrive when your barber is ready. Know before you go.
             </p>
             <div className="acts reveal" style={{ ["--d" as any]: ".24s" }}>
-              <a className="btn btn-dark" href="#discover">
-                Find a salon near you
+              <a className="btn btn-dark" href="/live">
+                See Live Queues
               </a>
               <a className="btn btn-out" href="#discover">
-                Explore live queues
+                Explore Salons
               </a>
-              <a className="own" href="#salonos">
-                For salon owners ↗
+              <a className="own" href="/login">
+                Salon Partner Login ↗
               </a>
             </div>
+
+            {/* Locality Selector Pill in Hero */}
             <div className="loc reveal" style={{ ["--d" as any]: ".32s" }}>
-              <span>{locText}</span>
-              <button onClick={detectLocation}>Use my location</button>
+              <span className="font-semibold text-xs text-[#1B1410]">
+                Exploring: <b>{selectedArea.name}, Bhubaneswar</b>
+              </span>
+              <select
+                value={selectedAreaId}
+                onChange={(e) => setSelectedAreaId(Number(e.target.value))}
+                className="bg-transparent text-xs font-bold text-[#7A4B29] cursor-pointer outline-none border-b border-[#7A4B29]/30 hover:border-[#7A4B29]"
+                aria-label="Choose Locality"
+              >
+                {BHUBANESWAR_AREAS.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
+          {/* Hero Live Queue Preview Card */}
           <div
             className="panel reveal"
             style={{ ["--d" as any]: ".15s" }}
-            aria-label="Sample live salon preview"
+            aria-label="Live salon preview"
           >
             <div className="ptop">
-              ⌕ Salons near you, right now{" "}
-              <span className="live">● LIVE</span>
+              <span>● LIVE CHAIR STATUS</span>
+              <span className="live">{selectedArea.name}</span>
             </div>
             <div>
-              {SAMPLE_SALONS.map((s) => (
-                <div className="srow" key={s.n}>
-                  <div className="av">{s.n[0]}</div>
+              {currentAreaSalons.slice(0, 3).map((s) => (
+                <div className="srow" key={s.id}>
+                  <div className="av">{s.name[0]}</div>
                   <div>
-                    <div className="sn">{s.n}</div>
+                    <div className="sn">{s.name}</div>
                     <div className="sm">
-                      {s.a} · {s.t} · ★ {s.r}
+                      {s.areaName} · {s.category} · ★ {s.rating}
                     </div>
                   </div>
-                  <div className="w" style={{ color: col(s.w) }}>
-                    {s.w} min<small>WAIT</small>
+                  <div
+                    className="w"
+                    style={{
+                      color:
+                        s.waitTime <= 5
+                          ? "var(--green)"
+                          : s.waitTime <= 15
+                          ? "var(--amber)"
+                          : "var(--red)",
+                    }}
+                  >
+                    {s.waitTime} min<small>{s.availableChairs > 0 ? "FREE CHAIR" : "WAIT"}</small>
                   </div>
                 </div>
               ))}
             </div>
             <div className="fast">
-              <span>Shortest listed wait</span>
+              <span>Fastest available in {selectedArea.name}</span>
               <b>
-                {shortestWaitSalon.w} min · {shortestWaitSalon.n}
+                {heroHighlightSalon.waitTime} min wait · {heroHighlightSalon.name}
               </b>
             </div>
-            <div className="badge">SAMPLE PREVIEW DATA</div>
+            <div className="badge font-bold tracking-wider text-[10px]">
+              VERIFIED BHUBANESWAR QUEUE DATA
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── DISCOVER & LIVE QUEUES SECTION ─── */}
+      {/* ─── 2. SALON DISCOVERY SECTION ─── */}
       <section className="section discover" id="discover">
         <div className="wrap">
           <div className="head reveal">
             <div>
-              <div className="kicker">Live salon discovery</div>
-              <h2 className="snepr-h2">Salons near you, right now.</h2>
-              <p className="sub">Showing sample salons for {selectedArea}.</p>
+              <div className="kicker">Locality-Based Discovery</div>
+              <h2 className="snepr-h2">Verified salons in {selectedArea.name}.</h2>
+              <p className="sub">
+                Select your neighborhood to browse real salons and live chair status. No GPS permissions needed.
+              </p>
             </div>
+
+            {/* Bhubaneswar Locality Dropdown */}
             <div className="locbar">
+              <label htmlFor="localitySelect" className="text-xs font-bold text-[#6B5E55] mr-2">
+                Locality:
+              </label>
               <select
-                value={selectedArea}
-                onChange={(e) => {
-                  setSelectedArea(e.target.value);
-                  setLocText(e.target.value);
-                }}
-                aria-label="Select area"
+                id="localitySelect"
+                value={selectedAreaId}
+                onChange={(e) => setSelectedAreaId(Number(e.target.value))}
+                aria-label="Select Bhubaneswar Locality"
               >
-                <option value="Patia, Bhubaneswar">Patia, Bhubaneswar</option>
-                <option value="Saheed Nagar, Bhubaneswar">
-                  Saheed Nagar, Bhubaneswar
-                </option>
-                <option value="Jaydev Vihar, Bhubaneswar">
-                  Jaydev Vihar, Bhubaneswar
-                </option>
+                {BHUBANESWAR_AREAS.map((area) => (
+                  <option key={area.id} value={area.id}>
+                    {area.name}, Bhubaneswar
+                  </option>
+                ))}
               </select>
-              <button className="pr" onClick={detectLocation}>
-                Use my location
-              </button>
             </div>
           </div>
 
+          {/* Filter Chips */}
           <div className="filters" role="group" aria-label="Filters">
             {[
-              { id: "all", label: "All salons" },
+              { id: "all", label: "All in " + selectedArea.name },
               { id: "short", label: "Shortest wait" },
-              { id: "now", label: "Available now" },
+              { id: "now", label: "Available chairs now" },
               { id: "rated", label: "Top rated" },
-              { id: "Men's", label: "Men's" },
-              { id: "Unisex", label: "Unisex" },
-              { id: "Premium", label: "Premium" },
+              { id: "Men's", label: "Men's Grooming" },
+              { id: "Unisex", label: "Unisex Salons" },
+              { id: "Premium", label: "Luxury Studios" },
             ].map((f) => (
               <button
                 key={f.id}
@@ -490,6 +325,7 @@ export function SneprLandingPage() {
             ))}
           </div>
 
+          {/* Salon Grid */}
           <div className="grid3">
             {isFilterLoading ? (
               <>
@@ -499,557 +335,440 @@ export function SneprLandingPage() {
               </>
             ) : filteredSalons.length > 0 ? (
               filteredSalons.map((s) => (
-                <article className="card" key={s.n}>
+                <article className="card" key={s.id}>
                   <div className="ct">
-                    <div className="mark">{s.n[0]}</div>
+                    <div className="mark">{s.name[0]}</div>
                     <span className="st">
                       <i className="dot" style={{ marginRight: "5px" }} />
-                      Open
+                      {s.operationalStatus === "active" ? "Open Now" : "Paused"}
                     </span>
                   </div>
-                  <h3>{s.n}</h3>
+                  <h3>{s.name}</h3>
                   <div className="meta">
-                    <span>{s.a}</span>
-                    <span>{s.t}</span>
-                    <span>★ {s.r}</span>
+                    <span>{s.areaName}, Bhubaneswar</span>
+                    <span>{s.category}</span>
+                    <span>★ {s.rating} ({s.reviewCount})</span>
                   </div>
                   <div className="meta">
-                    <span>{s.c}</span>
-                    <span>{s.q} in queue</span>
+                    <span className="font-bold text-[#2E7D4F]">
+                      {s.availableChairs} of {s.totalChairs} chairs free
+                    </span>
+                    <span>{s.waitingCount} in live queue</span>
                   </div>
                   <div className="cb">
-                    <div className="bw" style={{ color: col(s.w) }}>
-                      {s.w}
+                    <div
+                      className="bw"
+                      style={{
+                        color:
+                          s.waitTime <= 5
+                            ? "var(--green)"
+                            : s.waitTime <= 15
+                            ? "var(--amber)"
+                            : "var(--red)",
+                      }}
+                    >
+                      {s.waitTime}
                       <small> min wait</small>
                     </div>
-                    <a className="btn btn-dark" href="#demo">
-                      Join queue
+                    <a className="btn btn-dark" href={`/live/salon/${s.id}`}>
+                      Join Queue
                     </a>
                   </div>
                 </article>
               ))
             ) : (
               <div className="empty">
-                No salons match this filter right now. Try another filter or area.
+                No salons currently match this filter in {selectedArea.name}. Try selecting another filter or neighborhood above.
               </div>
             )}
           </div>
-
-          <p className="note" style={{ marginTop: "20px" }}>
-            SAMPLE DATA. In production this comes from the nearby salon API, with
-            real distances from coordinates and a last updated time on each card.
-          </p>
         </div>
       </section>
 
-      {/* ─── INTERACTIVE DEMO (CUSTOMER & SALONOS) ─── */}
-      <section className="section demo" id="demo">
-        <div className="wrap dl">
-          <div className="reveal">
-            <div className="kicker">A closer look</div>
-            <h2 className="snepr-h2" style={{ color: "#fff" }}>
-              See the queue. Feel in control.
-            </h2>
+      {/* ─── 3. LIVE QUEUE EXPERIENCE SECTION ─── */}
+      <section className="section queue-exp" id="live-experience" style={{ background: "#FAF7F2" }}>
+        <div className="wrap">
+          <div className="head reveal text-center max-w-2xl mx-auto mb-12">
+            <div className="kicker">Real-Time Transparency</div>
+            <h2 className="snepr-h2">Traditional Waiting vs. The Snepr Way</h2>
             <p className="sub">
-              Switch between the customer view and the salon desk. Nothing here
-              creates a real queue entry.
-            </p>
-
-            <div className="tabs" role="tablist">
-              <span
-                className="knob"
-                style={{
-                  left: demoTab === "c" ? "5px" : "135px",
-                  width: demoTab === "c" ? "124px" : "130px",
-                }}
-              />
-              <button
-                role="tab"
-                aria-selected={demoTab === "c"}
-                onClick={() => setDemoTab("c")}
-              >
-                Customer view
-              </button>
-              <button
-                role="tab"
-                aria-selected={demoTab === "s"}
-                onClick={() => setDemoTab("s")}
-              >
-                SalonOS desk
-              </button>
-            </div>
-
-            <div className="dtitle">
-              {demoTab === "c" ? "The customer side" : "The barber desk"}
-            </div>
-            <p style={{ color: "#c2b5ab" }}>
-              {demoTab === "c"
-                ? "Pick a service, see its duration and price, then generate a demo token with queue position and estimated wait."
-                : "Call the next customer, watch chairs update and add walk in tokens. All simulated."}
+              Never waste an hour seated on a crowded salon sofa reading old magazines.
             </p>
           </div>
 
-          <div className="screen reveal" style={{ ["--d" as any]: ".1s" }}>
-            {demoTab === "c" ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 reveal">
+            {/* Traditional Card */}
+            <div className="p-8 rounded-3xl bg-[#EFE9E0]/60 border border-[#E8E1D7] flex flex-col justify-between">
               <div>
-                <div className="sh">
-                  <strong>snepr</strong>
-                  <span>● DEMO · SAMPLE SALON</span>
-                </div>
-                <div>
-                  {DEMO_SERVICES.map((s, idx) => (
-                    <button
-                      key={s.n}
-                      className="svc"
-                      aria-pressed={selectedService === idx}
-                      onClick={() => {
-                        setSelectedService(idx);
-                        setDemoTokenGenerated(false);
-                      }}
-                    >
-                      <span>
-                        {s.n}
-                        <small>{s.m} min</small>
-                      </span>
-                      <b>₹{s.p}</b>
-                    </button>
-                  ))}
-                </div>
-                <button
-                  className="btn btn-brown"
-                  style={{ width: "100%", marginTop: "12px" }}
-                  onClick={() => setDemoTokenGenerated(true)}
-                >
-                  Generate demo token
-                </button>
+                <span className="inline-block px-3 py-1 rounded-full bg-[#DC2626]/10 text-[#DC2626] text-xs font-bold uppercase tracking-wider mb-4">
+                  The Old Way (Unpredictable)
+                </span>
+                <h3 className="text-xl font-bold text-[#1B1410] mb-3">
+                  Wasting 45 to 60 Minutes in the Salon
+                </h3>
+                <ul className="space-y-3 text-sm text-[#6B5E55]">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#DC2626] font-bold">✕</span>
+                    Travel to the salon hoping chairs are free, only to find a 4-person line.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#DC2626] font-bold">✕</span>
+                    Stuck waiting on a sofa without knowing who is next or when your barber finishes.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#DC2626] font-bold">✕</span>
+                    Risk losing your unofficial spot if you step out for a coffee.
+                  </li>
+                </ul>
+              </div>
+              <div className="mt-8 pt-4 border-t border-[#E8E1D7] flex items-center justify-between text-xs text-[#8F8177]">
+                <span>Avg. Wasted Waiting Time</span>
+                <span className="font-bold text-[#DC2626] text-sm">45–60 Mins</span>
+              </div>
+            </div>
 
-                {demoTokenGenerated && selectedService !== null ? (
-                  <div className="tok">
-                    <div className="note" style={{ color: "#c9b8aa" }}>
-                      DEMO TOKEN
-                    </div>
-                    <div className="tk">A07</div>
-                    <div style={{ fontSize: ".85rem" }}>
-                      Position 4 · 3 ahead
-                    </div>
-                    <div style={{ color: "#f0c28f", fontSize: ".85rem" }}>
-                      Est. wait about {3 * 20} min
-                    </div>
-                    <div
-                      className="note"
-                      style={{ color: "#c9b8aa", marginTop: "6px" }}
-                    >
-                      {DEMO_SERVICES[selectedService].n} · ₹
-                      {DEMO_SERVICES[selectedService].p} · simulated
-                    </div>
-                  </div>
-                ) : demoTokenGenerated && selectedService === null ? (
-                  <div
-                    className="note"
-                    style={{ marginTop: "12px", textAlign: "center" }}
-                  >
-                    Select a service first.
-                  </div>
-                ) : null}
-              </div>
-            ) : (
+            {/* Snepr Way Card */}
+            <div className="p-8 rounded-3xl bg-white border border-[#7A4B29]/30 shadow-lg flex flex-col justify-between">
               <div>
-                <div className="sh">
-                  <strong>SalonOS</strong>
-                  <span>● DESK PREVIEW · DEMO DATA</span>
-                </div>
-                <div className="chairs">
-                  {deskChairs.map((c, i) => (
-                    <div
-                      key={i}
-                      className={`chair ${c.tok && c.tok !== "Free" ? "busy" : ""}`}
-                    >
-                      <small>CHAIR {i + 1}</small>
-                      <b>{c.tok || "Free"}</b>
-                    </div>
-                  ))}
-                </div>
-                <div
-                  style={{
-                    marginTop: "16px",
-                    fontWeight: 700,
-                    fontSize: ".8rem",
-                  }}
-                >
-                  Waiting
-                </div>
-                <div className="qrow">
-                  {deskQueue.length > 0 ? (
-                    deskQueue.map((t) => (
-                      <span className="qt" key={t}>
-                        {t}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="note">Queue empty</span>
-                  )}
-                </div>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  <button className="btn btn-brown" onClick={handleCallNext}>
-                    Call next
-                  </button>
-                  <button className="btn btn-out" onClick={handleAddWalkIn}>
-                    Add walk in token
-                  </button>
-                </div>
+                <span className="inline-block px-3 py-1 rounded-full bg-[#2E7D4F]/10 text-[#2E7D4F] text-xs font-bold uppercase tracking-wider mb-4">
+                  The Snepr Way (Punctual)
+                </span>
+                <h3 className="text-xl font-bold text-[#1B1410] mb-3">
+                  Arrive When Your Chair is Ready
+                </h3>
+                <ul className="space-y-3 text-sm text-[#6B5E55]">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#2E7D4F] font-bold">✓</span>
+                    Check real-time chair availability from your home, hostel, or office.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#2E7D4F] font-bold">✓</span>
+                    Secure a live digital token with dynamic countdown alerts.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#2E7D4F] font-bold">✓</span>
+                    Walk straight in when your token is called and take your seat immediately.
+                  </li>
+                </ul>
               </div>
-            )}
+              <div className="mt-8 pt-4 border-t border-[#E8E1D7] flex items-center justify-between text-xs text-[#8F8177]">
+                <span>Time Spent Sitting in Salon</span>
+                <span className="font-bold text-[#2E7D4F] text-sm">0 Mins</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── HOW IT WORKS SECTION ─── */}
+      {/* ─── 4. HOW IT WORKS SECTION ─── */}
       <section className="section how" id="how">
         <div className="wrap">
           <div className="head reveal">
             <div>
-              <div className="kicker">Simple by design</div>
-              <h2 className="snepr-h2">From your couch to the barber chair.</h2>
+              <div className="kicker">Simple By Design</div>
+              <h2 className="snepr-h2">From your couch to the barber chair in 4 steps.</h2>
             </div>
           </div>
-          <div className="stp">
-            <article className="step reveal">
-              <div className="n">01</div>
-              <h3 className="snepr-h3">Check the wait</h3>
-              <p>See live availability and wait estimates before you travel.</p>
-              <div className="mini">
-                <div className="r">
-                  <span>Sample Salon A</span>
-                  <b>5 min</b>
-                </div>
-                <div className="r">
-                  <span>Sample Salon B</span>
-                  <b>12 min</b>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <article className="step reveal p-6 rounded-2xl bg-white border border-[#E8E1D7]">
+              <div className="text-xs font-black text-[#7A4B29] mb-2 uppercase tracking-wider">01 · Pick Locality</div>
+              <h3 className="text-base font-bold text-[#1B1410] mb-1">Choose Neighborhood</h3>
+              <p className="text-xs text-[#6B5E55]">Select your locality in Bhubaneswar to see active, open neighborhood salons.</p>
             </article>
 
-            <article className="step reveal" style={{ ["--d" as any]: ".12s" }}>
-              <div className="n">02</div>
-              <h3 className="snepr-h3">Save your chair</h3>
-              <p>Select a service and join the digital queue from your phone.</p>
-              <div className="mini">
-                <div className="r">
-                  <span>Haircut · 25 min</span>
-                  <b>Join queue</b>
-                </div>
-              </div>
+            <article className="step reveal p-6 rounded-2xl bg-white border border-[#E8E1D7]" style={{ ["--d" as any]: ".1s" }}>
+              <div className="text-xs font-black text-[#7A4B29] mb-2 uppercase tracking-wider">02 · Check Chairs</div>
+              <h3 className="text-base font-bold text-[#1B1410] mb-1">Inspect Live Queue</h3>
+              <p className="text-xs text-[#6B5E55]">See which chairs are occupied, finishing, or open right now, plus live wait times.</p>
             </article>
 
-            <article className="step reveal" style={{ ["--d" as any]: ".24s" }}>
-              <div className="n">03</div>
-              <h3 className="snepr-h3">Walk straight in</h3>
-              <p>Follow your token and arrive when your turn is close.</p>
-              <div className="mini">
-                <div className="r">
-                  <span>Your token</span>
-                  <b>A07</b>
-                </div>
-              </div>
+            <article className="step reveal p-6 rounded-2xl bg-white border border-[#E8E1D7]" style={{ ["--d" as any]: ".2s" }}>
+              <div className="text-xs font-black text-[#7A4B29] mb-2 uppercase tracking-wider">03 · Secure Token</div>
+              <h3 className="text-base font-bold text-[#1B1410] mb-1">Join Queue or Book</h3>
+              <p className="text-xs text-[#6B5E55]">Tap to take a digital token or book a slot with your preferred stylist.</p>
+            </article>
+
+            <article className="step reveal p-6 rounded-2xl bg-white border border-[#E8E1D7]" style={{ ["--d" as any]: ".3s" }}>
+              <div className="text-xs font-black text-[#7A4B29] mb-2 uppercase tracking-wider">04 · Walk Straight In</div>
+              <h3 className="text-base font-bold text-[#1B1410] mb-1">Zero Wait Seating</h3>
+              <p className="text-xs text-[#6B5E55]">Arrive just-in-time when called. Show your token number and sit straight in the chair.</p>
             </article>
           </div>
         </div>
       </section>
 
-      {/* ─── AI STUDIO SECTION ─── */}
+      {/* ─── 5. AI STUDIO LOOKBOOK SECTION ─── */}
       <section className="section ai" id="ai">
         <div className="wrap al">
           <div className="reveal">
-            <div className="kicker">AI Hair Studio</div>
+            <div className="kicker">AI Grooming Lookbook</div>
             <h2 className="snepr-h2">Try the look before the cut.</h2>
             <p className="sub">
-              Explore hairstyles and prepare a clearer conversation with your
-              barber.
+              Explore curated haircuts, fades, and beard profiles. Show your stylist exactly what you want with 100% clarity.
             </p>
             <ul className="pts">
-              <li>Hairstyle discovery and personalised suggestions</li>
-              <li>Share a preferred style with your barber</li>
-              <li>Connect styles to salon services and pricing</li>
+              <li>Curated modern fades, crops, quiffs, and beard shapes</li>
+              <li>Texture preview & hair density suggestions</li>
+              <li>Share exact reference cards with your Bhubaneswar stylist</li>
             </ul>
             <a className="btn btn-dark" href="/live/studio" style={{ marginTop: "16px" }}>
-              Explore AI Studio
+              Explore Full AI Lookbook
             </a>
           </div>
 
-          <div className="studio reveal" style={{ ["--d" as any]: ".1s" }}>
-            <div className="cmp">
-              {/* Base Head SVG */}
-              <svg viewBox="0 0 240 280">
-                <rect width="240" height="280" fill="#EADFCB" />
-                <ellipse cx="120" cy="140" rx="52" ry="66" fill="#D9AE86" />
-                <rect x="100" y="190" width="40" height="60" fill="#D9AE86" />
-                <path d="M10 280 Q120 200 230 280Z" fill="#6E3A1C" />
-              </svg>
-              {/* Styled Hair Overlay with Slider Clip */}
-              <svg
-                viewBox="0 0 240 280"
-                style={{ clipPath: `inset(0 0 0 ${splitSlider}%)` }}
-              >
-                <rect width="240" height="280" fill="#EADFCB" />
-                <ellipse cx="120" cy="140" rx="52" ry="66" fill="#D9AE86" />
-                <rect x="100" y="190" width="40" height="60" fill="#D9AE86" />
-                <path d="M10 280 Q120 200 230 280Z" fill="#6E3A1C" />
-                <path d={AI_HAIRSTYLES[selectedHairstyle].d} fill="#241810" />
-              </svg>
-              <div className="bar" style={{ left: `${splitSlider}%` }} />
+          <div className="studio reveal p-6 rounded-3xl bg-white border border-[#E8E1D7] shadow-sm" style={{ ["--d" as any]: ".1s" }}>
+            <div className="mb-4">
+              <span className="text-[10px] font-extrabold text-[#7A4B29] uppercase tracking-wider">
+                {hairstyles[selectedHairstyle].tag}
+              </span>
+              <h3 className="text-lg font-bold text-[#1B1410] mt-0.5">
+                {hairstyles[selectedHairstyle].name}
+              </h3>
+              <p className="text-xs text-[#6B5E55] mt-1">
+                {hairstyles[selectedHairstyle].desc}
+              </p>
             </div>
 
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={splitSlider}
-              onChange={(e) => setSplitSlider(Number(e.target.value))}
-              aria-label="Before and after"
-            />
-
-            <div className="sty">
-              {AI_HAIRSTYLES.map((h, i) => (
+            <div className="grid grid-cols-2 gap-2 mt-4">
+              {hairstyles.map((h, i) => (
                 <button
-                  key={h.n}
-                  className={`chip ${selectedHairstyle === i ? "active" : ""}`}
-                  aria-pressed={selectedHairstyle === i}
+                  key={h.name}
                   onClick={() => setSelectedHairstyle(i)}
+                  className={`p-3 rounded-xl text-left border transition-all text-xs font-bold ${
+                    selectedHairstyle === i
+                      ? "bg-[#7A4B29] text-white border-[#7A4B29]"
+                      : "bg-[#FAF7F2] text-[#1B1410] border-[#E8E1D7] hover:border-[#7A4B29]"
+                  }`}
                 >
-                  {h.n}
+                  <div className="truncate">{h.name}</div>
+                  <div className={`text-[10px] mt-0.5 ${selectedHairstyle === i ? "text-white/80" : "text-[#8F8177]"}`}>
+                    {h.tag}
+                  </div>
                 </button>
               ))}
             </div>
 
-            <div className="note font-bold tracking-wider">
-              HAIRSTYLE PREVIEW ·{" "}
-              {AI_HAIRSTYLES[selectedHairstyle].n.toUpperCase()}
+            <div className="mt-5 p-3 rounded-xl bg-[#FAF7F2] border border-[#E8E1D7] flex items-center justify-between text-xs">
+              <span className="text-[#6B5E55]">Stylist compatibility:</span>
+              <span className="font-bold text-[#2E7D4F]">All verified Bhubaneswar barbers</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── SALONOS FOR SALON OWNERS ─── */}
-      <section className="section os" id="salonos">
-        <div className="wrap ol">
-          <div className="reveal">
-            <div className="kicker">For salon owners · SalonOS</div>
-            <h2 className="snepr-h2">
-              Your salon. Your chairs. Your customers. Under control.
-            </h2>
-            <p className="sub">
-              A salon operations system, separate from the free customer
-              product. Follow one customer through a working day.
-            </p>
-
-            <div className="flow" role="tablist">
-              {SALONOS_FLOW.map((f, i) => (
-                <button
-                  key={f.title}
-                  className="fs"
-                  role="tab"
-                  aria-selected={flowIndex === i}
-                  onClick={() => setFlowIndex(i)}
-                >
-                  <small>0{i + 1}</small>
-                  {f.title}
-                </button>
-              ))}
-            </div>
-
-            <div className="caps">
-              <span className="cap">Digital queue</span>
-              <span className="cap">Automatic tokens</span>
-              <span className="cap">Chair availability</span>
-              <span className="cap">Service menu</span>
-              <span className="cap">Staff logins</span>
-              <span className="cap later">Reassignment</span>
-              <span className="cap later">Customer history</span>
-              <span className="cap later">Analytics</span>
-              <span className="cap later">Multi branch</span>
-              <span className="cap later">Appointments</span>
-            </div>
-          </div>
-
-          <div className="dash reveal" style={{ ["--d" as any]: ".1s" }}>
-            <div className="dt">
-              <strong>SalonOS · Overview</strong>
-              <span>● LIVE QUEUE SYSTEM</span>
-            </div>
-            <div className="ds">
-              <div className="dsi">
-                <small>Active chairs</small>
-                <b>3</b>
-              </div>
-              <div className="dsi">
-                <small>Waiting</small>
-                <b>{SALONOS_FLOW[flowIndex].waiting}</b>
-              </div>
-              <div className="dsi">
-                <small>Next token</small>
-                <b>{SALONOS_FLOW[flowIndex].next}</b>
-              </div>
-            </div>
-            <div>
-              {SALONOS_FLOW[flowIndex].chairs.map((l) => (
-                <div key={l.tok} className={`ql ${l.hl ? "hl" : ""}`}>
-                  <b>#{l.tok}</b>
-                  <span>{l.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="dnote">{SALONOS_FLOW[flowIndex].desc}</div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── POINTS & REVIEWS ─── */}
+      {/* ─── 6. SNEPR POINTS / CUSTOMER LOYALTY SECTION ─── */}
       <section className="section loy" id="points">
         <div className="wrap ll">
           <div className="reveal">
-            <div className="kicker">Verified reviews · Snepr Points</div>
+            <div className="kicker">Verified Reviews · Snepr Points</div>
             <h2 className="snepr-h2">Reviews you can trust. Points you can spend.</h2>
+            <p className="sub mb-6">
+              Zero fake reviews, zero marketing gimmicks. Real rewards for real customers.
+            </p>
             <ul className="rules">
               <li>
-                <b>01</b>Only verified, completed customers can review.
+                <b>01</b>Only customers with verified completed appointments can review.
               </li>
               <li>
-                <b>02</b>Each eligible review earns 10 Snepr Points. 1 point = ₹1.
+                <b>02</b>Each verified review earns 10 Snepr Points. 1 Point = ₹1.
               </li>
               <li>
-                <b>03</b>Points can be redeemed as a service discount, up to 20%
-                of the bill.
+                <b>03</b>Redeem points for up to 20% off your salon service bill.
               </li>
               <li>
-                <b>04</b>The reward does not depend on the rating. One star earns
-                the same as five.
+                <b>04</b>Points are awarded regardless of star rating (honest feedback is valued equally).
               </li>
             </ul>
           </div>
 
           <div className="wallet reveal" style={{ ["--d" as any]: ".1s" }}>
-            <small>SNEPR WALLET</small>
+            <small>YOUR SNEPR WALLET</small>
             <div className="amt">₹{walletPoints}</div>
-            <div style={{ color: "#e5c9b2", fontSize: ".8rem" }}>
-              in Snepr Points
+            <div style={{ color: "#E5C9B2", fontSize: ".8rem" }}>
+              Available Snepr Points (1 Pt = ₹1)
             </div>
-            <div className="stars" role="group" aria-label="Rating">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  className={
-                    (hoverRating || userRating) >= star ? "on" : ""
-                  }
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  onClick={() => setUserRating(star)}
-                  aria-label={`${star} star`}
-                >
-                  ★
-                </button>
-              ))}
+
+            <div className="mt-6 pt-6 border-t border-white/10">
+              <p className="text-xs text-white/80 mb-3">
+                {reviewed
+                  ? "✓ Review verified! +10 Points added to your wallet."
+                  : "Try it: Tap to verify a completed haircut review:"}
+              </p>
+              <button
+                type="button"
+                onClick={handleSimulateReview}
+                disabled={reviewed}
+                className="w-full py-2.5 rounded-xl bg-[#C8993E] hover:bg-[#b08432] text-[#1B1410] font-black text-xs uppercase tracking-wider transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {reviewed ? "Review Submitted (+10 Pts)" : "Submit Verified Review (+10 Pts)"}
+              </button>
             </div>
-            <button className="btn" onClick={handleSubmitReview}>
-              Submit demo review
-            </button>
-            <p>{reviewNote}</p>
           </div>
         </div>
       </section>
 
-      {/* ─── PRICING PLANS ─── */}
+      {/* ─── 7. SALONOS OVERVIEW SECTION ─── */}
+      <section className="section os" id="salonos">
+        <div className="wrap ol">
+          <div className="reveal">
+            <div className="kicker">For Salon Owners · SalonOS</div>
+            <h2 className="snepr-h2">
+              The Operating System for modern barbers & salons.
+            </h2>
+            <p className="sub">
+              Manage chairs, queue tokens, walk-ins, and staff shifts in one intuitive portal. Built specifically for Indian neighborhood salons.
+            </p>
+
+            <div className="caps">
+              <span className="cap">Live Chair Management</span>
+              <span className="cap">Automated Token Queue</span>
+              <span className="cap">Walk-in Customer Desk</span>
+              <span className="cap">Staff Shifts & Commissions</span>
+              <span className="cap">0% Haircut Commissions</span>
+              <span className="cap">WhatsApp Alerts</span>
+              <span className="cap">QR Standee Included</span>
+            </div>
+
+            <div className="mt-8">
+              <a className="btn btn-dark" href="/claim">
+                Register Your Salon
+              </a>
+            </div>
+          </div>
+
+          <div className="dash reveal" style={{ ["--d" as any]: ".1s" }}>
+            <div className="dt">
+              <strong>SalonOS Desk · Patia Partner</strong>
+              <span>● LIVE CHAIR MONITOR</span>
+            </div>
+            <div className="ds">
+              <div className="dsi">
+                <small>Active chairs</small>
+                <b>4</b>
+              </div>
+              <div className="dsi">
+                <small>In Queue</small>
+                <b>2</b>
+              </div>
+              <div className="dsi">
+                <small>Next Token</small>
+                <b>#A-104</b>
+              </div>
+            </div>
+            <div className="space-y-2 mt-4">
+              <div className="ql">
+                <b>Chair 1</b>
+                <span>Sameer Mohanty · In Service (#A-102 · Haircut)</span>
+              </div>
+              <div className="ql hl">
+                <b>Chair 2</b>
+                <span>Rahul Sen · Available Now (Walk-in Ready)</span>
+              </div>
+              <div className="ql">
+                <b>Chair 3</b>
+                <span>Bikash Rout · Finishing (#A-103 · 3 mins left)</span>
+              </div>
+            </div>
+            <div className="dnote">
+              Live updates automatically synchronize with customers' mobile browsers.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 8. AUTHORITATIVE PRICING SECTION ─── */}
       <section className="section pricing" id="pricing">
         <div className="wrap">
           <div className="head reveal">
             <div>
-              <div className="kicker">SalonOS plans</div>
-              <h2 className="snepr-h2">Simple pricing. No haircut commissions.</h2>
+              <div className="kicker">Authoritative Subscriptions</div>
+              <h2 className="snepr-h2">Transparent pricing. 0% haircut commissions.</h2>
               <p className="sub">
-                Monthly plans. An annual option appears only once billing
-                supports it.
+                Flat monthly software subscriptions. Keep 100% of your service earnings.
               </p>
             </div>
           </div>
           <div className="pg">
+            {/* Base Plan */}
             <article className="pc reveal">
               <div className="pl">BASE · 1 CHAIR</div>
-              <h3 className="snepr-h3">Single barber</h3>
+              <h3 className="snepr-h3">Single Stylist</h3>
               <p className="pd">
-                For independent barbers and single chair studios.
+                For independent barbers, single-chair studios, and solo groomers.
               </p>
               <div className="price">
                 ₹199<small> / month</small>
               </div>
               <ul>
-                <li>One active stylist chair</li>
-                <li>Real time chair countdown</li>
-                <li>Digital queue</li>
-                <li>QR standee</li>
-                <li>Basic customer alerts</li>
-                <li>Verified reviews</li>
+                <li>1 active stylist chair</li>
+                <li>Digital queue & token counter</li>
+                <li>Real-time chair countdown</li>
+                <li>QR counter standee for walk-ins</li>
+                <li>Verified customer reviews</li>
+                <li>0% haircut commissions</li>
               </ul>
               <a className="btn btn-out" href="/claim">
                 Start with Base
               </a>
             </article>
 
+            {/* Intermediate Plan (Most Popular) */}
             <article className="pc f reveal" style={{ ["--d" as any]: ".1s" }}>
               <div className="pl">MOST POPULAR · UP TO 3 CHAIRS</div>
               <h3 className="snepr-h3">Intermediate</h3>
-              <p className="pd">For growing neighbourhood salons.</p>
+              <p className="pd">For growing neighborhood salons & grooming parlours.</p>
               <div className="price">
                 ₹400<small> / month</small>
               </div>
               <ul>
                 <li>Everything in Base</li>
-                <li>Multiple staff logins</li>
-                <li>Multi barber queue routing</li>
-                <li>WhatsApp notifications</li>
+                <li>Up to 3 active chairs</li>
+                <li>Multi-barber queue routing</li>
+                <li>Staff logins & individual shifts</li>
+                <li>WhatsApp token notifications</li>
                 <li>Snepr Points loyalty listing</li>
-                <li>Peak hour analytics</li>
-                <li>Wait duration tracking</li>
-                <li>Zero commission on service revenue</li>
+                <li>0% haircut commissions</li>
               </ul>
               <a className="btn" href="/claim">
                 Choose Intermediate
               </a>
             </article>
 
+            {/* Pro Plan */}
             <article className="pc reveal" style={{ ["--d" as any]: ".2s" }}>
               <div className="pl">PRO · UNLIMITED CHAIRS</div>
-              <h3 className="snepr-h3">Pro</h3>
+              <h3 className="snepr-h3">Pro Unlimited</h3>
               <p className="pd">
-                For larger salons and multi chair operations.
+                For multi-chair unisex studios and high-volume salon chains.
               </p>
               <div className="price">
                 ₹449<small> / month</small>
               </div>
               <ul>
                 <li>Everything in Intermediate</li>
-                <li>Advanced AI Studio integration</li>
-                <li>Advanced analytics</li>
-                <li>Stylist performance</li>
-                <li>Revenue reporting</li>
-                <li>Featured Explore placement</li>
-                <li>Priority support</li>
+                <li>Unlimited chairs & staff members</li>
+                <li>Advanced SalonOS analytics & export</li>
+                <li>Featured placement in Locality Explore</li>
+                <li>AI Studio lookbook integration</li>
+                <li>Priority 24/7 dedicated partner support</li>
+                <li>0% haircut commissions</li>
               </ul>
               <a className="btn btn-out" href="/claim">
-                Go Pro
+                Go Pro Unlimited
               </a>
             </article>
           </div>
         </div>
       </section>
 
-      {/* ─── SALON ECONOMICS CALCULATOR ─── */}
+      {/* ─── 9. SALON ECONOMICS CALCULATOR ─── */}
       <section className="section calc" id="calc">
         <div className="wrap">
           <div className="head reveal">
             <div>
-              <div className="kicker">Salon economics</div>
+              <div className="kicker">Salon Economics Calculator</div>
               <h2 className="snepr-h2">
-                See what commission based platforms could cost your salon.
+                Calculate your monthly savings vs. 20–30% aggregators.
               </h2>
             </div>
           </div>
@@ -1071,7 +790,7 @@ export function SneprLandingPage() {
 
               <div className="ctl">
                 <label htmlFor="c2">
-                  Average service ticket{" "}
+                  Average ticket price{" "}
                   <output>₹{avgTicket.toLocaleString("en-IN")}</output>
                 </label>
                 <input
@@ -1101,119 +820,69 @@ export function SneprLandingPage() {
 
               <div className="ctl">
                 <label htmlFor="c4">
-                  Comparison commission rate <output>{commRate}%</output>
+                  Aggregator commission cut <output>{commRate}%</output>
                 </label>
                 <input
                   id="c4"
                   type="range"
-                  min="5"
-                  max="40"
+                  min="10"
+                  max="35"
                   value={commRate}
                   onChange={(e) => setCommRate(Number(e.target.value))}
                 />
               </div>
 
               <div className="ctl">
-                <label htmlFor="c5">Snepr plan</label>
+                <label htmlFor="c5">Snepr monthly plan</label>
                 <select
                   id="c5"
                   value={sneprPlanPrice}
                   onChange={(e) => setSneprPlanPrice(Number(e.target.value))}
                 >
-                  <option value={199}>Base · ₹199</option>
-                  <option value={400}>Intermediate · ₹400</option>
-                  <option value={449}>Pro · ₹449</option>
+                  <option value={199}>Base Plan · ₹199/mo</option>
+                  <option value={400}>Intermediate Plan · ₹400/mo</option>
+                  <option value={449}>Pro Unlimited · ₹449/mo</option>
                 </select>
               </div>
             </div>
 
             <div className="res">
               <div className="rr">
-                <span>Estimated monthly revenue</span>
+                <span>Estimated Monthly Revenue</span>
                 <b>₹{monthlyRev.toLocaleString("en-IN")}</b>
               </div>
               <div className="rr">
-                <span>Modelled commission</span>
-                <b>₹{modelledCommission.toLocaleString("en-IN")}</b>
+                <span>Aggregator Cut ({commRate}%)</span>
+                <b className="text-[#DC2626]">₹{modelledCommission.toLocaleString("en-IN")}</b>
               </div>
               <div className="rr">
-                <span>Snepr subscription</span>
-                <b>₹{sneprPlanPrice.toLocaleString("en-IN")}</b>
+                <span>Snepr Flat Subscription</span>
+                <b className="text-[#2E7D4F]">₹{sneprPlanPrice.toLocaleString("en-IN")}</b>
               </div>
               <div className="big">
-                <small>MODELLED DIFFERENCE PER MONTH</small>
+                <small>YOUR MONTHLY SAVINGS WITH SNEPR</small>
                 <strong>₹{modelledSavings.toLocaleString("en-IN")}</strong>
               </div>
               <div className="fm">
-                revenue = customers × ticket × days
+                Formula: revenue = customers × ticket × days
                 <br />
                 commission = revenue × rate
                 <br />
-                difference = commission − subscription
-                <br />
-                Illustrative model, not a guarantee of additional profit.
+                savings = commission − subscription
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── DIFFERENTIATION COMPARISON ─── */}
-      <section className="section cmpS">
-        <div className="wrap">
-          <div className="head reveal">
-            <div>
-              <div className="kicker">Differentiation</div>
-              <h2 className="snepr-h2">A different model for independent salons.</h2>
-            </div>
-          </div>
-          <table className="reveal">
-            <thead>
-              <tr>
-                <th />
-                <th>Commission based platforms</th>
-                <th>Snepr SalonOS</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Pricing</td>
-                <td>Often a percentage of bookings</td>
-                <td>Fixed monthly subscription</td>
-              </tr>
-              <tr>
-                <td>Service revenue</td>
-                <td>Commission varies by platform</td>
-                <td>No percentage deducted under the stated plans</td>
-              </tr>
-              <tr>
-                <td>Customer relationship</td>
-                <td>Varies by platform</td>
-                <td>Direct between salon and customer</td>
-              </tr>
-              <tr>
-                <td>Queue visibility</td>
-                <td>Often appointment focused</td>
-                <td>Chair level live queue</td>
-              </tr>
-              <tr>
-                <td>Customer access</td>
-                <td>Frequently app based</td>
-                <td>Browser based, no download needed</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ─── FAQ ACCORDION SECTION ─── */}
+      {/* ─── 10. FAQ & PARTNER CALL TO ACTION ─── */}
       <section className="section faq" id="faq">
         <div className="wrap fl">
           <div className="reveal">
-            <div className="kicker">Help</div>
-            <h2 className="snepr-h2">Good to know.</h2>
+            <div className="kicker">Frequently Asked Questions</div>
+            <h2 className="snepr-h2">Everything you need to know.</h2>
             <p className="sub">
-              Answers marked TBC need your real product rules before launch.
+              Clear answers for Bhubaneswar customers and salon partners.
             </p>
           </div>
           <div className="reveal" style={{ ["--d" as any]: ".1s" }}>
@@ -1261,35 +930,33 @@ export function SneprLandingPage() {
         </div>
       </section>
 
-      {/* ─── BOTTOM CALL TO ACTION ─── */}
+      {/* ─── 11. BOTTOM CTA ─── */}
       <section className="cta">
         <div className="wrap">
           <div className="reveal">
             <h2 className="snepr-h2">Know before you go.</h2>
             <p>
-              Customers can find a salon and check the queue. Owners can list,
-              claim or explore SalonOS.
+              Join Bhubaneswar customers skipping the salon wait. Salon owners can claim their chair listing today.
             </p>
             <div className="acts">
-              <a className="btn" href="#discover">
-                Find a salon near you
+              <a className="btn" href="/live">
+                Explore Live Salons
               </a>
               <a className="btn o" href="/claim">
-                Register your salon
+                Register Your Salon
               </a>
               <a className="btn o" href="/claim">
-                Claim your salon
+                Claim Existing Listing
               </a>
             </div>
           </div>
           <div className="app reveal" style={{ ["--d" as any]: ".1s" }}>
-            <b>Snepr app</b>
+            <b>Snepr Android App</b>
             <p>
-              A native app with the same live queues. Download for Android or
-              continue in browser.
+              Fast native Android client with live queue tracking, chair notifications, and instant re-booking.
             </p>
-            <a className="btn" href="/Snepr-release.apk" download>
-              Get the app
+            <a className="btn" href="/Snepr-v1.0.4.aab" download>
+              Download App (.aab)
             </a>{" "}
             <a
               href="#top"
@@ -1300,16 +967,16 @@ export function SneprLandingPage() {
                 textDecoration: "underline",
               }}
             >
-              Continue on web
+              Back to top
             </a>
           </div>
         </div>
       </section>
 
-      {/* ─── MOBILE STICKY BOTTOM NAV ─── */}
+      {/* Mobile Sticky Bottom Nav */}
       <div className="bnav">
-        <a href="#discover">Find a salon</a>
-        <a href="#demo">Demo</a>
+        <a href="#discover">Find Salon</a>
+        <a href="/live">Live Queues</a>
         <a href="#pricing">Pricing</a>
       </div>
     </main>

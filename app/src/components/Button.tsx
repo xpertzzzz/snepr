@@ -38,7 +38,7 @@ export function Button({ title, variant = "primary", loading, style, disabled, .
         getStyle(),
         pressed && styles.pressed,
         disabled && styles.disabled,
-        typeof style === 'function' ? style({ pressed }) : style,
+        typeof style === 'function' ? (style as any)({ pressed }) : style,
       ]}
       disabled={disabled || loading}
       {...props}
