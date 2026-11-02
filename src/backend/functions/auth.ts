@@ -42,26 +42,31 @@ export function canManageSalon(user: SessionUser, salonId: number) {
 // ─── Login ───────────────────────────────────────────────────────────────────
 
 export const login = createServerFn({ method: "POST" })
-  .validator((d: { username: string; password: string }) => d)
+  .validator((d: { username?: string; email?: string; identifier?: string; password: string }) => d)
   .handler(async ({ data }) => {
-    const userResult = await db.select().from(users).where(eq(users.username, data.username));
+    const ident = (data.identifier || data.email || data.username || "").trim().toLowerCase();
+    const userResult = await db.select().from(users).where(
+      sql`LOWER(${users.username}) = ${ident} OR LOWER(${users.email}) = ${ident}`
+    );
     const user = userResult[0];
 
-    if (!user) throw new Error("Invalid username or password");
+    if (!user) throw new Error("Invalid email or password");
 
     const isValid = await bcrypt.compare(data.password, user.password);
-    if (!isValid) throw new Error("Invalid username or password");
+    if (!isValid) throw new Error("Invalid email or password");
 
     if (user.suspendedAt) throw new Error("This account has been suspended.");
 
     let approvalStatus = "approved";
     let rejectionReason: string | null = null;
+    let salonName: string | null = null;
 
     if (user.salonId) {
       const [salon] = await db.select().from(salons).where(eq(salons.id, user.salonId));
       if (salon) {
         approvalStatus = salon.approvalStatus || "approved";
         rejectionReason = salon.rejectionReason || null;
+        salonName = salon.name;
       }
     }
 
@@ -69,11 +74,15 @@ export const login = createServerFn({ method: "POST" })
       id: user.id,
       username: user.username,
       name: user.name,
+      email: user.email,
+      phone: user.phone,
       role: user.role as UserRole,
       cityId: user.cityId ?? null,
       salonId: user.salonId ?? null,
+      salonName,
       approvalStatus,
       rejectionReason,
+      isAdmin: user.role === "super_admin",
     };
   });
 
