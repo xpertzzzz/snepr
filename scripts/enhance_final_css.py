@@ -249,3 +249,4 @@ with open('src/styles/snepr-final.css', 'w', encoding='utf-8') as f:
     f.write(css)
 
 print("Updated src/styles/snepr-final.css with enhanced visibility, contrast, and mobile frame styles!")
+

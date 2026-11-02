@@ -467,7 +467,7 @@ export function SneprPricingPage() {
           <div className="foot-top">
             <div className="foot-brand">
               <img
-                src="/snepr-logo-white-transparent.png"
+                src="/snepr-logo-transparent.png"
                 alt="Snepr"
                 className="foot-brand-logo"
               />
@@ -478,7 +478,7 @@ export function SneprPricingPage() {
               {/* Real Instagram Button with Official SVG Icon */}
               <div style={{ marginTop: "18px" }}>
                 <a
-                  href="https://www.instagram.com/snepr.app/"
+                  href="https://www.instagram.com/sneprofficial/"
                   target="_blank"
                   rel="noreferrer"
                   className="foot-instagram-btn"
@@ -497,7 +497,7 @@ export function SneprPricingPage() {
                     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
                     <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
                   </svg>
-                  <span>Follow @snepr.app</span>
+                  <span>Follow @sneprofficial</span>
                 </a>
               </div>
             </div>
@@ -532,7 +532,7 @@ export function SneprPricingPage() {
               <a href="/partner-terms">Terms of service</a>
               <div style={{ display: "flex", gap: "12px", marginTop: "14px" }}>
                 <a
-                  href="https://www.instagram.com/snepr.app/"
+                  href="https://www.instagram.com/sneprofficial/"
                   target="_blank"
                   rel="noreferrer"
                   title="Instagram"
@@ -574,7 +574,7 @@ export function SneprPricingPage() {
           </div>
 
           <div className="foot-bottom">
-            <span>© 2026 Snepr Technologies Inc. | Bhubaneswar, Odisha</span>
+            <span>© 2026 Snepr | Bhubaneswar, Odisha</span>
             <span>Crafted for Bhubaneswar</span>
           </div>
         </div>

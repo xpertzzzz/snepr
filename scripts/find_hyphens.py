@@ -20,3 +20,4 @@ for i, line in enumerate(lines):
 print(f"Total lines with hyphenated text in index.tsx: {len(hyphen_lines)}")
 for ln, m, content in hyphen_lines[:25]:
     print(f"Line {ln}: {m} -> {content[:80]}")
+

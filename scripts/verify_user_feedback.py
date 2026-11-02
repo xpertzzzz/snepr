@@ -40,3 +40,4 @@ assert "Serving" in home or "SERVING" in home, "Missing Serving state"
 assert "The Scissors Edge | Flagship Salon" in home, "Missing premium cockpit salon header"
 
 print("✓ All 6 User Feedback & Quality Assertions PASSED!")
+
