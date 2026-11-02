@@ -7,7 +7,7 @@ export function SalonOSProductPage() {
   const features = [
     {
       title: "Digital Queue System",
-      desc: "Automatically routes walk-in customers and remote mobile arrivals to open chairs. No crowded waiting rooms or chaotic paper registers.",
+      desc: "Automatically routes walk in customers and remote mobile arrivals to open chairs. No crowded waiting rooms or chaotic paper registers.",
       icon: "⚡",
     },
     {
@@ -27,7 +27,7 @@ export function SalonOSProductPage() {
     },
     {
       title: "Automated Customer Alerts",
-      desc: "Clients receive instant alerts when their turn is approaching, reducing no-shows and keeping chairs running smoothly throughout peak hours.",
+      desc: "Clients receive instant alerts when their turn is approaching, reducing no shows and keeping chairs running smoothly throughout peak hours.",
       icon: "🔔",
     },
     {
@@ -51,7 +51,7 @@ export function SalonOSProductPage() {
             Your salon, your chairs, <span className="font-serif italic text-[#80543a]">your customers.</span>
           </h1>
           <p className="mt-5 text-base sm:text-lg text-[#5c4f44] leading-relaxed">
-            The all-in-one salon operations software built for barbers and salon owners across Bhubaneswar. Eliminate reception chaos, boost daily chair turns, and never pay a percentage of your haircut revenue.
+            The all in one salon operations software built for barbers and salon owners across Bhubaneswar. Eliminate reception chaos, boost daily chair turns, and never pay a percentage of your haircut revenue.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
@@ -133,3 +133,4 @@ export function SalonOSProductPage() {
     </div>
   );
 }
+

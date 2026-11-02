@@ -216,7 +216,7 @@ export function SalonOSWorkspace({
 
   // Salon info
   const [salonName, setSalonName] = useState(
-    session?.salonName || "Lakmé Salon — KIIT Road"
+    session?.salonName || "Lakmé Salon  |  KIIT Road"
   );
   const [locality, setLocality] = useState("Patia, Bhubaneswar");
   const [ownerName, setOwnerName] = useState(session?.name || "Arjun Sharma");
@@ -257,7 +257,7 @@ export function SalonOSWorkspace({
     { id: 1, name: "Signature Haircut & Styling", price: 280, durationMins: 30, category: "Hair", isActive: true },
     { id: 2, name: "Beard Sculpt & Razor Finish", price: 150, durationMins: 15, category: "Beard", isActive: true },
     { id: 3, name: "Deep Nourishing Hair Spa", price: 650, durationMins: 45, category: "Spa", isActive: true },
-    { id: 4, name: "Charcoal Face Clean-up", price: 400, durationMins: 30, category: "Skin", isActive: true },
+    { id: 4, name: "Charcoal Face Clean up", price: 400, durationMins: 30, category: "Skin", isActive: true },
     { id: 5, name: "Hot Towel Shave & Oil Massage", price: 200, durationMins: 20, category: "Grooming", isActive: true },
   ]);
   const [newServiceName, setNewServiceName] = useState("");
@@ -392,7 +392,7 @@ export function SalonOSWorkspace({
     setWalkInName("");
     setWalkInPhone("");
     setShowWalkInModal(false);
-    toast.success(`Walk-in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
+    toast.success(`Walk in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
   };
 
   const handleAddService = (e: React.FormEvent) => {
@@ -616,7 +616,7 @@ export function SalonOSWorkspace({
           {/* TAB 1: OVERVIEW */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* Header with Call Next & Add Walk-in */}
+              {/* Header with Call Next & Add Walk in */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
                 <div>
                   <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
@@ -642,7 +642,7 @@ export function SalonOSWorkspace({
                     className="px-4 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
-                    <span>Add Walk-in</span>
+                    <span>Add Walk in</span>
                   </button>
                 </div>
               </div>
@@ -1015,7 +1015,7 @@ export function SalonOSWorkspace({
                       Unlock Advanced Financial Analytics
                     </div>
                     <p className="text-[11px] text-[#8C8074] max-w-xs mx-auto">
-                      Upgrade to the Pro Plan (₹449/mo) to track real-time revenue and chair monetization.
+                      Upgrade to the Pro Plan (₹449/mo) to track real time revenue and chair monetization.
                     </p>
                     <button
                       onClick={() => setActiveTab("profile")}
@@ -1111,7 +1111,7 @@ export function SalonOSWorkspace({
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3.5 h-3.5 text-[#477B5D]" />
-                          <span>Real-time chair countdown queue</span>
+                          <span>Real time chair countdown queue</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3.5 h-3.5 text-[#477B5D]" />
@@ -1170,7 +1170,7 @@ export function SalonOSWorkspace({
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3.5 h-3.5 text-[#477B5D]" />
-                          <span>Multi-barber queue routing</span>
+                          <span>Multi barber queue routing</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3.5 h-3.5 text-[#477B5D]" />
@@ -1342,7 +1342,7 @@ export function SalonOSWorkspace({
                   </div>
                   <h1 className="text-2xl font-bold font-serif text-[#211912]">Live Queue Management</h1>
                   <p className="text-xs text-[#8C8074] mt-0.5">
-                    Advance tokens, call walk-ins to available chairs, and view queue progress for {salonName}.
+                    Advance tokens, call walk ins to available chairs, and view queue progress for {salonName}.
                   </p>
                 </div>
 
@@ -1360,7 +1360,7 @@ export function SalonOSWorkspace({
                     className="px-4 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                   >
                     <UserPlus className="w-3.5 h-3.5" />
-                    <span>Add Walk-in</span>
+                    <span>Add Walk in</span>
                   </button>
 
                   <button
@@ -1625,7 +1625,7 @@ export function SalonOSWorkspace({
                 </div>
                 <h3 className="text-xl font-bold font-serif text-[#211912]">{salonName}</h3>
                 <p className="text-xs text-[#8C8074]">
-                  Place this standee at your reception counter. Walk-ins scan to join the live queue without downloading an app.
+                  Place this standee at your reception counter. Walk ins scan to join the live queue without downloading an app.
                 </p>
                 <div className="w-48 h-48 mx-auto bg-white border-2 border-[#70472F] rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner">
                   <div className="text-6xl mb-2">📱</div>
@@ -1701,13 +1701,13 @@ export function SalonOSWorkspace({
         </nav>
       </div>
 
-      {/* ─── MODAL 1: ADD WALK-IN CUSTOMER ─── */}
+      {/* ─── MODAL 1: ADD WALK IN CUSTOMER ─── */}
       {showWalkInModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
               <div>
-                <h3 className="text-base font-bold font-serif text-[#211912]">Add Walk-in Customer</h3>
+                <h3 className="text-base font-bold font-serif text-[#211912]">Add Walk in Customer</h3>
                 <p className="text-xs text-[#8C8074]">Manual entry at salon counter</p>
               </div>
               <button

@@ -326,7 +326,7 @@ export function PublicSalonDetailPage() {
               <div>
                 <h3 className="text-xl font-bold font-serif text-[#1d1b17]">Live Chair Matrix</h3>
                 <p className="text-xs text-[#6b5e52] mt-0.5">
-                  Real-time occupancy signals from each styling chair in this salon
+                  Real time occupancy signals from each styling chair in this salon
                 </p>
               </div>
               <div className="text-xs font-bold text-[#267447] bg-[#eaf3ec] px-3 py-1 rounded-full">

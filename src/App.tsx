@@ -31,6 +31,7 @@ import { ErrorPage } from "./components/ErrorPage";
 import { Route as LiveExplorePage } from "./routes/live/index";
 import { Route as StudioPage } from "./routes/live/studio";
 import { Route as QueuePage } from "./routes/live/queue";
+import { CustomerDashboardPage } from "./routes/dashboard";
 import { Route as ActivityPage } from "./routes/live/activity";
 import { Route as CheckoutPage } from "./routes/live/checkout";
 import { Route as ProfilePage } from "./routes/live/profile";
@@ -45,9 +46,10 @@ import { PartnerApplicationStatusPage } from "./routes/partner/application";
 // SalonOS Dashboard & Auth
 import { Route as LoginPage } from "./routes/login";
 import { SalonOSPage } from "./routes/salon-os/index";
+import { StaffDeskPage } from "./routes/staff/index";
 
-// Admin Console
-import { AdminConsole } from "./routes/admin/index";
+// Admin Console (Private /ankom/)
+import { AdminConsole } from "./routes/ankom/index";
 
 const queryClient = new QueryClient();
 
@@ -80,7 +82,7 @@ export function App() {
           <Route path="/refund" element={<RefundPolicyPage />} />
           <Route path="/partner-terms" element={<PartnerTermsPage />} />
 
-          {/* ─── 2. AUTHENTICATION ─── */}
+          {/* ─── 2. SINGLE AUTHENTICATION FOR ALL ROLES ─── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/salon/login" element={<LoginPage />} />
 
@@ -106,17 +108,17 @@ export function App() {
           <Route path="/live/queue" element={<QueuePage />} />
           <Route path="/my-queue" element={<QueuePage />} />
 
-          {/* ─── 4. CUSTOMER ACCOUNT & REWARDS ─── */}
-          <Route path="/dashboard" element={<ActivityPage />} />
+          {/* ─── 4. CUSTOMER DASHBOARD & REWARDS ─── */}
+          <Route path="/dashboard" element={<CustomerDashboardPage />} />
           <Route path="/live/activity" element={<ActivityPage />} />
-          <Route path="/my-bookings" element={<ActivityPage />} />
+          <Route path="/my-bookings" element={<CustomerDashboardPage />} />
           <Route path="/live/checkout" element={<CheckoutPage />} />
           <Route path="/account" element={<ProfilePage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/live/profile" element={<ProfilePage />} />
           <Route path="/points" element={<SneprPointsPage />} />
           <Route path="/my-points" element={<SneprPointsPage />} />
-          <Route path="/saved-salons" element={<LiveExplorePage />} />
+          <Route path="/saved-salons" element={<CustomerDashboardPage />} />
 
           {/* Mobile Continuity Redirect */}
           <Route path="/app/*" element={<Navigate to="/live" replace />} />
@@ -142,11 +144,16 @@ export function App() {
           <Route path="/salon/dashboard" element={<SalonOSPage initialTab="overview" />} />
           <Route path="/salon/queue" element={<SalonOSPage initialTab="queue" />} />
 
-          {/* ─── 7. ADMIN CONSOLE ─── */}
-          <Route path="/admin" element={<AdminConsole />} />
-          <Route path="/admin/*" element={<AdminConsole />} />
+          {/* ─── 7. STAFF DASHBOARD ─── */}
+          <Route path="/staff/dashboard" element={<StaffDeskPage />} />
+          <Route path="/staff" element={<StaffDeskPage />} />
+          <Route path="/staff/*" element={<StaffDeskPage />} />
 
-          {/* ─── 8. ERROR & 404 ROUTES ─── */}
+          {/* ─── 8. PRIVATE ADMIN DASHBOARD (/ankom/) ─── */}
+          <Route path="/ankom" element={<AdminConsole />} />
+          <Route path="/ankom/*" element={<AdminConsole />} />
+
+          {/* ─── 9. ERROR & 404 ROUTES ─── */}
           <Route path="/error" element={<ErrorPageRoute />} />
           <Route path="/404" element={<ErrorPage code="404" message="We couldn't find the page you were looking for." />} />
           <Route path="*" element={<ErrorPage code="404" message="The page you are looking for does not exist or has been moved." />} />

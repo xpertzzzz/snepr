@@ -342,3 +342,4 @@ if needle in code and 'DEDICATED LIVE QUEUE MANAGEMENT' not in code:
 with open('src/components/salon/SalonOSWorkspace.tsx', 'w', encoding='utf-8') as f:
     f.write(code)
 print("Updated SalonOSWorkspace.tsx tab content successfully")
+

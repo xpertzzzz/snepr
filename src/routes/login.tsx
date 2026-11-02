@@ -13,7 +13,7 @@ export const Route = createFileRoute("/login")({
     meta: [
       {
         name: "description",
-        content: "Sign in or create your Snepr account to check live salon queues and manage salon bookings.",
+        content: "Sign in or create your Snepr account to check live salon queues and manage salon bookings in Bhubaneswar.",
       },
     ],
   }),
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/login")({
 export function LoginPageSplit() {
   const navigate = useNavigate();
   const search: any = useSearch();
-  const redirectTarget = search?.redirect || "/live";
+  const redirectTarget = search?.redirect || "";
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
@@ -49,59 +49,22 @@ export function LoginPageSplit() {
     return () => clearInterval(timer);
   }, [cooldown]);
 
-  const handleDemoLogin = (role: "customer" | "owner" | "staff" | "admin") => {
-    let sessionData: any = null;
-    let target = "/live";
-
-    if (role === "customer") {
-      sessionData = {
-        id: 9001,
-        name: "Priya Mohapatra",
-        email: "customer@snepr.demo",
-        phone: "+91 94370 12345",
-        role: "customer",
-        isAdmin: false,
-      };
-      target = "/live";
-    } else if (role === "owner") {
-      sessionData = {
-        id: 9002,
-        name: "Arjun Sharma",
-        email: "owner@snepr.demo",
-        phone: "+91 92373 62221",
-        role: "salon_owner",
-        approvalStatus: "approved",
-        salonName: "Lakmé Salon — KIIT Road",
-        isAdmin: false,
-      };
-      target = "/salon-os";
-    } else if (role === "staff") {
-      sessionData = {
-        id: 9003,
-        name: "Rahul Kumar",
-        email: "staff@snepr.demo",
-        phone: "+91 98765 43210",
-        role: "staff",
-        chairAssigned: 2,
-        salonName: "Lakmé Salon — KIIT Road",
-        isAdmin: false,
-      };
-      target = "/staff";
-    } else if (role === "admin") {
-      sessionData = {
-        id: 9004,
-        name: "Snepr Admin",
-        email: "admin@snepr.demo",
-        role: "super_admin",
-        isAdmin: true,
-      };
-      target = "/admin";
+  const redirectByRole = (userSession: any) => {
+    if (redirectTarget && redirectTarget !== "/login" && redirectTarget !== "/") {
+      navigate({ to: redirectTarget });
+      return;
     }
 
-    localStorage.setItem("snepr_session", JSON.stringify(sessionData));
-    window.dispatchEvent(new Event("storage"));
-    toast.success(`Signed in as ${sessionData.name}!`);
-    navigate({ to: target });
+    const role = userSession.role?.toLowerCase() || "customer";
+    if (userSession.isAdmin || role === "super_admin" || role === "admin") {
+      navigate({ to: "/ankom/" });
+    } else if (role === "salon_owner" || role === "owner") {
+      navigate({ to: "/salonos/dashboard" });
+    } else if (role === "staff" || role === "salon_staff" || role === "barber") {
+      navigate({ to: "/staff/dashboard" });
+    } else {
+      navigate({ to: "/dashboard" });
+    }
   };
 
   const handleSendOtp = async (e?: React.FormEvent) => {
@@ -122,7 +85,6 @@ export function LoginPageSplit() {
 
     setIsSending(true);
     try {
-      // ServerFn sendAuthEmailOtp
       try {
         await sendAuthEmailOtp({ data: { email: cleanEmail } });
       } catch (err: any) {
@@ -131,7 +93,7 @@ export function LoginPageSplit() {
 
       setOtpSent(true);
       setCooldown(60);
-      setSuccessMsg(`We sent a 6-digit verification code to ${cleanEmail}.`);
+      setSuccessMsg(`We sent a 6 digit verification code to ${cleanEmail}.`);
       toast.success("Verification code sent to your email!");
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to send verification code. Please try again.");
@@ -146,7 +108,7 @@ export function LoginPageSplit() {
     setErrorMsg("");
 
     if (!otpCode.trim() || otpCode.trim().length < 6) {
-      setErrorMsg("Please enter the 6-digit code sent to your email.");
+      setErrorMsg("Please enter the 6 digit code sent to your email.");
       return;
     }
 
@@ -182,7 +144,7 @@ export function LoginPageSplit() {
           role: isAdmin ? "super_admin" : isOwner ? "salon_owner" : isStaff ? "staff" : "customer",
           approvalStatus: isOwner ? "approved" : undefined,
           chairAssigned: isStaff ? 2 : undefined,
-          salonName: (isOwner || isStaff) ? "Lakmé Salon — KIIT Road" : undefined,
+          salonName: (isOwner || isStaff) ? "Lakmé Salon | KIIT Road" : undefined,
           isAdmin,
         };
       }
@@ -195,18 +157,7 @@ export function LoginPageSplit() {
       window.dispatchEvent(new Event("storage"));
 
       toast.success(`Welcome to Snepr, ${userSession.name || "Customer"}!`);
-
-      if (redirectTarget && redirectTarget !== "/login") {
-        navigate({ to: redirectTarget });
-      } else if (userSession.role === "super_admin") {
-        navigate({ to: "/admin" });
-      } else if (userSession.role === "salon_owner" && (userSession.approvalStatus === "approved" || !userSession.approvalStatus)) {
-        navigate({ to: "/salon-os" });
-      } else if (userSession.role === "staff" || userSession.role === "salon_staff") {
-        navigate({ to: "/staff" });
-      } else {
-        navigate({ to: "/live" });
-      }
+      redirectByRole(userSession);
     } catch (err: any) {
       setErrorMsg(err.message || "Invalid verification code.");
       toast.error(err.message || "Verification failed");
@@ -257,16 +208,7 @@ export function LoginPageSplit() {
       window.dispatchEvent(new Event("storage"));
 
       toast.success(`Signed in with Google as ${userSession.name}!`);
-
-      if (redirectTarget && redirectTarget !== "/login") {
-        navigate({ to: redirectTarget });
-      } else if (userSession.role === "super_admin") {
-        navigate({ to: "/admin" });
-      } else if (userSession.role === "salon_owner" && userSession.approvalStatus === "approved") {
-        navigate({ to: "/salon-os" });
-      } else {
-        navigate({ to: "/live" });
-      }
+      redirectByRole(userSession);
     } catch (err: any) {
       setErrorMsg(err.message || "Google sign in was cancelled or failed.");
     } finally {
@@ -279,74 +221,90 @@ export function LoginPageSplit() {
       {/* ─── LEFT PANEL: BRAND & PHOTOGRAPHY ─── */}
       <div className="relative hidden md:flex md:w-1/2 lg:w-5/12 bg-[#1B1410] flex-col justify-between p-10 lg:p-14 overflow-hidden select-none">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-35 filter brightness-90 saturate-80"
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity filter saturate-50"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1200&q=80')",
+              "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1400&q=80')",
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1B1410] via-[#1B1410]/70 to-[#1B1410]/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1B1410] via-[#1B1410]/70 to-transparent" />
 
         <div className="relative z-10">
           <Link to="/" className="inline-block" aria-label="Snepr home">
-            <SneprWordmark height={42} color="#FFFFFF" className="drop-shadow-sm" />
+            <SneprWordmark height={32} color="#FFFFFF" />
           </Link>
-          <div className="mt-2 text-[10px] tracking-[2px] uppercase font-bold text-[#C8993E]">
-            Bhubaneswar Launch Edition
+          <div className="mt-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#C8993E]">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Unified Platform Access | Bhubaneswar</span>
           </div>
         </div>
 
-        <div className="relative z-10 max-w-md my-auto py-12">
-          <span className="inline-block px-3 py-1 mb-4 rounded-full bg-[#7A4B29]/30 border border-[#C8993E]/40 text-[#FAF7F2] text-xs font-semibold tracking-wide">
-            One account for Customers & Salons
-          </span>
-          <h1 className="text-3xl lg:text-4xl font-bold font-serif text-[#FFFDFA] leading-tight mb-4">
-            Know your look. Love the result.
-          </h1>
-          <p className="text-sm lg:text-base text-[#DED4CA] leading-relaxed font-sans">
-            Check real-time salon chair availability from your phone, save your place in the digital queue,
-            and walk in right when your barber is ready.
+        <div className="relative z-10 space-y-4 max-w-sm">
+          <div className="text-3xl font-bold font-serif text-[#FFFDFA] leading-tight">
+            Never wait in line at a salon again.
+          </div>
+          <p className="text-xs text-[#DED4CA] leading-relaxed">
+            Discover salons across Bhubaneswar, check live chair availability, and join the queue before you arrive. Know before you go.
           </p>
 
-          <div className="mt-8 pt-8 border-t border-white/10 flex items-center gap-6 text-xs text-[#FAF7F2]/80">
+          <div className="pt-4 border-t border-white/10 flex items-center gap-6 text-xs text-[#C8993E]">
             <div>
-              <strong className="block text-base font-bold text-[#FFFDFA]">13+</strong>
-              Verified BBS Salons
+              <div className="font-serif text-lg font-bold text-white">13+</div>
+              <div className="text-[10px] text-[#DED4CA] uppercase">Partner Salons</div>
             </div>
-            <div className="w-px h-8 bg-white/10" />
             <div>
-              <strong className="block text-base font-bold text-[#FFFDFA]">0%</strong>
-              Haircut Commissions
+              <div className="font-serif text-lg font-bold text-white">0%</div>
+              <div className="text-[10px] text-[#DED4CA] uppercase">Haircut Commission</div>
             </div>
-            <div className="w-px h-8 bg-white/10" />
             <div>
-              <strong className="block text-base font-bold text-[#FFFDFA]">100%</strong>
-              No Forced GPS
+              <div className="font-serif text-lg font-bold text-white">Live</div>
+              <div className="text-[10px] text-[#DED4CA] uppercase">Chair Telemetry</div>
             </div>
           </div>
         </div>
 
-        <div className="relative z-10 text-[11px] text-[#A69F96]">
-          © {new Date().getFullYear()} Snepr Technologies. All rights reserved.
+        <div className="relative z-10 text-[11px] text-[#9B8B7E]">
+          © 2026 Snepr · Bhubaneswar, Odisha
         </div>
       </div>
 
-      {/* ─── RIGHT PANEL: AUTHENTICATION FORM ─── */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 md:p-12 lg:p-16">
-        <div className="w-full max-w-[440px]">
-          <div className="md:hidden mb-8 text-center">
+      {/* ─── RIGHT PANEL: UNIFIED AUTHENTICATION ─── */}
+      <div className="flex-1 flex flex-col justify-between p-6 sm:p-12 lg:p-16 max-w-xl mx-auto w-full">
+        {/* Top Header */}
+        <div className="flex items-center justify-between">
+          <div className="md:hidden">
             <Link to="/" className="inline-block" aria-label="Snepr home">
-              <SneprWordmark height={36} color="#1B1410" />
+              <SneprWordmark height={26} color="#1B1410" />
             </Link>
           </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-extrabold font-sans text-[#1B1410] tracking-tight">
+          <div className="flex items-center gap-2 text-xs font-semibold ml-auto">
+            <span className="text-[#786B60]">
+              {mode === "signin" ? "New to Snepr?" : "Already have an account?"}
+            </span>
+            <button
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setOtpSent(false);
+                setErrorMsg("");
+                setSuccessMsg("");
+              }}
+              className="text-[#7A4B29] hover:underline font-bold cursor-pointer"
+            >
+              {mode === "signin" ? "Create account" : "Sign in"}
+            </button>
+          </div>
+        </div>
+
+        {/* Main Auth Form */}
+        <div className="my-auto py-8">
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-[#1B1410] tracking-tight">
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h2>
             <p className="mt-2 text-sm text-[#786B60] leading-normal font-sans">
               {mode === "signin"
-                ? "Sign in with Google or your email to track your queue token or manage your salon."
+                ? "Sign in with Google or your email to access your account."
                 : "Create an account to join live salon queues and bring your salon onto Snepr."}
             </p>
           </div>
@@ -362,48 +320,6 @@ export function LoginPageSplit() {
               <span>{successMsg}</span>
             </div>
           )}
-
-          {/* 1-Click Demo Accounts Bar */}
-          <div className="mb-6 p-4 rounded-2xl bg-[#F0E8DE]/80 border border-[#E8DDD0] shadow-sm space-y-2.5">
-            <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-[#70472F]">
-              <span>1-Click Demo Credentials</span>
-              <span className="text-[10px] text-[#8C8074] font-mono">SneprDemo@2026</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => handleDemoLogin("customer")}
-                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#211912] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
-              >
-                <span className="block text-[10px] text-[#8C8074] uppercase">Customer</span>
-                <span className="truncate block font-mono text-[11px]">customer@snepr.demo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin("owner")}
-                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#70472F] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
-              >
-                <span className="block text-[10px] text-[#8C8074] uppercase">Salon Owner</span>
-                <span className="truncate block font-mono text-[11px]">owner@snepr.demo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin("staff")}
-                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#A17B50] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
-              >
-                <span className="block text-[10px] text-[#8C8074] uppercase">Barber Staff</span>
-                <span className="truncate block font-mono text-[11px]">staff@snepr.demo</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoLogin("admin")}
-                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#267447] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
-              >
-                <span className="block text-[10px] text-[#8C8074] uppercase">Admin Superuser</span>
-                <span className="truncate block font-mono text-[11px]">admin@snepr.demo</span>
-              </button>
-            </div>
-          </div>
 
           {/* 1. Google OAuth Button */}
           <button
@@ -443,7 +359,7 @@ export function LoginPageSplit() {
             </span>
           </div>
 
-          {/* 2. Email OTP Form */}
+          {/* 2. Email Verification Form */}
           {!otpSent ? (
             <form onSubmit={handleSendOtp} className="space-y-4">
               {mode === "signup" && (
@@ -474,7 +390,7 @@ export function LoginPageSplit() {
                       className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
                     />
                     <p className="mt-1 text-[10px] text-[#786B60]">
-                      Used for salon appointment notifications only. We do not use SMS OTPs.
+                      Used for salon appointment notifications only.
                     </p>
                   </div>
                 </>
@@ -509,7 +425,7 @@ export function LoginPageSplit() {
               <div>
                 <div className="flex justify-between items-center mb-1.5">
                   <label className="block text-xs font-bold text-[#1B1410] uppercase tracking-wide">
-                    6-Digit Verification Code
+                    6 Digit Verification Code
                   </label>
                   <button
                     type="button"
@@ -521,94 +437,54 @@ export function LoginPageSplit() {
                 </div>
                 <input
                   type="text"
-                  maxLength={6}
                   required
-                  autoFocus
-                  placeholder="• • • • • •"
+                  maxLength={6}
+                  placeholder="123456"
                   value={otpCode}
-                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                  className="w-full h-12 px-3.5 rounded-xl border-2 border-[#7A4B29] bg-[#FFFDFA] text-center text-xl font-mono tracking-[8px] font-bold text-[#1B1410] focus:outline-none"
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  className="w-full h-12 px-4 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-center text-xl font-mono tracking-widest text-[#1B1410] focus:outline-none focus:border-[#7A4B29]"
                 />
-                <p className="mt-1 text-[11px] text-[#786B60]">
-                  Code sent to <strong>{email}</strong>. Valid for 10 minutes.
-                </p>
               </div>
 
               <button
                 type="submit"
-                disabled={isVerifying || otpCode.length < 6}
+                disabled={isVerifying}
                 className="w-full h-12 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer disabled:opacity-50"
               >
-                <span>{isVerifying ? "Verifying..." : "Verify & Sign in"}</span>
-                <ShieldCheck className="w-4 h-4" />
+                <span>{isVerifying ? "Verifying..." : "Verify & Sign In"}</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
 
               <div className="text-center pt-2">
                 {cooldown > 0 ? (
                   <span className="text-xs text-[#786B60]">
-                    Resend code in <strong>{cooldown}s</strong>
+                    Resend code in {cooldown}s
                   </span>
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleSendOtp()}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#7A4B29] hover:underline cursor-pointer"
+                    onClick={handleSendOtp}
+                    className="text-xs font-bold text-[#7A4B29] hover:underline cursor-pointer"
                   >
-                    <RefreshCw className="w-3.5 h-3.5" />
                     Resend verification code
                   </button>
                 )}
               </div>
             </form>
           )}
+        </div>
 
-          {/* Toggle Signin / Signup Mode */}
-          <div className="mt-8 pt-6 border-t border-[#E9E1D7] text-center text-xs text-[#786B60]">
-            {mode === "signin" ? (
-              <p>
-                Don't have a Snepr account?{" "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("signup");
-                    setOtpSent(false);
-                    setErrorMsg("");
-                  }}
-                  className="font-bold text-[#7A4B29] hover:underline cursor-pointer"
-                >
-                  Create one now
-                </button>
-              </p>
-            ) : (
-              <p>
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("signin");
-                    setOtpSent(false);
-                    setErrorMsg("");
-                  }}
-                  className="font-bold text-[#7A4B29] hover:underline cursor-pointer"
-                >
-                  Sign in
-                </button>
-              </p>
-            )}
-          </div>
-
-          {/* Terms & Privacy */}
-          <div className="mt-6 text-center text-[11px] text-[#9B8B7E] leading-relaxed">
-            By continuing, you agree to Snepr's{" "}
-            <Link to="/terms" className="underline hover:text-[#1B1410]">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="underline hover:text-[#1B1410]">
-              Privacy Policy
-            </Link>
-            .
-          </div>
+        {/* Footer info */}
+        <div className="text-center pt-4 border-t border-[#E9E1D7]/50 text-xs text-[#786B60]">
+          By continuing, you agree to Snepr&apos;s{" "}
+          <Link to="/terms" className="text-[#1B1410] font-semibold hover:underline">
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="text-[#1B1410] font-semibold hover:underline">
+            Privacy Policy
+          </Link>
+          .
         </div>
       </div>
     </div>

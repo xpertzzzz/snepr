@@ -33,7 +33,7 @@ export const Route = createFileRoute("/live/")({
       {
         name: "description",
         content:
-          "Discover verified salons across Bhubaneswar with live chair availability, real-time waiting times, and digital queue tokens. Know before you go.",
+          "Discover verified salons across Bhubaneswar with live chair availability, real time waiting times, and digital queue tokens. Know before you go.",
       },
       { name: "theme-color", content: "#f5f1e9" },
     ],

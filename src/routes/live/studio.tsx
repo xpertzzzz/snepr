@@ -30,7 +30,7 @@ function AIStudioPage() {
   // Salon match modal state
   const [matchModalLook, setMatchModalLook] = useState<StudioHairstyle | null>(null);
 
-  // Photo-assisted try-on modal state
+  // Photo assisted try-on modal state
   const [tryonModalLook, setTryonModalLook] = useState<StudioHairstyle | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
 
@@ -112,7 +112,7 @@ function AIStudioPage() {
               Know the style before you go.
             </h2>
             <p className="text-xs text-[#A69F96] leading-relaxed">
-              Curated hairstyle taxonomies across Men's, Women's, and Guardian-Aware Kids' cuts.
+              Curated hairstyle taxonomies across Men's, Women's, and Guardian Aware Kids' cuts.
               Select any look to instantly see verified salons in your city equipped to execute it.
             </p>
           </div>
@@ -162,7 +162,7 @@ function AIStudioPage() {
               className="bg-card border border-border text-ink text-xs font-semibold rounded-xl px-3 py-2.5 focus:outline-none"
             >
               <option value="all">All Lengths</option>
-              <option value="buzz">Buzz / Ultra-short</option>
+              <option value="buzz">Buzz / Ultra short</option>
               <option value="short">Short</option>
               <option value="medium">Medium</option>
               <option value="long">Long</option>
@@ -175,7 +175,7 @@ function AIStudioPage() {
               className="bg-card border border-border text-ink text-xs font-semibold rounded-xl px-3 py-2.5 focus:outline-none"
             >
               <option value="all">All Categories</option>
-              <option value="trend">Trend-Led</option>
+              <option value="trend">Trend Led</option>
               <option value="classic">Timeless Classics</option>
               <option value="aesthetic">Aesthetic Moods</option>
               <option value="color">Colour &amp; Highlights</option>
@@ -261,7 +261,7 @@ function AIStudioPage() {
                     <button
                       onClick={() => setTryonModalLook(look)}
                       className="py-2.5 px-3 bg-surface-2 hover:bg-surface-3 text-ink font-semibold text-xs rounded-xl transition-colors border border-border flex items-center gap-1"
-                      title="Photo-Assisted Try-On"
+                      title="Photo Assisted Try-On"
                     >
                       <Camera className="w-3.5 h-3.5 text-primary" />
                       <span>Try-On</span>
@@ -397,7 +397,7 @@ function AIStudioPage() {
 
             <div className="border-2 border-dashed border-border/80 rounded-2xl p-6 text-center space-y-2 hover:border-primary/50 transition-colors">
               <Camera className="w-8 h-8 text-primary mx-auto" />
-              <p className="font-bold text-ink">Upload a clear front-facing portrait</p>
+              <p className="font-bold text-ink">Upload a clear front facing portrait</p>
               <p className="text-[10px] text-ink-soft">JPEG or PNG, good lighting, neutral expression</p>
             </div>
 

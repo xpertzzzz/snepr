@@ -460,7 +460,7 @@ export function SneprLandingPage() {
             <a href="/live" onClick={() => setNavOpen(false)}>
               Live Queues
             </a>
-            <a href="/how-it-works" onClick={() => setNavOpen(false)}>
+            <a href="/#how-it-works" onClick={() => setNavOpen(false)}>
               How it works
             </a>
             <a href="/ai-studio" onClick={() => setNavOpen(false)}>
@@ -1071,7 +1071,7 @@ export function SneprLandingPage() {
         </section>
 
         {/* ─── 6. HOW IT WORKS ─── */}
-        <section className="section" id="how">
+        <section className="section" id="how-it-works">
           <div className="wrap">
             <div className="section-head">
               <div>

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/live/queue")({
       {
         name: "description",
         content:
-          "Your live digital queue pass with 5-stage progress countdown and GPS navigation to your salon.",
+          "Your live digital queue pass with 5 stage progress countdown and GPS navigation to your salon.",
       },
       { name: "theme-color", content: "#f5f1e9" },
     ],
@@ -250,10 +250,10 @@ export function AppQueue() {
             </div>
           </div>
 
-          {/* ─── 5-STAGE PROGRESS JOURNEY ─── */}
+          {/* ─── 5 STAGE PROGRESS JOURNEY ─── */}
           <div className="pt-6 border-t border-[#eee4d8] text-left max-w-lg mx-auto">
             <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c8074] text-center mb-4">
-              5-STAGE LIVE VISIT PROGRESS
+              5 STAGE LIVE VISIT PROGRESS
             </div>
 
             <div className="space-y-3">

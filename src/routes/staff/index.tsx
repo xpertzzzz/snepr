@@ -17,7 +17,7 @@ import { SneprWordmark } from "@/components/SneprWordmark";
 
 export const Route = createFileRoute("/staff/")({
   head: () => ({
-    title: "Staff Desk — Chair Queue & Intake | Snepr",
+    title: "Staff Desk  |  Chair Queue & Intake | Snepr",
     meta: [
       {
         name: "description",
@@ -51,7 +51,7 @@ export function StaffDeskPage() {
     phone: "+91 98765 43210",
     email: "rahul@example.com",
     chair: "Chair 02",
-    salon: "Lakmé Salon — KIIT Road",
+    salon: "Lakmé Salon  |  KIIT Road",
     locality: "Patia, Bhubaneswar",
   });
 
@@ -170,7 +170,7 @@ export function StaffDeskPage() {
     toast.success(`Ticket ${code} verified and added to queue!`);
   };
 
-  // Add walk-in customer
+  // Add walk in customer
   const handleAddWalkIn = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!walkinName.trim()) {
@@ -192,7 +192,7 @@ export function StaffDeskPage() {
     setWalkinName("");
     setWalkinPhone("");
     setActiveTab("queue");
-    toast.success(`Walk-in added: Token ${nextNum} issued for ${newEntry.customerName}!`);
+    toast.success(`Walk in added: Token ${nextNum} issued for ${newEntry.customerName}!`);
   };
 
   // Sign out
@@ -402,7 +402,7 @@ export function StaffDeskPage() {
                     <UserPlus className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-[#211912]">Add Walk-in Customer</div>
+                    <div className="text-xs font-bold text-[#211912]">Add Walk in Customer</div>
                     <div className="text-[11px] text-[#887D72]">Issue manual token at counter</div>
                   </div>
                 </button>
@@ -415,7 +415,7 @@ export function StaffDeskPage() {
 
               {/* Station Telemetry Card */}
               <div className="bg-[#FAF7F2] border border-[#684E34]/10 rounded-3xl p-5 text-xs space-y-2">
-                <div className="font-bold text-[#211912]">Real-time Station Telemetry</div>
+                <div className="font-bold text-[#211912]">Real time Station Telemetry</div>
                 <p className="text-[11px] text-[#887D72] leading-relaxed">
                   Your station wait time is dynamically calculated and broadcast to customers in {staffInfo.locality}.
                 </p>
@@ -481,14 +481,14 @@ export function StaffDeskPage() {
           </div>
         )}
 
-        {/* VIEW 3: WALK-IN MANUAL INTAKE */}
+        {/* VIEW 3: WALK IN MANUAL INTAKE */}
         {activeTab === "walkin" && (
           <div className="max-w-md mx-auto bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 p-6 sm:p-8 shadow-sm">
             <div className="text-center space-y-1 mb-5">
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#A17B50]">
                 COUNTER INTAKE
               </div>
-              <h2 className="text-xl font-bold font-serif text-[#211912]">Add Walk-in Customer</h2>
+              <h2 className="text-xl font-bold font-serif text-[#211912]">Add Walk in Customer</h2>
               <p className="text-xs text-[#887D72]">
                 For customers who walk in without using the app. They will be queued for your chair.
               </p>
@@ -558,7 +558,7 @@ export function StaffDeskPage() {
           </div>
         )}
 
-        {/* VIEW 4: STAFF PROFILE (READ-ONLY) */}
+        {/* VIEW 4: STAFF PROFILE (READ ONLY) */}
         {activeTab === "profile" && (
           <div className="max-w-md mx-auto bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 p-6 sm:p-8 shadow-sm space-y-5">
             <div className="flex items-center justify-between pb-4 border-b border-[#684E34]/10">

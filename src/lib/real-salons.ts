@@ -99,7 +99,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   // ──────────────────────────────────────────────────────────────────────────
   {
     id: 1,
-    name: "Lakmé Salon — For Him and Her",
+    name: "Lakmé Salon | For Him and Her",
     slug: "lakme-salon-patia",
     rating: "4.8",
     reviewCount: 2554,
@@ -183,7 +183,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   },
   {
     id: 3,
-    name: "Green Trends Unisex Salon — Patia",
+    name: "Green Trends Unisex Salon | Patia",
     slug: "green-trends-patia",
     rating: "4.7",
     reviewCount: 4887,
@@ -265,7 +265,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   },
   {
     id: 5,
-    name: "7Sense Unisex Salon — Patia Branch",
+    name: "7Sense Unisex Salon | Patia Branch",
     slug: "7sense-unisex-salon-patia",
     rating: "4.7",
     reviewCount: 446,
@@ -346,7 +346,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   },
   {
     id: 7,
-    name: "Essensuals Hairdressing — KIIT Square",
+    name: "Essensuals Hairdressing | KIIT Square",
     slug: "essensuals-hairdressing-kiit",
     rating: "4.9",
     reviewCount: 726,
@@ -391,7 +391,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   // ──────────────────────────────────────────────────────────────────────────
   {
     id: 8,
-    name: "Green Trends Unisex Salon — Chandrasekharpur",
+    name: "Green Trends Unisex Salon | Chandrasekharpur",
     slug: "green-trends-chandrasekharpur",
     rating: "4.8",
     reviewCount: 1420,
@@ -515,7 +515,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   // ──────────────────────────────────────────────────────────────────────────
   {
     id: 11,
-    name: "Green Trends Unisex Salon — Jayadev Vihar",
+    name: "Green Trends Unisex Salon | Jayadev Vihar",
     slug: "green-trends-jayadev-vihar",
     rating: "4.7",
     reviewCount: 1890,
@@ -556,7 +556,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   },
   {
     id: 12,
-    name: "Indulge The Salon — Pal Heights",
+    name: "Indulge The Salon | Pal Heights",
     slug: "indulge-the-salon-pal-heights",
     rating: "4.6",
     reviewCount: 1130,
@@ -600,7 +600,7 @@ export const REAL_SALONS_DATA: RealSalon[] = [
   // ──────────────────────────────────────────────────────────────────────────
   {
     id: 13,
-    name: "7Sense Unisex Salon — Gajapati Nagar Branch",
+    name: "7Sense Unisex Salon | Gajapati Nagar Branch",
     slug: "7sense-unisex-salon-gajapati-nagar",
     rating: "4.8",
     reviewCount: 312,

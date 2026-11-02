@@ -42,11 +42,21 @@ export function Navbar() {
   const navLinks = [
     { label: "Explore", to: "/explore" },
     { label: "Live Queues", to: "/live" },
-    { label: "How it works", to: "/how-it-works" },
+    { label: "How it works", to: "/#how-it-works" },
     { label: "AI Studio", to: "/ai-studio" },
     { label: "For Salons", to: "/salonos" },
     { label: "Pricing", to: "/pricing" },
   ];
+
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    if (location.pathname === "/") {
+      e.preventDefault();
+      const el = document.getElementById("how-it-works") || document.getElementById("how");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
 
   return (
     <header
@@ -69,7 +79,22 @@ export function Navbar() {
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-8 text-[13px] font-semibold text-[#514d46]">
           {navLinks.map((link) => {
+            const isHow = link.label === "How it works";
             const isActive = location.pathname === link.to;
+
+            if (isHow) {
+              return (
+                <a
+                  key={link.to}
+                  href={link.to}
+                  onClick={handleHowItWorksClick}
+                  className="transition-colors hover:text-[#80543a]"
+                >
+                  {link.label}
+                </a>
+              );
+            }
+
             return (
               <Link
                 key={link.to}
@@ -89,14 +114,22 @@ export function Navbar() {
           {session ? (
             <div className="flex items-center gap-3">
               <Link
-                to={session.role === "SALON_OWNER" || session.role === "STAFF" ? "/salonos/dashboard" : "/dashboard"}
+                to={
+                  session.role === "super_admin" || session.isAdmin
+                    ? "/ankom/"
+                    : session.role === "salon_owner"
+                    ? "/salonos/dashboard"
+                    : session.role === "staff"
+                    ? "/staff/dashboard"
+                    : "/dashboard"
+                }
                 className="text-[12px] font-bold px-4 py-2 rounded-full border border-[#1d1b17] text-[#1d1b17] hover:bg-[#1d1b17] hover:text-[#f5f1e9] transition-all"
               >
                 Dashboard
               </Link>
               <button
                 onClick={handleLogout}
-                className="text-[12px] font-medium text-[#777168] hover:text-[#1d1b17]"
+                className="text-[12px] font-medium text-[#777168] hover:text-[#1d1b17] cursor-pointer"
               >
                 Sign out
               </button>
@@ -122,7 +155,7 @@ export function Navbar() {
         {/* Mobile Hamburger Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="lg:hidden p-2 text-[#1d1b17] text-2xl focus:outline-none"
+          className="lg:hidden p-2 text-[#1d1b17] text-2xl focus:outline-none cursor-pointer"
           aria-label="Toggle navigation menu"
         >
           {mobileMenuOpen ? "✕" : "☰"}
@@ -133,22 +166,48 @@ export function Navbar() {
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#fffdfa] border-b border-[#1d1b17]/10 px-6 py-6 space-y-4 shadow-xl">
           <div className="flex flex-col space-y-3">
-            {navLinks.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-base font-semibold text-[#1d1b17] py-2 border-b border-[#1d1b17]/5"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isHow = link.label === "How it works";
+              if (isHow) {
+                return (
+                  <a
+                    key={link.to}
+                    href={link.to}
+                    onClick={(e) => {
+                      setMobileMenuOpen(false);
+                      handleHowItWorksClick(e);
+                    }}
+                    className="text-base font-semibold text-[#1d1b17] py-2 border-b border-[#1d1b17]/5"
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-base font-semibold text-[#1d1b17] py-2 border-b border-[#1d1b17]/5"
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
           <div className="pt-2 flex flex-col gap-3">
             {session ? (
               <>
                 <Link
-                  to={session.role === "SALON_OWNER" || session.role === "STAFF" ? "/salonos/dashboard" : "/dashboard"}
+                  to={
+                    session.role === "super_admin" || session.isAdmin
+                      ? "/ankom/"
+                      : session.role === "salon_owner"
+                      ? "/salonos/dashboard"
+                      : session.role === "staff"
+                      ? "/staff/dashboard"
+                      : "/dashboard"
+                  }
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center py-3 rounded-full bg-[#1d1b17] text-[#f5f1e9] font-bold text-sm"
                 >
@@ -159,7 +218,7 @@ export function Navbar() {
                     setMobileMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full text-center py-2.5 rounded-full border border-[#1d1b17]/20 text-[#1d1b17] font-semibold text-sm"
+                  className="w-full text-center py-2.5 rounded-full border border-[#1d1b17]/20 text-[#1d1b17] font-semibold text-sm cursor-pointer"
                 >
                   Sign out
                 </button>
@@ -188,3 +247,5 @@ export function Navbar() {
     </header>
   );
 }
+
+export default Navbar;

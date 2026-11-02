@@ -44,3 +44,4 @@ if all_passed:
     print("\nALL 22 ROUTES SUCCESSFULLY RESPONDED WITH HTTP 200!")
 else:
     print("\nSome routes failed.")
+

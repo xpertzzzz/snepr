@@ -10,6 +10,8 @@ html,
 body {
   color-scheme: light !important;
   forced-color-adjust: none !important;
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
 }
 
 /* Custom Thin Warm Brown Scrollbar (Vertical Only) */

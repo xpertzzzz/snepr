@@ -6,3 +6,4 @@ import re
 salons = re.findall(r'id:\s*(\d+),\s*name:\s*"([^"]+)",\s*slug:\s*"([^"]+)"', text)
 for s in salons:
     print(f'{s[0]}: {s[1]} ({s[2]})')
+

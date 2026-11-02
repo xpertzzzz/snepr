@@ -15,6 +15,18 @@ export function AdminConsole() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [session, setSession] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("snepr_session");
+      if (stored) {
+        const u = JSON.parse(stored);
+        setSession(u);
+      }
+    } catch {}
+    setAuthChecked(true);
+  }, []);
 
   // Check admin access
   useEffect(() => {
@@ -110,7 +122,7 @@ export function AdminConsole() {
           phone: "+91 92373 62221",
           role: "salon_owner",
           isSuspended: false,
-          associatedSalon: "Lakmé Salon — KIIT Road",
+          associatedSalon: "Lakmé Salon  |  KIIT Road",
           createdAt: "2026-10-20",
         },
         {
@@ -287,6 +299,45 @@ export function AdminConsole() {
   const approvedSalonsCount = salonsList.filter((s) => !s.isSuspended).length;
   const suspendedSalonsCount = salonsList.filter((s) => s.isSuspended).length;
   const activeQueuesCount = salonsList.reduce((acc, s) => acc + (s.waitingCount || 0), 3);
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#1B1410] text-[#FFFDFA] flex items-center justify-center text-xs">
+        Verifying administrative authorization...
+      </div>
+    );
+  }
+
+  const isAuthorizedAdmin = session && (session.isAdmin === true || session.role === "super_admin" || session.role === "admin");
+
+  if (!isAuthorizedAdmin) {
+    return (
+      <div className="min-h-screen bg-[#1B1410] text-[#FFFDFA] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-red-950/60 border border-red-800 text-red-400 flex items-center justify-center text-2xl mb-4">
+          🔒
+        </div>
+        <h2 className="text-2xl font-bold font-serif text-white">Administrative Access Restricted</h2>
+        <p className="text-xs text-[#DED4CA] max-w-sm mt-2 leading-relaxed">
+          The requested console requires verified administrator privileges. If you are an authorized administrator, please sign in with your administrative account.
+        </p>
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <Link
+            to="/login"
+            search={{ redirect: "/ankom/" }}
+            className="px-6 py-2.5 rounded-xl bg-[#C8993E] text-[#1B1410] text-xs font-bold hover:bg-[#d8a84e] transition-colors"
+          >
+            Sign in as Administrator
+          </Link>
+          <Link
+            to="/"
+            className="px-6 py-2.5 rounded-xl border border-white/20 text-[#DED4CA] text-xs font-semibold hover:bg-white/5 transition-colors"
+          >
+            Return to Homepage
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col md:flex-row">
@@ -647,7 +698,7 @@ export function AdminConsole() {
                         <td className="p-3 font-semibold uppercase text-[10px] text-[#7A4B29]">
                           {user.role}
                         </td>
-                        <td className="p-3 text-[#786B60]">{user.associatedSalon || "—"}</td>
+                        <td className="p-3 text-[#786B60]">{user.associatedSalon || " | "}</td>
                         <td className="p-3 text-right">
                           <button
                             onClick={() => handleToggleSuspendUser(user.id)}
