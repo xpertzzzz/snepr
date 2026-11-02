@@ -646,3 +646,4 @@ with open('app/app/(tabs)/index.tsx', 'w', encoding='utf-8') as f:
     f.write(code)
 
 print("Successfully updated app/app/(tabs)/index.tsx with Snepr Pricing and luxury design!")
+

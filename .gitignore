@@ -54,3 +54,5 @@ local.properties
 *.njsproj
 *.sln
 *.sw?
+
+app/dist-android/

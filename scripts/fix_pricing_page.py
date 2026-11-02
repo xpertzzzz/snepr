@@ -110,3 +110,4 @@ else:
 
 with open('src/components/snepr/PricingSection.tsx', 'w', encoding='utf-8') as f:
     f.write(c_norm)
+
