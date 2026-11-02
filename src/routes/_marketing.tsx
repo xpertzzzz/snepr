@@ -8,9 +8,13 @@ export const Route = createFileRoute("/_marketing")({
 
 function MarketingLayout() {
   const location = useLocation();
-  const isHome = location.pathname === "/" || location.pathname === "";
+  const isStandalone =
+    location.pathname === "/" ||
+    location.pathname === "" ||
+    location.pathname === "/pricing" ||
+    location.pathname === "/pricing/";
 
-  if (isHome) {
+  if (isStandalone) {
     return <Outlet />;
   }
 

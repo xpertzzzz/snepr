@@ -14,3 +14,4 @@ with open('final_clean_preview.html', 'w', encoding='utf-8') as f:
 
 print("Created final_clean_preview.html without base64!")
 print(f"Original size: {len(raw):,} bytes | Clean size: {len(clean):,} bytes")
+

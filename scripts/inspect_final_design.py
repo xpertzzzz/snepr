@@ -36,3 +36,4 @@ print('Images:', img_srcs[:20])
 # Check for sections
 sections = re.findall(r'<section[^>]*id=["\']([^"\']+)["\']', html)
 print('Section IDs:', sections)
+

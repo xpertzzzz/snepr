@@ -12,3 +12,4 @@ imgs = re.findall(r'<img[^>]*>', body)
 print(f"\nImages found: {len(imgs)}")
 for img in imgs:
     print(repr(img))
+

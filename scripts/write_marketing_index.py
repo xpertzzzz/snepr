@@ -1161,3 +1161,4 @@ with open('src/routes/_marketing/index.tsx', 'w', encoding='utf-8') as f:
     f.write(react_code)
 
 print("Generated src/routes/_marketing/index.tsx successfully! Length:", len(react_code))
+

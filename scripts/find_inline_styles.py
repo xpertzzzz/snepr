@@ -7,3 +7,4 @@ styles = re.findall(r'style="([^"]*)"', body)
 print(f"Total style attributes found: {len(styles)}")
 for s in sorted(set(styles)):
     print(repr(s))
+

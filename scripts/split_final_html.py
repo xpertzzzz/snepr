@@ -31,3 +31,4 @@ with open('scripts/extracted_js.js', 'w', encoding='utf-8') as f:
     f.write(js)
 
 print("Saved extracted_body.html, extracted_css.css, extracted_js.js!")
+

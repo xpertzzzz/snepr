@@ -27,3 +27,4 @@ if body_match:
     print("\n=== TOP LEVEL ELEMENTS IN BODY ===")
     tags = re.findall(r'<(header|section|nav|main|footer|div|aside)[^>]*>', body)
     print(tags[:30])
+
