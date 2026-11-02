@@ -4,23 +4,23 @@ import "@/styles/snepr-final.css";
 
 export const Route = createFileRoute("/_marketing/")({
   head: () => ({
-    title: "sn≡pr — Best Salons in Bhubaneswar | Live Salon Queue & Waiting Times",
+    title: "sn≡pr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times",
     meta: [
       {
         name: "description",
         content:
-          "Find the best salons in Bhubaneswar, check live chair waiting times, and save your spot in the live salon queue at top barber shops & unisex salons near you in Patia, Saheed Nagar & Jaydev Vihar.",
+          "Find the best salons in Bhubaneswar, check live chair waiting times, and save your spot in the live salon queue at top barber shops and unisex salons near you in Patia, Saheed Nagar, and Jaydev Vihar.",
       },
       {
         name: "keywords",
         content:
           "Salons in Bhubaneswar, Best salons in Bhubaneswar, Salon near me, Live salon queue, Salon waiting time, Barber shops in Bhubaneswar, Haircut Bhubaneswar, SalonOS",
       },
-      { property: "og:title", content: "sn≡pr — Best Salons in Bhubaneswar | Live Salon Queue & Waiting Times" },
+      { property: "og:title", content: "sn≡pr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times" },
       {
         property: "og:description",
         content:
-          "Check live salon waiting times from home. Join the digital queue for top salons & barber shops in Bhubaneswar. Arrive when your barber chair is ready.",
+          "Check live salon waiting times from home. Join the digital queue for top salons and barber shops in Bhubaneswar. Arrive when your barber chair is ready.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://snepr.com/" },
@@ -103,7 +103,7 @@ const BHUBANESWAR_SALONS: SalonItem[] = [
     queue: 2,
     wait: 5,
     letter: "N",
-    services: ["Haircut", "Beard Grooming", "Clean-up"],
+    services: ["Haircut", "Beard Grooming", "Cleanup"],
   },
   {
     name: "Green Trends Salon",
@@ -127,10 +127,10 @@ const BHUBANESWAR_SALONS: SalonItem[] = [
     queue: 1,
     wait: 4,
     letter: "R",
-    services: ["Fade & Taper", "Hot Towel Shave", "Beard Oil Spa"],
+    services: ["Fade and Taper", "Hot Towel Shave", "Beard Oil Spa"],
   },
   {
-    name: "Ozone Studio & Spa",
+    name: "Ozone Studio and Spa",
     area: "Nayapalli",
     locality: "Nayapalli",
     type: "Premium",
@@ -139,7 +139,7 @@ const BHUBANESWAR_SALONS: SalonItem[] = [
     queue: 2,
     wait: 8,
     letter: "O",
-    services: ["Men's Grooming", "Hair Therapy", "Detox Facial"],
+    services: ["Men Grooming", "Hair Therapy", "Detox Facial"],
   },
 ];
 
@@ -165,9 +165,11 @@ export function SneprLandingPage() {
   const [currentFilter, setCurrentFilter] = useState("All");
   const [locating, setLocating] = useState(false);
 
-  // Phone demo tabs & token
+  // Phone demo tabs & tokens
   const [demoTab, setDemoTab] = useState<"customer" | "desk">("customer");
-  const [tokenGenerated, setTokenGenerated] = useState(false);
+  const [tokenCode, setTokenCode] = useState("A07");
+  const [tokenPosition, setTokenPosition] = useState(2);
+  const [tokenWait, setTokenWait] = useState(12);
 
   // Filtered Salons calculation
   const displayedSalons = useMemo(() => {
@@ -176,7 +178,9 @@ export function SneprLandingPage() {
     // Filter by locality
     if (selectedLocality !== "All Localities") {
       list = list.filter(
-        (s) => s.locality.toLowerCase() === selectedLocality.toLowerCase() || s.area.toLowerCase() === selectedLocality.toLowerCase()
+        (s) =>
+          s.locality.toLowerCase() === selectedLocality.toLowerCase() ||
+          s.area.toLowerCase() === selectedLocality.toLowerCase()
       );
     }
 
@@ -214,10 +218,10 @@ export function SneprLandingPage() {
     }
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      () => {
         setSelectedLocality("Patia");
         setLocating(false);
-        notify("GPS location verified: Showing nearest salons in Patia, Bhubaneswar.");
+        notify("GPS location verified. Showing nearest salons in Patia, Bhubaneswar.");
       },
       () => {
         setLocating(false);
@@ -226,26 +230,6 @@ export function SneprLandingPage() {
       { timeout: 8000 }
     );
   };
-
-  // IntersectionObserver for reveal animation
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-
-    const elements = document.querySelectorAll(".reveal");
-    elements.forEach((el) => io.observe(el));
-
-    return () => io.disconnect();
-  }, []);
 
   // Scissor animation on scroll (Original exact motion math)
   const cutSceneRef = useRef<HTMLElement>(null);
@@ -340,44 +324,13 @@ export function SneprLandingPage() {
     };
   }, []);
 
-  // SEO JSON-LD Structured Data
-  const jsonLdData = {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "Snepr",
-    applicationCategory: "LifestyleApplication",
-    operatingSystem: "Web, Android, iOS",
-    description:
-      "Find the best salons in Bhubaneswar, monitor live chair waiting times, and join the digital salon queue from home.",
-    url: "https://snepr.com",
-    areaServed: {
-      "@type": "City",
-      name: "Bhubaneswar",
-      addressRegion: "Odisha",
-      addressCountry: "IN",
-    },
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "INR",
-      lowPrice: "199",
-      highPrice: "449",
-      offerCount: "3",
-    },
-  };
-
   return (
     <>
-      {/* Inject JSON-LD Structured Data for Local SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
-      />
-
       {/* ─── 1. HERO HEADER ─── */}
       <header className="hero" id="top">
         <div className="hero-head">
           <a className="brand" href="#top" aria-label="Snepr home">
-            <img src="/snepr-logo-transparent.png" alt="sn≡pr" />
+            <img src="/snepr-logo-transparent.png" alt="Snepr" />
           </a>
           <nav className={`hero-nav ${navOpen ? "open" : ""}`} id="navlinks">
             <a href="#discover" onClick={() => setNavOpen(false)}>
@@ -419,13 +372,15 @@ export function SneprLandingPage() {
 
         <div className="hero-main">
           <div className="hero-content">
-            <div className="eyebrow">Salons in Bhubaneswar · Live Queue Discovery</div>
+            <div className="eyebrow" style={{ letterSpacing: "0.15em", color: "#80543a", fontWeight: 700 }}>
+              Salons in Bhubaneswar | Live Queue Discovery
+            </div>
             <h1>
               Never wait in line<br />
               <span>at a salon again.</span>
             </h1>
             <p className="hero-desc">
-              Discover the best salons in Bhubaneswar with real-time chair wait times. Save your place in the live salon queue from home and arrive right when your barber is ready. Know before you go.
+              Discover the best salons in Bhubaneswar with real time chair wait times. Save your place in the live salon queue from home and arrive right when your barber is ready. Know before you go.
             </p>
             <div className="hero-ctas">
               <a className="btn fill" href="#discover">
@@ -436,7 +391,7 @@ export function SneprLandingPage() {
               </a>
             </div>
             <a className="owner-link" href="#salons">
-              For salon owners · SalonOS ↗
+              For salon owners | SalonOS ↗
             </a>
           </div>
         </div>
@@ -444,9 +399,9 @@ export function SneprLandingPage() {
         <div className="hero-art"></div>
 
         <div className="hero-bottom wrap">
-          <span>sn≡pr · Bhubaneswar, Odisha</span>
+          <span>sn≡pr in Bhubaneswar, Odisha</span>
           <span className="scrollline">Scroll to explore</span>
-          <span>Live chair countdown · Zero wait</span>
+          <span>Live chair countdown | Zero wait</span>
         </div>
       </header>
 
@@ -551,21 +506,23 @@ export function SneprLandingPage() {
       <main>
         <section className="section" id="discover">
           <div className="wrap">
-            <div className="section-head reveal">
+            <div className="section-head">
               <div>
-                <div className="eyebrow">⌕ &nbsp; Salons in Bhubaneswar · Live Queue Updates</div>
+                <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                  Salons in Bhubaneswar | Live Queue Updates
+                </div>
                 <h2>
                   Find your <em>salon.</em>
                 </h2>
-                <p style={{ marginTop: "6px", maxWidth: "620px", color: "var(--muted)", fontSize: "13px", lineHeight: "1.7" }}>
-                  Explore top-rated barber shops and unisex salons in Bhubaneswar. Check chair availability and real-time salon waiting times before leaving home.
+                <p style={{ marginTop: "8px", maxWidth: "640px" }}>
+                  Explore top rated barber shops and unisex salons in Bhubaneswar. Check chair availability and real time salon waiting times before leaving home.
                 </p>
               </div>
-              <div className="live-label">● LIVE QUEUE PREVIEW</div>
+              <div className="live-label" style={{ fontWeight: 700 }}>● LIVE QUEUE PREVIEW</div>
             </div>
 
             {/* Combined Search & Controls Bar */}
-            <div className="area-bar reveal">
+            <div className="area-bar">
               <div className="search-wrap">
                 <span className="search-icon">🔍</span>
                 <input
@@ -585,7 +542,7 @@ export function SneprLandingPage() {
                 onChange={(e) => setSelectedLocality(e.target.value)}
                 aria-label="Select Bhubaneswar neighborhood"
               >
-                <option value="All Localities">All Localities · Bhubaneswar</option>
+                <option value="All Localities">All Localities | Bhubaneswar</option>
                 <option value="Patia">Patia, Bhubaneswar</option>
                 <option value="Saheed Nagar">Saheed Nagar, Bhubaneswar</option>
                 <option value="Jaydev Vihar">Jaydev Vihar, Bhubaneswar</option>
@@ -600,7 +557,7 @@ export function SneprLandingPage() {
             </div>
 
             {/* Filter Pills */}
-            <div className="filters reveal" id="filters">
+            <div className="filters" id="filters">
               {["All", "Shortest", "Available", "Top", "Men's", "Unisex", "Premium"].map((f) => (
                 <button
                   key={f}
@@ -624,17 +581,17 @@ export function SneprLandingPage() {
             <div className="salon-grid" id="salonGrid">
               {displayedSalons.length > 0 ? (
                 displayedSalons.map((s) => (
-                  <article className="salon reveal" key={s.name}>
+                  <article className="salon" key={s.name}>
                     <div className="salon-top">
                       <div className="avatar flex items-center justify-center relative">
-                        <span className="font-bold">{s.letter}</span>
+                        <span className="font-bold text-lg">{s.letter}</span>
                         <img
                           src="/snepr-logo-square-transparent.png"
                           alt="Verified Snepr Salon"
-                          className="w-3.5 h-3.5 absolute -bottom-1 -right-1 rounded-full bg-[#1d1b17]/10"
+                          className="w-4 h-4 absolute -bottom-1 -right-1 rounded-full bg-[#1d1b17]/10"
                         />
                       </div>
-                      <span className="open">● Open</span>
+                      <span className="open" style={{ fontWeight: 700 }}>● Open</span>
                     </div>
                     <h3>{s.name}</h3>
                     <div className="salon-meta">
@@ -655,13 +612,17 @@ export function SneprLandingPage() {
                       </div>
                     </div>
                     <div className="salon-foot">
-                      <small>{s.free}</small>
+                      <small style={{ fontSize: "13px", fontWeight: 600, color: "#6b5e52" }}>{s.free}</small>
                       <button
                         className="join"
                         data-salon={s.name}
-                        onClick={() =>
-                          notify(`Connecting to ${s.name} live queue service. Live token available upon launch!`)
-                        }
+                        onClick={() => {
+                          setDemoTab("customer");
+                          setTokenCode("S105");
+                          setTokenPosition(1);
+                          setTokenWait(s.wait || 5);
+                          notify(`Selected ${s.name}. Generated token S105 in Customer View below!`);
+                        }}
                       >
                         Join queue ↗
                       </button>
@@ -670,10 +631,12 @@ export function SneprLandingPage() {
                 ))
               ) : (
                 <div style={{ padding: "40px 20px", textAlign: "center", gridColumn: "1 / -1", color: "var(--muted)" }}>
-                  <p>No salons match your search criteria in {selectedLocality}. Try resetting your search or filter.</p>
+                  <p style={{ fontSize: "16px", color: "#4a3e35" }}>
+                    No salons match your search criteria in {selectedLocality}. Try resetting your search or filter.
+                  </p>
                   <button
                     className="btn"
-                    style={{ marginTop: "12px" }}
+                    style={{ marginTop: "14px" }}
                     onClick={() => {
                       setSearchQuery("");
                       setSelectedLocality("All Localities");
@@ -686,208 +649,339 @@ export function SneprLandingPage() {
               )}
             </div>
 
-            <p className="sample-note" style={{ marginTop: "14px" }}>
+            <p className="sample-note" style={{ marginTop: "16px" }}>
               VERIFIED SALONS IN BHUBANESWAR. Chair availability, GPS distances, and live queue updates are powered directly by salon desk activity.
             </p>
 
-            {/* Seamless Interactive Queue Simulator within Discovery */}
-            <div className="demo reveal" style={{ marginTop: "48px" }}>
+            {/* ─── AUTHENTIC MOBILE APP SIMULATOR (From app-customer & app-owner-snepros) ─── */}
+            <div className="demo" style={{ marginTop: "50px" }}>
               <div className="tabs">
                 <button
                   className={`tab ${demoTab === "customer" ? "active" : ""}`}
                   onClick={() => setDemoTab("customer")}
                 >
-                  Customer view
+                  Customer view (Mobile App)
                 </button>
                 <button
                   className={`tab ${demoTab === "desk" ? "active" : ""}`}
                   onClick={() => setDemoTab("desk")}
                 >
-                  SalonOS desk
+                  SalonOS desk (Owner System)
                 </button>
               </div>
 
-              <div className="demo-layout">
+              <div className="demo-layout" style={{ alignItems: "center" }}>
                 <div className="demo-copy" id="demoCopy">
                   {demoTab === "customer" ? (
                     <>
-                      <div className="eyebrow">The customer side · Salon near me</div>
-                      <h3>Choose your service. Know your place.</h3>
-                      <p>
-                        Pick a service, see its duration and pricing upfront, then generate a live digital token with your estimated waiting time and place in line.
+                      <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                        Customer Experience | App Interface
+                      </div>
+                      <h3 style={{ fontSize: "32px", lineHeight: "1.1", margin: "14px 0" }}>
+                        Choose your service.<br />
+                        Know your place.
+                      </h3>
+                      <p style={{ fontSize: "16px", lineHeight: "1.7", color: "#3d322a" }}>
+                        Experience the exact Snepr Customer Mobile App. Track your place with a live 5 stage journey, see how many people are ahead, and get notified right when your stylist calls your token.
                       </p>
+                      <div style={{ marginTop: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        <button
+                          className="btn fill"
+                          onClick={() => {
+                            const next = "A0" + (Math.floor(Math.random() * 8) + 1);
+                            setTokenCode(next);
+                            setTokenPosition(Math.floor(Math.random() * 3) + 1);
+                            setTokenWait((Math.floor(Math.random() * 3) + 1) * 5);
+                            notify(`Generated new verified live token #${next}`);
+                          }}
+                        >
+                          Generate New Demo Token ↗
+                        </button>
+                        <button
+                          className="btn"
+                          onClick={() => notify("Notification sent: Your stylist is ready at Chair 02!")}
+                        >
+                          Simulate Barber Call
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
-                      <div className="eyebrow">The salon desk · SalonOS</div>
-                      <h3>One unified view of the working day.</h3>
-                      <p>
-                        Barbers see active chairs, waiting customers, and calling the next token in this real-time SalonOS operations preview.
+                      <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                        Salon Desk Experience | SalonOS
+                      </div>
+                      <h3 style={{ fontSize: "32px", lineHeight: "1.1", margin: "14px 0" }}>
+                        One unified view of<br />
+                        the entire working day.
+                      </h3>
+                      <p style={{ fontSize: "16px", lineHeight: "1.7", color: "#3d322a" }}>
+                        Experience the exact SalonOS Owner Desk. Barbers monitor active chairs in real time, see who is waiting in line, and click one button to call the next token to an empty chair with zero waiting room chaos.
                       </p>
+                      <div style={{ marginTop: "20px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
+                        <a className="btn fill" href="/pricing">
+                          Explore SalonOS Plans ↗
+                        </a>
+                        <button
+                          className="btn"
+                          onClick={() => notify("Chair 02 called Token #A07! Customer phone alerted.")}
+                        >
+                          Test Call Next Token
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
 
-                {/* Customer Phone Simulator */}
-                <div
-                  className="phone"
-                  id="customerDemo"
-                  style={{ display: demoTab === "customer" ? "block" : "none" }}
-                >
-                  <div className="phone-head">
-                    <span className="flex items-center gap-1.5">
-                      <img
-                        src="/snepr-logo-square-transparent.png"
-                        alt="Snepr"
-                        className="w-4 h-4 rounded-sm object-contain"
-                      />
-                      <b>sn≡pr</b>
-                    </span>
-                    <span>● PATIA · LIVE SALON QUEUE</span>
+                {/* ─── REAL MOBILE DEVICE FRAME ─── */}
+                <div className="mobile-device-frame">
+                  <div className="mobile-device-notch">
+                    <div style={{ width: "40px", height: "4px", background: "#333", borderRadius: "99px" }}></div>
                   </div>
-                  <div className="service">
-                    <span>
-                      Haircut<small>25 min</small>
-                    </span>
-                    <b>₹150</b>
-                  </div>
-                  <div className="service">
-                    <span>
-                      Beard trim<small>15 min</small>
-                    </span>
-                    <b>₹80</b>
-                  </div>
-                  <div className="service">
-                    <span>
-                      Haircut + Beard<small>40 min</small>
-                    </span>
-                    <b>₹200</b>
-                  </div>
-                  <div className="service">
-                    <span>
-                      Facial<small>35 min</small>
-                    </span>
-                    <b>₹350</b>
-                  </div>
-                  <button
-                    className="btn fill"
-                    style={{ width: "100%", marginTop: "18px" }}
-                    id="tokenBtn"
-                    onClick={() => {
-                      setTokenGenerated(true);
-                      notify("Verified token #A07 generated! Estimated wait is 15 minutes.");
-                    }}
-                  >
-                    {tokenGenerated ? "Demo token generated" : "Generate demo token"}
-                  </button>
-                  <div className={`demo-token ${tokenGenerated ? "show" : ""}`} id="token">
-                    <div>
-                      <small>YOUR TOKEN</small>
-                      <strong>A07</strong>
-                    </div>
-                    <div>
-                      <small>POSITION</small>
-                      <strong>#3</strong>
-                    </div>
-                    <div>
-                      <small>EST. WAIT</small>
-                      <strong>15 min</strong>
-                    </div>
-                    <div className="col-span-3 pt-1 border-t border-[#d4a17b]/20 flex items-center justify-between text-[9px] text-[#8b8176]">
-                      <span className="flex items-center gap-1">
-                        <img
-                          src="/snepr-logo-square.png"
-                          alt="Token"
-                          className="w-3.5 h-3.5 rounded-full"
-                        />
-                        Verified Snepr Token
-                      </span>
-                      <span>Patia, Bhubaneswar</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* SalonOS Desk Phone Simulator */}
-                <div
-                  className="phone"
-                  id="deskDemo"
-                  style={{
-                    display: demoTab === "desk" ? "block" : "none",
-                    background: "#24211d",
-                    color: "#f5f1e9",
-                  }}
-                >
-                  <div className="phone-head" style={{ borderColor: "#ffffff22" }}>
-                    <span className="flex items-center gap-1.5">
-                      <img
-                        src="/snepr-logo-square-transparent.png"
-                        alt="SalonOS"
-                        className="w-4 h-4 rounded-sm object-contain"
-                      />
-                      <b>SalonOS · Desk</b>
-                    </span>
-                    <span style={{ color: "#d4a17b" }}>● LIVE DESK</span>
-                  </div>
-                  <div className="metrics">
-                    <div className="metric">
-                      <small>Active chairs</small>
-                      <strong>3</strong>
+                  {/* ─── A) CUSTOMER APP SCREEN (Exact app-customer ui.html fidelity) ─── */}
+                  {demoTab === "customer" && (
+                    <div className="mobile-device-screen" style={{ padding: "20px 18px" }}>
+                      {/* Top Status Bar */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "#70472f", marginBottom: "14px", paddingTop: "4px" }}>
+                        <span>9:41</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span>5G</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+
+                      {/* Header in App */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", borderBottom: "1px solid #eee4d8" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <img src="/snepr-logo-square-transparent.png" alt="Snepr" style={{ width: "24px", height: "24px" }} />
+                          <div>
+                            <div style={{ fontSize: "14px", fontWeight: 800, color: "#2b211a", lineHeight: 1 }}>The Scissors Edge</div>
+                            <small style={{ fontSize: "10px", color: "#8b7d70" }}>Saheed Nagar, Bhubaneswar</small>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", background: "#e8efe9", color: "#4c805e", borderRadius: "99px" }}>
+                          ● Live Queue
+                        </span>
+                      </div>
+
+                      {/* Token Hero Card */}
+                      <div style={{ marginTop: "14px", padding: "16px", borderRadius: "20px", background: "linear-gradient(145deg, #fff7ee, #f5ebd9)", border: "1px solid #ebd9c2", textAlign: "center", boxShadow: "0 8px 20px rgba(112, 71, 47, 0.08)" }}>
+                        <span style={{ fontSize: "10px", letterSpacing: "0.15em", color: "#80543a", fontWeight: 800, textTransform: "uppercase" }}>
+                          Your Live Token
+                        </span>
+                        <div style={{ fontSize: "40px", fontWeight: 900, color: "#2b211a", letterSpacing: "-0.04em", margin: "4px 0" }}>
+                          #{tokenCode}
+                        </div>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "11px", fontWeight: 700, color: "#4c805e", background: "#ffffff", padding: "4px 12px", borderRadius: "99px", boxShadow: "0 2px 6px rgba(0,0,0,0.05)" }}>
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4c805e" }}></span>
+                          Waiting for chair
+                        </div>
+                      </div>
+
+                      {/* 5-Stage Live Queue Journey (From app-customer ui.html) */}
+                      <div className="mob-journey">
+                        <div className="mob-stage done">
+                          <i>✓</i>
+                          <span>Joined</span>
+                        </div>
+                        <div className="mob-stage active">
+                          <i>2</i>
+                          <span>Waiting</span>
+                        </div>
+                        <div className="mob-stage">
+                          <i>3</i>
+                          <span>Turn</span>
+                        </div>
+                        <div className="mob-stage">
+                          <i>4</i>
+                          <span>In chair</span>
+                        </div>
+                        <div className="mob-stage">
+                          <i>5</i>
+                          <span>Done</span>
+                        </div>
+                      </div>
+
+                      {/* 3 Live Metric Chips */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", margin: "10px 0" }}>
+                        <div style={{ background: "#ffffff", border: "1px solid #eee4d8", padding: "10px 8px", borderRadius: "14px", textAlign: "center" }}>
+                          <span style={{ fontSize: "10px", color: "#8b7d70", display: "block" }}>Ahead of you</span>
+                          <strong style={{ fontSize: "15px", color: "#2b211a" }}>{tokenPosition} clients</strong>
+                        </div>
+                        <div style={{ background: "#ffffff", border: "1px solid #eee4d8", padding: "10px 8px", borderRadius: "14px", textAlign: "center" }}>
+                          <span style={{ fontSize: "10px", color: "#8b7d70", display: "block" }}>Est. wait</span>
+                          <strong style={{ fontSize: "15px", color: "#80543a" }}>{tokenWait} min</strong>
+                        </div>
+                        <div style={{ background: "#ffffff", border: "1px solid #eee4d8", padding: "10px 8px", borderRadius: "14px", textAlign: "center" }}>
+                          <span style={{ fontSize: "10px", color: "#8b7d70", display: "block" }}>Assigned</span>
+                          <strong style={{ fontSize: "15px", color: "#2b211a" }}>Chair 02</strong>
+                        </div>
+                      </div>
+
+                      {/* Service Breakdown */}
+                      <div style={{ background: "#ffffff", border: "1px solid #eee4d8", padding: "12px", borderRadius: "16px", marginTop: "4px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: "13px", fontWeight: 700, color: "#2b211a" }}>Precision Haircut + Beard Grooming</div>
+                            <small style={{ fontSize: "11px", color: "#8b7d70" }}>Stylist: Rahul Sharma · Est. 35 min</small>
+                          </div>
+                          <span style={{ fontSize: "14px", fontWeight: 800, color: "#80543a" }}>₹220</span>
+                        </div>
+                      </div>
+
+                      {/* Bottom In-App Action */}
+                      <div style={{ marginTop: "auto", paddingTop: "14px" }}>
+                        <button
+                          style={{ width: "100%", padding: "12px", borderRadius: "14px", background: "#70472f", color: "#fff", fontWeight: 700, fontSize: "12px", border: "none", cursor: "pointer" }}
+                          onClick={() => notify(`Token #${tokenCode} is active at The Scissors Edge. Arrive by 10:05 AM!`)}
+                        >
+                          Show Digital Token to Barber
+                        </button>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <small>Waiting</small>
-                      <strong>3</strong>
+                  )}
+
+                  {/* ─── B) SALONOS DESK SCREEN (Exact app-owner-snepros ui.html fidelity) ─── */}
+                  {demoTab === "desk" && (
+                    <div className="mobile-device-screen dark" style={{ padding: "20px 18px" }}>
+                      {/* Top Status Bar */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "11px", fontWeight: 700, color: "#c69a5c", marginBottom: "14px", paddingTop: "4px" }}>
+                        <span>9:41</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span>● Desk Live</span>
+                          <span>100%</span>
+                        </div>
+                      </div>
+
+                      {/* Header in Desk */}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <img src="/snepr-logo-square-transparent.png" alt="SalonOS" style={{ width: "24px", height: "24px" }} />
+                          <div>
+                            <div style={{ fontSize: "14px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>SalonOS Desk</div>
+                            <small style={{ fontSize: "10px", color: "#aaa" }}>The Scissors Edge | Saheed Nagar</small>
+                          </div>
+                        </div>
+                        <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", background: "rgba(198, 154, 92, 0.2)", color: "#c69a5c", borderRadius: "99px" }}>
+                          3 Chairs
+                        </span>
+                      </div>
+
+                      {/* 3 Active Chairs in SalonOS Desk */}
+                      <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                        {/* Chair 1 */}
+                        <div style={{ background: "#25211e", border: "1px solid rgba(255,255,255,0.08)", padding: "10px 12px", borderRadius: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 01</span>
+                              <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Rahul S. → #S104 (Haircut)</div>
+                          </div>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>14m in</span>
+                        </div>
+
+                        {/* Chair 2 (Ready to Call) */}
+                        <div style={{ background: "#2e2720", border: "1px solid #c69a5c", padding: "10px 12px", borderRadius: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 02</span>
+                              <span style={{ fontSize: "9px", color: "#c69a5c", fontWeight: 700 }}>● READY</span>
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#ddd", marginTop: "2px" }}>Prakash K. available</div>
+                          </div>
+                          <button
+                            style={{ background: "#c69a5c", color: "#191715", border: "none", padding: "5px 10px", borderRadius: "8px", fontSize: "10px", fontWeight: 800, cursor: "pointer" }}
+                            onClick={() => notify("Calling customer #A07 to Chair 02 via SMS and WhatsApp push!")}
+                          >
+                            Call #A07
+                          </button>
+                        </div>
+
+                        {/* Chair 3 */}
+                        <div style={{ background: "#25211e", border: "1px solid rgba(255,255,255,0.08)", padding: "10px 12px", borderRadius: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 03</span>
+                              <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
+                            </div>
+                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Amit S. → #S103 (Beard Spa)</div>
+                          </div>
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>8m in</span>
+                        </div>
+                      </div>
+
+                      {/* Live Queue Next Customers */}
+                      <div style={{ marginTop: "14px" }}>
+                        <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#888", textTransform: "uppercase", marginBottom: "6px" }}>
+                          Live Queue Stream
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.03)", borderRadius: "8px" }}>
+                            <span>#A07 · Priya K. (Unisex Cut)</span>
+                            <span style={{ color: "#c69a5c", fontWeight: 700 }}>Next up</span>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.03)", borderRadius: "8px" }}>
+                            <span>#A08 · Rohan Dash (Beard)</span>
+                            <span style={{ color: "#aaa" }}>8 min wait</span>
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.03)", borderRadius: "8px" }}>
+                            <span>#A09 · Debasis M. (Haircut)</span>
+                            <span style={{ color: "#aaa" }}>15 min wait</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Desk Today Metrics Footer */}
+                      <div style={{ marginTop: "auto", paddingTop: "12px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "6px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                        <div>
+                          <small style={{ fontSize: "9px", color: "#888" }}>Served Today</small>
+                          <div style={{ fontSize: "13px", fontWeight: 800, color: "#fff" }}>28 clients</div>
+                        </div>
+                        <div>
+                          <small style={{ fontSize: "9px", color: "#888" }}>Day Total</small>
+                          <div style={{ fontSize: "13px", fontWeight: 800, color: "#c69a5c" }}>₹6,450</div>
+                        </div>
+                        <div>
+                          <small style={{ fontSize: "9px", color: "#888" }}>Commission</small>
+                          <div style={{ fontSize: "13px", fontWeight: 800, color: "#4c805e" }}>₹0 (0%)</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="metric">
-                      <small>Next token</small>
-                      <strong>A06</strong>
-                    </div>
-                  </div>
-                  <div className="queue-row">
-                    <span>#A05 · Chair 1</span>
-                    <span>In service</span>
-                  </div>
-                  <div className="queue-row">
-                    <span>#A06</span>
-                    <span>Next</span>
-                  </div>
-                  <div className="queue-row">
-                    <span>#A07</span>
-                    <span>Just joined</span>
-                  </div>
-                  <p style={{ fontSize: "10px", color: "#b8afa3", lineHeight: 1.7, margin: "17px 0 0" }}>
-                    Customers join from their phone, and the barber calls the next chair without chaotic waiting room crowding.
-                  </p>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ─── 4. HOW IT WORKS ─── */}
+        {/* ─── 4. HOW IT WORKS (High Visibility Text) ─── */}
         <section className="section" id="how">
           <div className="wrap">
-            <div className="section-head reveal">
+            <div className="section-head">
               <div>
-                <div className="eyebrow">Simple by design</div>
+                <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                  Simple by design
+                </div>
                 <h2>
                   From your couch<br />
                   to the <em>barber chair.</em>
                 </h2>
               </div>
-              <p>Three straightforward steps to make your salon visit in Bhubaneswar completely wait-free.</p>
+              <p>Three straightforward steps to make your salon visit in Bhubaneswar completely wait free.</p>
             </div>
             <div className="steps">
-              <article className="step reveal">
+              <article className="step">
                 <span className="n">01</span>
                 <h3>Check the wait</h3>
                 <p>View live chair availability and estimated salon waiting times across Bhubaneswar before traveling.</p>
               </article>
-              <article className="step reveal delay">
+              <article className="step">
                 <span className="n">02</span>
                 <h3>Save your chair</h3>
                 <p>Select your haircut or groom service and join the digital queue directly from your phone.</p>
               </article>
-              <article className="step reveal delay2">
+              <article className="step">
                 <span className="n">03</span>
                 <h3>Walk straight in</h3>
                 <p>Track your token live on Snepr and step in right as your barber chair opens.</p>
@@ -899,119 +993,168 @@ export function SneprLandingPage() {
         {/* ─── 5. AI HAIR STUDIO CONCEPT ─── */}
         <section className="ai-band" id="ai">
           <div className="wrap ai-layout">
-            <div className="ai-copy reveal">
-              <div className="eyebrow" style={{ color: "#d4a17b" }}>AI Hair Studio · Concept</div>
+            <div className="ai-copy">
+              <div className="eyebrow" style={{ color: "#d4a17b", fontWeight: 700 }}>
+                AI Hair Studio | Concept
+              </div>
               <h2>
                 Try the look<br />
                 before the <em>cut.</em>
               </h2>
               <p>Explore hairstyles tailored to your face shape and share clear inspiration with your barber.</p>
-              <ul className="ai-list">
+              <ul className="ai-list" style={{ fontSize: "15px", lineHeight: "1.8", color: "#f7f3ed" }}>
                 <li>Hairstyle discovery and personalized suggestions</li>
                 <li>Share a preferred reference directly with your stylist</li>
                 <li>Connect virtual styles to salon services and transparent pricing</li>
               </ul>
-              <a className="btn" href="#contact" style={{ borderColor: "#d4a17b", color: "#f5f1e9" }}>
+              <a className="btn" href="#contact" style={{ borderColor: "#d4a17b", color: "#f5f1e9", marginTop: "16px" }}>
                 Join the AI Studio waitlist ↗
               </a>
-              <p style={{ fontSize: "10px", color: "#8f877d", marginTop: "18px" }}>
+              <p style={{ fontSize: "12px", color: "#c4bcb1", marginTop: "18px" }}>
                 Concept preview. Full AI visual styling integration is slated for our upcoming platform release.
               </p>
             </div>
-            <div className="style-orbit reveal delay">
+            <div className="style-orbit">
               <div className="style-disc flex items-center justify-center p-6 text-center">
                 <img
                   src="/snepr-logo.png"
                   alt="Snepr AI Studio"
-                  className="w-24 h-auto opacity-70 drop-shadow"
+                  className="w-28 h-auto opacity-80 drop-shadow"
                 />
               </div>
             </div>
           </div>
         </section>
 
-        {/* ─── 6. FOR SALON OWNERS · SALONOS ─── */}
+        {/* ─── 6. PREMIUM SALONOS DASHBOARD SECTION ─── */}
         <section className="owner" id="salons">
           <div className="wrap">
-            <div className="section-head reveal">
+            <div className="section-head">
               <div>
-                <div className="eyebrow">For salon owners · SalonOS</div>
+                <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                  For salon owners | SalonOS
+                </div>
                 <h2>
-                  Your salon. Your chairs.<br />
-                  <em>Your customers.</em>
+                  Your salon, your chairs,<br />
+                  <em>your customers.</em>
                 </h2>
               </div>
               <p>A modern salon operations platform designed for barbers and salon owners across Bhubaneswar. Zero commission fees.</p>
             </div>
-            <div className="owner-flow reveal">
-              <span>01 &nbsp; Customer joins</span>
+
+            <div className="owner-flow">
+              <span>01 Customer joins</span>
               <i>→</i>
-              <span>02 &nbsp; Token appears</span>
+              <span>02 Token appears</span>
               <i>→</i>
-              <span>03 &nbsp; Barber calls next</span>
+              <span>03 Barber calls next</span>
               <i>→</i>
-              <span>04 &nbsp; Customer notified</span>
+              <span>04 Customer notified</span>
               <i>→</i>
-              <span>05 &nbsp; Service completes</span>
+              <span>05 Service completes</span>
               <i>→</i>
-              <span>06 &nbsp; Review and points</span>
+              <span>06 Review and points</span>
             </div>
-            <div className="owner-grid reveal">
+
+            <div className="owner-grid">
               <div className="owner-feature">
-                <b>Digital queue</b>Automatic tokens & live chair routing
+                <b>Digital queue</b>Automatic tokens and live chair routing
               </div>
               <div className="owner-feature">
                 <b>Chair availability</b>Service timing and staff assignment
               </div>
               <div className="owner-feature">
-                <b>Customer history</b>Direct customer retention & loyalty
+                <b>Customer history</b>Direct customer retention and loyalty
               </div>
               <div className="owner-feature">
-                <b>Salon insights</b>Peak hour analytics & multi-branch support
+                <b>Salon insights</b>Peak hour analytics and multi branch support
               </div>
             </div>
-            <div className="owner-dashboard reveal">
-              <div className="dash-top">
-                <span className="flex items-center gap-2">
+
+            {/* Premium Full-Fidelity SalonOS Operations Cockpit */}
+            <div className="owner-dashboard" style={{ background: "#1c1917", borderRadius: "28px", border: "1px solid rgba(255,255,255,0.12)", padding: "28px", color: "#f5f1e9", boxShadow: "0 28px 70px rgba(0,0,0,0.35)" }}>
+              <div className="dash-top" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "18px", borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
+                <span className="flex items-center gap-3">
                   <img
                     src="/snepr-logo-square-transparent.png"
                     alt="SalonOS"
-                    className="w-5 h-5 rounded-sm object-contain"
+                    className="w-7 h-7 rounded-md object-contain bg-white/10 p-1"
                   />
-                  <b>SalonOS · Desk Overview</b>
+                  <div>
+                    <b style={{ fontSize: "16px", color: "#fff" }}>The Scissors Edge | Flagship Salon</b>
+                    <div style={{ fontSize: "12px", color: "#a89f91" }}>Saheed Nagar, Bhubaneswar · Live Desk Active</div>
+                  </div>
                 </span>
-                <span style={{ color: "#d4a17b" }}>● ACTIVE DESK</span>
-              </div>
-              <div className="metrics">
-                <div className="metric">
-                  <small>Active chairs</small>
-                  <strong>3</strong>
-                </div>
-                <div className="metric">
-                  <small>Waiting</small>
-                  <strong>3</strong>
-                </div>
-                <div className="metric">
-                  <small>Next token</small>
-                  <strong>A06</strong>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "11px", fontWeight: 700, padding: "5px 12px", borderRadius: "99px", background: "rgba(198, 154, 92, 0.2)", color: "#d4a17b" }}>
+                    ● 3 CHAIRS IN OPERATION
+                  </span>
                 </div>
               </div>
-              <div className="queue-row">
-                <span>#A05 · Chair 1</span>
-                <span>In service</span>
+
+              {/* 3 Active Chairs in Salon */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "14px", margin: "20px 0" }}>
+                <div style={{ background: "#26221f", border: "1px solid rgba(255,255,255,0.08)", padding: "16px", borderRadius: "18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <strong style={{ fontSize: "14px", color: "#fff" }}>Chair 01</strong>
+                    <span style={{ fontSize: "11px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
+                  </div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#e8dfd5" }}>Stylist: Rahul Sharma</div>
+                  <div style={{ fontSize: "12px", color: "#aaa", marginTop: "4px" }}>Client: #S104 (Fade & Beard)</div>
+                  <div style={{ fontSize: "11px", color: "#d4a17b", fontWeight: 700, marginTop: "8px" }}>14 min elapsed | 11 min left</div>
+                </div>
+
+                <div style={{ background: "#2c251f", border: "1px solid #c69a5c", padding: "16px", borderRadius: "18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <strong style={{ fontSize: "14px", color: "#fff" }}>Chair 02</strong>
+                    <span style={{ fontSize: "11px", color: "#c69a5c", fontWeight: 700 }}>● READY TO CALL</span>
+                  </div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>Stylist: Prakash Jena</div>
+                  <div style={{ fontSize: "12px", color: "#ddd", marginTop: "4px" }}>Available for next client</div>
+                  <button
+                    className="btn fill"
+                    style={{ width: "100%", marginTop: "10px", padding: "8px", fontSize: "11px" }}
+                    onClick={() => notify("Calling customer #A07 to Chair 02 via SMS and WhatsApp push!")}
+                  >
+                    Call Next Token #A07 ↗
+                  </button>
+                </div>
+
+                <div style={{ background: "#26221f", border: "1px solid rgba(255,255,255,0.08)", padding: "16px", borderRadius: "18px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+                    <strong style={{ fontSize: "14px", color: "#fff" }}>Chair 03</strong>
+                    <span style={{ fontSize: "11px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
+                  </div>
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "#e8dfd5" }}>Stylist: Amit Swain</div>
+                  <div style={{ fontSize: "12px", color: "#aaa", marginTop: "4px" }}>Client: #S103 (Hair Spa)</div>
+                  <div style={{ fontSize: "11px", color: "#d4a17b", fontWeight: 700, marginTop: "8px" }}>8 min elapsed | 17 min left</div>
+                </div>
               </div>
-              <div className="queue-row">
-                <span>#A06</span>
-                <span>Next</span>
-              </div>
-              <div className="queue-row">
-                <span>#A07</span>
-                <span>Just joined</span>
+
+              {/* Desk Key Performance Metrics */}
+              <div className="metrics" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "18px" }}>
+                <div className="metric">
+                  <small style={{ fontSize: "11px", color: "#aaa" }}>Clients Served Today</small>
+                  <strong style={{ fontSize: "22px", color: "#fff" }}>28</strong>
+                </div>
+                <div className="metric">
+                  <small style={{ fontSize: "11px", color: "#aaa" }}>Live Queue Waiting</small>
+                  <strong style={{ fontSize: "22px", color: "#d4a17b" }}>3</strong>
+                </div>
+                <div className="metric">
+                  <small style={{ fontSize: "11px", color: "#aaa" }}>Daily Service Revenue</small>
+                  <strong style={{ fontSize: "22px", color: "#fff" }}>₹6,450</strong>
+                </div>
+                <div className="metric">
+                  <small style={{ fontSize: "11px", color: "#aaa" }}>Commission Deducted</small>
+                  <strong style={{ fontSize: "22px", color: "#4c805e" }}>₹0 (0%)</strong>
+                </div>
               </div>
             </div>
-            <div style={{ textAlign: "center", marginTop: "24px" }}>
-              <a className="btn fill" href="/pricing">
-                View SalonOS Plans & Pricing (Starting at ₹199/mo) ↗
+
+            <div style={{ textAlign: "center", marginTop: "32px" }}>
+              <a className="btn fill" href="/pricing" style={{ padding: "14px 32px", fontSize: "14px" }}>
+                View SalonOS Plans and Pricing (Starting at ₹199 per month) ↗
               </a>
             </div>
           </div>
@@ -1020,26 +1163,28 @@ export function SneprLandingPage() {
         {/* ─── 7. VERIFIED REVIEWS & SNEPR POINTS ─── */}
         <section className="section" id="points" style={{ paddingTop: "20px" }}>
           <div className="wrap">
-            <div className="points reveal">
+            <div className="points">
               <div>
-                <div className="eyebrow">Verified reviews · Snepr Points</div>
+                <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                  Verified reviews | Snepr Points
+                </div>
                 <h2>
-                  Reviews you can trust.<br />
-                  <em>Points you can spend.</em>
+                  Reviews you can trust,<br />
+                  <em>points you can spend.</em>
                 </h2>
                 <p>Customer rewards in Bhubaneswar are tied directly to verified completed visits, never manipulated ratings.</p>
                 <div className="wallet">
                   <img
                     src="/snepr-logo-square.png"
                     alt="Snepr Points"
-                    className="w-7 h-7 mx-auto mb-1 rounded-full shadow-sm"
+                    className="w-10 h-10 mx-auto mb-2 rounded-full shadow-md"
                   />
-                  <small style={{ fontSize: "9px", letterSpacing: ".15em", color: "#8b8176" }}>
+                  <small style={{ fontSize: "11px", letterSpacing: ".15em", color: "#6b5e52", fontWeight: 700 }}>
                     DEMO WALLET
                   </small>
                   <br />
-                  <strong>₹0</strong>
-                  <div className="stars">★★★★★</div>
+                  <strong style={{ fontSize: "28px", color: "#1d1b17" }}>₹0</strong>
+                  <div className="stars" style={{ fontSize: "18px", color: "#c69a5c", margin: "6px 0" }}>★★★★★</div>
                   <button
                     className="btn fill"
                     id="reviewBtn"
@@ -1047,7 +1192,7 @@ export function SneprLandingPage() {
                   >
                     Submit demo review
                   </button>
-                  <p id="reviewMsg" style={{ margin: "12px 0 0", fontSize: "10px" }}>
+                  <p id="reviewMsg" style={{ margin: "14px 0 0", fontSize: "12px", color: "#5c4f44", fontWeight: 500 }}>
                     Choose any rating. You earn 10 points either way.
                   </p>
                 </div>
@@ -1070,7 +1215,7 @@ export function SneprLandingPage() {
                   <b>04</b>
                   <span>Rewards are never influenced by star rating. Honest feedback is always honored.</span>
                 </div>
-                <p className="sample-note">
+                <p className="sample-note" style={{ marginTop: "16px" }}>
                   VERIFIED FIDELITY. Loyalty discount redemption is honored at participating partner salons in Bhubaneswar.
                 </p>
               </div>
@@ -1081,17 +1226,19 @@ export function SneprLandingPage() {
         {/* ─── 8. FREQUENTLY ASKED QUESTIONS ─── */}
         <section className="section" id="faq" style={{ paddingTop: "30px" }}>
           <div className="wrap faq">
-            <div className="reveal">
-              <div className="eyebrow">Help & FAQ</div>
+            <div>
+              <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                Help and FAQ
+              </div>
               <h2>
                 Good to<br />
                 <em>know.</em>
               </h2>
-              <p style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.8 }}>
+              <p style={{ fontSize: "14px", color: "#4a3e35", lineHeight: 1.8, marginTop: "8px" }}>
                 Everything you need to know about salon discovery, live queues, and SalonOS in Bhubaneswar.
               </p>
             </div>
-            <div className="faq-list reveal delay">
+            <div className="faq-list">
               <details>
                 <summary>Do I need to download an app to join a queue?</summary>
                 <p>
@@ -1101,7 +1248,7 @@ export function SneprLandingPage() {
               <details>
                 <summary>How are live salon waiting times calculated?</summary>
                 <p>
-                  Waiting estimates combine the salon's active stylist chairs, each customer's specific service duration, and real-time chair departures tracked on the barber's SalonOS desk.
+                  Waiting estimates combine the salon active stylist chairs, each customer specific service duration, and real time chair departures tracked on the barber SalonOS desk.
                 </p>
               </details>
               <details>
@@ -1113,7 +1260,7 @@ export function SneprLandingPage() {
               <details>
                 <summary>How can salon owners list their salon on Snepr?</summary>
                 <p>
-                  Salon owners can visit our dedicated <a href="/pricing" style={{ color: "var(--brown)", fontWeight: 600 }}>SalonOS Pricing page</a> to register their salon, select a monthly plan, and get a digital QR standee with zero haircut commissions.
+                  Salon owners can visit our dedicated <a href="/pricing" style={{ color: "var(--brown)", fontWeight: 700 }}>SalonOS Pricing page</a> to register their salon, select a monthly plan, and get a digital QR standee with zero haircut commissions.
                 </p>
               </details>
               <details>
@@ -1129,7 +1276,9 @@ export function SneprLandingPage() {
         {/* ─── 9. FINAL CALL TO ACTION ─── */}
         <section className="final-cta" id="contact">
           <div className="wrap">
-            <div className="eyebrow">Know before you go</div>
+            <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+              Know before you go
+            </div>
             <h2>
               Your time is worth<br />
               <em>more than a wait.</em>
@@ -1152,17 +1301,47 @@ export function SneprLandingPage() {
         </section>
       </main>
 
-      {/* ─── 10. DARK FOOTER ─── */}
+      {/* ─── 10. LUXURY DARK FOOTER WITH REAL LOGO & INSTAGRAM ─── */}
       <footer id="footer">
         <div className="wrap">
           <div className="foot-top">
             <div className="foot-brand">
-              <img src="/snepr-logo-transparent.png" alt="sn≡pr" />
-              <p>
-                Live salon queues and waiting times.<br />
+              <img
+                src="/snepr-logo-white-transparent.png"
+                alt="Snepr"
+                className="foot-brand-logo"
+              />
+              <p style={{ fontSize: "14px", lineHeight: "1.7", color: "#d0c8be", maxWidth: "240px" }}>
+                Live salon queues and waiting times in Bhubaneswar.<br />
                 Know before you go.
               </p>
+              {/* Real Instagram Button with Official SVG Icon */}
+              <div style={{ marginTop: "18px" }}>
+                <a
+                  href="https://www.instagram.com/snepr.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="foot-instagram-btn"
+                  aria-label="Follow Snepr on Instagram"
+                >
+                  <svg
+                    style={{ width: "18px", height: "18px" }}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                  <span>Follow @snepr.app</span>
+                </a>
+              </div>
             </div>
+
             <div className="foot-col">
               <b>Customers</b>
               <a href="#discover">Explore salons</a>
@@ -1171,32 +1350,73 @@ export function SneprLandingPage() {
               <a href="#ai">AI Studio</a>
               <a href="#points">Snepr Points</a>
             </div>
+
             <div className="foot-col">
               <b>Salon owners</b>
               <a href="/pricing">SalonOS plans</a>
-              <a href="/pricing">No-commission pricing</a>
+              <a href="/pricing">Zero commission pricing</a>
               <a href="/pricing#calc">Economics calculator</a>
               <a href="/login">Salon desk login</a>
               <a href="/pricing">Register a salon</a>
             </div>
+
             <div className="foot-col">
               <b>Company</b>
               <a href="#top">About Snepr</a>
               <a href="#contact">Contact</a>
               <a href="#faq">Help center</a>
             </div>
+
             <div className="foot-col">
-              <b>Legal and social</b>
+              <b>Legal and socials</b>
               <a href="/refund-policy">Privacy policy</a>
               <a href="/partner-terms">Terms of service</a>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer">
-                Instagram
-              </a>
+              <div style={{ display: "flex", gap: "12px", marginTop: "14px" }}>
+                <a
+                  href="https://www.instagram.com/snepr.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Instagram"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                  </svg>
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Twitter"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4l11.733 16h4.267l-11.733 -16z"/>
+                    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/>
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="LinkedIn"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                    <rect width="4" height="12" x="2" y="9"/>
+                    <circle cx="4" cy="4" r="2"/>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
+
           <div className="foot-bottom">
-            <span>© 2026 Snepr Technologies Inc. · Bhubaneswar, Odisha</span>
-            <span>Made with craft in Bhubaneswar</span>
+            <span>© 2026 Snepr Technologies Inc. | Bhubaneswar, Odisha</span>
+            <span>Crafted for Bhubaneswar</span>
           </div>
         </div>
       </footer>

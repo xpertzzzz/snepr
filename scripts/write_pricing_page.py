@@ -530,3 +530,4 @@ with open('src/routes/_marketing/pricing.tsx', 'w', encoding='utf-8') as f:
     f.write(pricing_code)
 
 print("Wrote dedicated pricing page to src/routes/_marketing/pricing.tsx! Length:", len(pricing_code))
+

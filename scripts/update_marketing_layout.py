@@ -28,3 +28,4 @@ if old_code in text:
     print("Updated _marketing.tsx to make /pricing standalone!")
 else:
     print("Could not find old_code in _marketing.tsx!")
+

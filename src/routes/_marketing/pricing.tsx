@@ -1,26 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import "@/styles/snepr-final.css";
 
 export const Route = createFileRoute("/_marketing/pricing")({
   head: () => ({
-    title: "SalonOS Pricing & Plans — Snepr | Zero Haircut Commission SaaS for Salons",
+    title: "SalonOS Pricing and Plans | Snepr | Zero Haircut Commission SaaS for Salons",
     meta: [
       {
         name: "description",
         content:
-          "Predictable flat monthly SaaS pricing for barbers and salon owners in Bhubaneswar. Starting at ₹199/month. Zero haircut commissions, live chair queue management, and customer loyalty.",
+          "Predictable flat monthly SaaS pricing for barbers and salon owners in Bhubaneswar. Starting at ₹199 per month. Zero haircut commissions, live chair queue management, and customer loyalty.",
       },
       {
         name: "keywords",
         content:
-          "Salon software Bhubaneswar, SalonOS pricing, Barber queue management, Salon SaaS, No commission salon app, Bhubaneswar salon management",
+          "Salon software Bhubaneswar, SalonOS pricing, Barber queue management, Salon SaaS, Zero commission salon app, Bhubaneswar salon management",
       },
-      { property: "og:title", content: "SalonOS Pricing & Plans — Snepr | Flat Monthly Subscriptions" },
+      { property: "og:title", content: "SalonOS Pricing and Plans | Snepr | Flat Monthly Subscriptions" },
       {
         property: "og:description",
         content:
-          "Keep 100% of your haircut and salon revenue. Flat monthly plans for salons in Bhubaneswar starting at ₹199/mo.",
+          "Keep 100% of your haircut and salon revenue. Flat monthly plans for salons in Bhubaneswar starting at ₹199 per month.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://snepr.com/pricing" },
@@ -58,33 +58,13 @@ export function SneprPricingPage() {
   const commission = (revenue * rate) / 100;
   const saving = commission - 400;
 
-  // Reveal animation on scroll
-  useEffect(() => {
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("visible");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-
-    const elements = document.querySelectorAll(".reveal");
-    elements.forEach((el) => io.observe(el));
-
-    return () => io.disconnect();
-  }, []);
-
   return (
     <>
       {/* ─── PRICING HEADER ─── */}
       <header className="hero" style={{ minHeight: "auto", paddingBottom: "70px", borderRadius: "0 0 5% 5%" }}>
         <div className="hero-head">
           <a className="brand" href="/" aria-label="Snepr home">
-            <img src="/snepr-logo-transparent.png" alt="sn≡pr" />
+            <img src="/snepr-logo-transparent.png" alt="Snepr" />
           </a>
           <nav className={`hero-nav ${navOpen ? "open" : ""}`} id="navlinks">
             <a href="/" onClick={() => setNavOpen(false)}>
@@ -123,13 +103,15 @@ export function SneprPricingPage() {
 
         <div className="hero-main" style={{ padding: "40px 20px 20px" }}>
           <div className="hero-content">
-            <div className="eyebrow">SalonOS Pricing · Bhubaneswar</div>
+            <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700, letterSpacing: "0.15em" }}>
+              SalonOS Pricing | Bhubaneswar
+            </div>
             <h1 style={{ fontSize: "clamp(48px, 8vw, 92px)", lineHeight: 0.95 }}>
               Predictable pricing.<br />
               <span>Zero haircut commissions.</span>
             </h1>
-            <p className="hero-desc">
-              Keep 100% of your service earnings. Transparent monthly software subscriptions designed for single barbers, neighborhood salons, and multi-chair studios across Bhubaneswar.
+            <p className="hero-desc" style={{ fontSize: "18px", lineHeight: "1.7", color: "#3d322a", fontWeight: 500 }}>
+              Keep 100% of your service earnings. Transparent monthly software subscriptions designed for single barbers, neighborhood salons, and multi chair studios across Bhubaneswar.
             </p>
             <div className="hero-ctas">
               <a className="btn fill" href="#plans">
@@ -147,32 +129,36 @@ export function SneprPricingPage() {
       <main>
         <section className="section" id="plans" style={{ paddingTop: "60px" }}>
           <div className="wrap">
-            <div className="section-head reveal">
+            <div className="section-head">
               <div>
-                <div className="eyebrow">SalonOS Monthly Plans</div>
+                <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                  SalonOS Monthly Plans
+                </div>
                 <h2>
                   Simple pricing.<br />
                   <em>No haircut commissions.</em>
                 </h2>
               </div>
-              <p>
-                Flat monthly software subscription. Never pay a percentage of your clients' bills or haircuts.
+              <p style={{ fontSize: "16px", color: "#4a3e35", fontWeight: 500 }}>
+                Flat monthly software subscription. Never pay a percentage of your clients bills or haircuts.
               </p>
             </div>
 
             <div className="pricing">
               {/* Base Plan */}
-              <article className="plan reveal">
-                <div className="plan-tag">Base · 1 chair</div>
+              <article className="plan">
+                <div className="plan-tag">Base | 1 chair</div>
                 <h3>Single barber</h3>
-                <p>For independent barbers and single chair studios.</p>
-                <div className="plan-price">
-                  ₹199 <small>/ month</small>
+                <p style={{ fontSize: "14px", color: "#4a3e35", lineHeight: "1.6" }}>
+                  For independent barbers and single chair studios.
+                </p>
+                <div className="plan-price" style={{ fontSize: "38px" }}>
+                  ₹199 <small style={{ fontSize: "14px" }}>/ month</small>
                 </div>
-                <ul>
+                <ul style={{ fontSize: "14px", lineHeight: "1.8", color: "#2b211a" }}>
                   <li>One active stylist chair</li>
-                  <li>Real-time chair countdown</li>
-                  <li>Digital queue & token routing</li>
+                  <li>Live chair countdown</li>
+                  <li>Digital queue and token routing</li>
                   <li>Official QR code standee</li>
                   <li>Basic customer SMS alerts</li>
                   <li>Verified customer reviews</li>
@@ -187,17 +173,19 @@ export function SneprPricingPage() {
               </article>
 
               {/* Intermediate Plan (Most popular) */}
-              <article className="plan popular reveal delay">
-                <div className="plan-tag">Most popular · Up to 3 chairs</div>
+              <article className="plan popular">
+                <div className="plan-tag">Most popular | Up to 3 chairs</div>
                 <h3>Intermediate</h3>
-                <p>For growing neighbourhood salons in Bhubaneswar.</p>
-                <div className="plan-price">
-                  ₹400 <small>/ month</small>
+                <p style={{ fontSize: "14px", color: "#4a3e35", lineHeight: "1.6" }}>
+                  For growing neighbourhood salons in Bhubaneswar.
+                </p>
+                <div className="plan-price" style={{ fontSize: "38px" }}>
+                  ₹400 <small style={{ fontSize: "14px" }}>/ month</small>
                 </div>
-                <ul>
+                <ul style={{ fontSize: "14px", lineHeight: "1.8", color: "#2b211a" }}>
                   <li>Everything in Base plan</li>
-                  <li>Multiple staff & barber logins</li>
-                  <li>Multi-barber queue routing</li>
+                  <li>Multiple staff and barber logins</li>
+                  <li>Multi barber queue routing</li>
                   <li>WhatsApp queue status notifications</li>
                   <li>Snepr Points loyalty listing</li>
                   <li>Peak hour traffic analytics</li>
@@ -213,18 +201,20 @@ export function SneprPricingPage() {
               </article>
 
               {/* Pro Plan */}
-              <article className="plan reveal delay2">
-                <div className="plan-tag">Pro · Unlimited chairs</div>
+              <article className="plan">
+                <div className="plan-tag">Pro | Unlimited chairs</div>
                 <h3>Pro</h3>
-                <p>For larger salons and multi-chair operations.</p>
-                <div className="plan-price">
-                  ₹449 <small>/ month</small>
+                <p style={{ fontSize: "14px", color: "#4a3e35", lineHeight: "1.6" }}>
+                  For larger salons and multi chair operations.
+                </p>
+                <div className="plan-price" style={{ fontSize: "38px" }}>
+                  ₹449 <small style={{ fontSize: "14px" }}>/ month</small>
                 </div>
-                <ul>
+                <ul style={{ fontSize: "14px", lineHeight: "1.8", color: "#2b211a" }}>
                   <li>Everything in Intermediate</li>
                   <li>Advanced AI Studio integration</li>
-                  <li>Stylist performance & revenue reporting</li>
-                  <li>Multi-branch salon support</li>
+                  <li>Stylist performance and revenue reporting</li>
+                  <li>Multi branch salon support</li>
                   <li>Featured placement in Explore discovery</li>
                   <li>Dedicated account manager</li>
                   <li>24/7 priority partner support</li>
@@ -238,19 +228,23 @@ export function SneprPricingPage() {
               </article>
             </div>
 
-            <p className="sample-note" style={{ marginTop: "16px" }}>
+            <p className="sample-note" style={{ marginTop: "20px" }}>
               ALL PLANS INCLUDE: Free digital onboarding, custom QR standee, verified review badge, and zero haircut commission guarantees.
             </p>
 
             {/* ─── SALON ECONOMICS CALCULATOR ─── */}
-            <div className="calc reveal" id="calc" style={{ marginTop: "60px" }}>
-              <div className="eyebrow" style={{ color: "#d4a17b" }}>Interactive ROI Calculator</div>
+            <div className="calc" id="calc" style={{ marginTop: "60px" }}>
+              <div className="eyebrow" style={{ color: "#d4a17b", fontWeight: 700 }}>
+                Interactive ROI Calculator
+              </div>
               <h3>Salon economics</h3>
-              <p>Compare what 15-25% aggregator commission platforms cost you versus flat Snepr SalonOS.</p>
+              <p style={{ fontSize: "16px", color: "#4a3e35" }}>
+                Compare what 15 to 25 percent aggregator commission platforms cost you versus flat Snepr SalonOS.
+              </p>
 
               <div className="calc-grid">
                 <div className="field">
-                  <label>
+                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
                     Average daily customers <b id="custVal">{customers}</b>
                   </label>
                   <input
@@ -264,7 +258,7 @@ export function SneprPricingPage() {
                   />
                 </div>
                 <div className="field">
-                  <label>
+                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
                     Average service ticket <b id="ticketVal">{money(ticket)}</b>
                   </label>
                   <input
@@ -279,7 +273,7 @@ export function SneprPricingPage() {
                   />
                 </div>
                 <div className="field">
-                  <label>
+                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
                     Working days per month <b id="daysVal">{days}</b>
                   </label>
                   <input
@@ -295,7 +289,7 @@ export function SneprPricingPage() {
               </div>
 
               <div className="field" style={{ marginTop: "24px" }}>
-                <label>
+                <label style={{ fontSize: "14px", fontWeight: 700 }}>
                   Comparison commission rate <b id="rateVal">{rate}%</b>
                 </label>
                 <input
@@ -311,33 +305,35 @@ export function SneprPricingPage() {
 
               <div className="result">
                 <div>
-                  <small>Estimated monthly revenue</small>
-                  <strong id="revenue">{money(revenue)}</strong>
+                  <small style={{ fontSize: "12px" }}>Estimated monthly revenue</small>
+                  <strong id="revenue" style={{ fontSize: "26px" }}>{money(revenue)}</strong>
                 </div>
                 <div>
-                  <small>Modelled commission</small>
-                  <strong id="commission" style={{ color: "#b95d52" }}>
+                  <small style={{ fontSize: "12px" }}>Modelled commission loss</small>
+                  <strong id="commission" style={{ fontSize: "26px", color: "#b95d52" }}>
                     {money(commission)}
                   </strong>
                 </div>
                 <div>
-                  <small>Modelled difference</small>
-                  <strong id="saving" style={{ color: "#4f8b68" }}>
+                  <small style={{ fontSize: "12px" }}>Modelled difference retained</small>
+                  <strong id="saving" style={{ fontSize: "26px", color: "#4c805e" }}>
                     {money(saving)}
                   </strong>
                 </div>
               </div>
 
-              <p style={{ margin: "14px 0 0" }}>
-                Illustrative model based on your inputs. Monthly revenue = daily clients × ticket × days. Difference = commission lost on aggregator platforms minus Snepr flat subscription (₹400/mo).
+              <p style={{ margin: "16px 0 0", fontSize: "13px", color: "#5c4f44", fontWeight: 500 }}>
+                Illustrative model based on your inputs. Monthly revenue = daily clients × ticket × days. Difference = commission lost on aggregator platforms minus Snepr flat subscription (₹400 per month).
               </p>
             </div>
 
-            {/* ─── SIDE-BY-SIDE COMPARISON TABLE ─── */}
-            <div className="reveal" style={{ marginTop: "60px" }}>
+            {/* ─── SIDE BY SIDE COMPARISON TABLE ─── */}
+            <div style={{ marginTop: "60px" }}>
               <div className="section-head" style={{ marginBottom: "24px" }}>
                 <div>
-                  <div className="eyebrow">Direct Comparison</div>
+                  <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                    Direct Comparison
+                  </div>
                   <h2>
                     Why salons choose <em>SalonOS.</em>
                   </h2>
@@ -356,12 +352,12 @@ export function SneprPricingPage() {
                   <tr>
                     <td>Pricing model</td>
                     <td>15% to 25% of every booking</td>
-                    <td>Fixed monthly subscription (from ₹199/mo)</td>
+                    <td>Fixed monthly subscription (from ₹199 per month)</td>
                   </tr>
                   <tr>
                     <td>Service revenue</td>
                     <td>Commission deducted from each cut</td>
-                    <td>Keep 100% of all cash, UPI & card payments</td>
+                    <td>Keep 100% of all cash, UPI, and card payments</td>
                   </tr>
                   <tr>
                     <td>Customer relationship</td>
@@ -370,8 +366,8 @@ export function SneprPricingPage() {
                   </tr>
                   <tr>
                     <td>Queue visibility</td>
-                    <td>Rigid appointment slots or walk-in chaos</td>
-                    <td>Chair-level live queue & real-time countdown</td>
+                    <td>Rigid appointment slots or walk in chaos</td>
+                    <td>Chair level live queue and live countdown</td>
                   </tr>
                   <tr>
                     <td>Client accessibility</td>
@@ -379,20 +375,22 @@ export function SneprPricingPage() {
                     <td>Instant browser access, no download needed</td>
                   </tr>
                   <tr>
-                    <td>Setup & standees</td>
+                    <td>Setup and standees</td>
                     <td>Generic listing</td>
-                    <td>Custom QR standee for walk-in self check-in</td>
+                    <td>Custom QR standee for walk in self check in</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             {/* ─── PRICING FAQ ─── */}
-            <div className="faq-list reveal delay" style={{ marginTop: "60px" }}>
+            <div className="faq-list" style={{ marginTop: "60px" }}>
               <div className="section-head" style={{ marginBottom: "20px" }}>
                 <div>
-                  <div className="eyebrow">Owner FAQ</div>
-                  <h2>Questions about <em>plans & billing.</em></h2>
+                  <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+                    Owner FAQ
+                  </div>
+                  <h2>Questions about <em>plans and billing.</em></h2>
                 </div>
               </div>
 
@@ -420,14 +418,14 @@ export function SneprPricingPage() {
               <details>
                 <summary>How does the physical QR code standee work?</summary>
                 <p>
-                  We provide a custom tabletop QR standee for your reception desk. Walk-in customers scan the QR code to take their digital token without crowding the waiting area.
+                  We provide a custom tabletop QR standee for your reception desk. Walk in customers scan the QR code to take their digital token without crowding the waiting area.
                 </p>
               </details>
 
               <details>
                 <summary>Can I test SalonOS before committing?</summary>
                 <p>
-                  Yes! We offer a 14-day risk-free preview for salons in Bhubaneswar. Our local team assists with staff training and standee setup.
+                  Yes. We offer a 14 day risk free preview for salons in Bhubaneswar. Our local team assists with staff training and standee setup.
                 </p>
               </details>
             </div>
@@ -437,7 +435,9 @@ export function SneprPricingPage() {
         {/* ─── FINAL CTA ─── */}
         <section className="final-cta" style={{ marginTop: "60px" }}>
           <div className="wrap">
-            <div className="eyebrow">Zero commission · Total control</div>
+            <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
+              Zero commission | Total control
+            </div>
             <h2>
               Ready to modernize<br />
               <em>your salon operations?</em>
@@ -461,17 +461,47 @@ export function SneprPricingPage() {
         </section>
       </main>
 
-      {/* ─── FOOTER ─── */}
+      {/* ─── LUXURY DARK FOOTER WITH REAL LOGO & INSTAGRAM ─── */}
       <footer id="footer">
         <div className="wrap">
           <div className="foot-top">
             <div className="foot-brand">
-              <img src="/snepr-logo-transparent.png" alt="sn≡pr" />
-              <p>
-                Live salon queues and waiting times.<br />
+              <img
+                src="/snepr-logo-white-transparent.png"
+                alt="Snepr"
+                className="foot-brand-logo"
+              />
+              <p style={{ fontSize: "14px", lineHeight: "1.7", color: "#d0c8be", maxWidth: "240px" }}>
+                Live salon queues and waiting times in Bhubaneswar.<br />
                 Know before you go.
               </p>
+              {/* Real Instagram Button with Official SVG Icon */}
+              <div style={{ marginTop: "18px" }}>
+                <a
+                  href="https://www.instagram.com/snepr.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="foot-instagram-btn"
+                  aria-label="Follow Snepr on Instagram"
+                >
+                  <svg
+                    style={{ width: "18px", height: "18px" }}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                  </svg>
+                  <span>Follow @snepr.app</span>
+                </a>
+              </div>
             </div>
+
             <div className="foot-col">
               <b>Customers</b>
               <a href="/#discover">Explore salons</a>
@@ -480,31 +510,72 @@ export function SneprPricingPage() {
               <a href="/#ai">AI Studio</a>
               <a href="/#points">Snepr Points</a>
             </div>
+
             <div className="foot-col">
               <b>Salon owners</b>
               <a href="/pricing">SalonOS plans</a>
-              <a href="/pricing">No-commission pricing</a>
+              <a href="/pricing">Zero commission pricing</a>
               <a href="#calc">Economics calculator</a>
               <a href="/login">Salon desk login</a>
             </div>
+
             <div className="foot-col">
               <b>Company</b>
               <a href="/">About Snepr</a>
               <a href="/#contact">Contact</a>
               <a href="/#faq">Help center</a>
             </div>
+
             <div className="foot-col">
-              <b>Legal and social</b>
+              <b>Legal and socials</b>
               <a href="/refund-policy">Privacy policy</a>
               <a href="/partner-terms">Terms of service</a>
-              <a href="https://instagram.com" target="_blank" rel="noreferrer">
-                Instagram
-              </a>
+              <div style={{ display: "flex", gap: "12px", marginTop: "14px" }}>
+                <a
+                  href="https://www.instagram.com/snepr.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Instagram"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                  </svg>
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Twitter"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 4l11.733 16h4.267l-11.733 -16z"/>
+                    <path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/>
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  title="LinkedIn"
+                  style={{ color: "#d4a17b", display: "inline-block" }}
+                >
+                  <svg style={{ width: "20px", height: "20px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                    <rect width="4" height="12" x="2" y="9"/>
+                    <circle cx="4" cy="4" r="2"/>
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
+
           <div className="foot-bottom">
-            <span>© 2026 Snepr Technologies Inc. · Bhubaneswar, Odisha</span>
-            <span>Made with craft in Bhubaneswar</span>
+            <span>© 2026 Snepr Technologies Inc. | Bhubaneswar, Odisha</span>
+            <span>Crafted for Bhubaneswar</span>
           </div>
         </div>
       </footer>

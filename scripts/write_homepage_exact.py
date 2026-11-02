@@ -1222,3 +1222,4 @@ with open('src/routes/_marketing/index.tsx', 'w', encoding='utf-8') as f:
     f.write(homepage_code)
 
 print("Wrote clean, optimized homepage to src/routes/_marketing/index.tsx! Length:", len(homepage_code))
+

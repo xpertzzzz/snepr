@@ -36,3 +36,4 @@ assert 'compare' in pricing_content, "Error: Pricing page missing comparison tab
 assert 'snepr-logo-transparent.png' in pricing_content, "Error: Pricing page missing brand logo"
 
 print("✓ All Pricing Page verification checks PASSED!")
+
