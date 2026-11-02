@@ -82,7 +82,7 @@ export function AiStudioShowcase() {
                     to="/live"
                     className="inline-flex h-13 items-center rounded-2xl border border-[#E8E1D7] bg-[#FAF7F2] px-5 text-[14px] font-semibold text-[#1B1410] transition-all hover:bg-[#F5EFEB]"
                   >
-                    Explore Salons
+                    Live Queues
                   </Link>
                 </div>
               </div>

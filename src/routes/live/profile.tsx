@@ -63,7 +63,7 @@ export function ProfilePageUnified() {
               to="/live"
               className="text-xs font-semibold text-[#7A4B29] hover:underline"
             >
-              Explore Salons
+              Live Salons
             </Link>
           </div>
         </div>

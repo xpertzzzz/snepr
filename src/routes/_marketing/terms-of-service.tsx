@@ -9,53 +9,58 @@ export const Route = createFileRoute("/_marketing/terms-of-service")({
 
 function TermsOfServicePage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:py-24">
-      <div className="mb-12">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16 w-full">
+      <div className="mb-10">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c4d27] bg-[#f2e6dc] px-3 py-1 rounded-full">
+          Legal Agreement
+        </span>
+        <h1 className="mt-3 mb-3 text-3xl sm:text-5xl font-extrabold tracking-tight text-[#211914] font-serif">
           Terms of Service
         </h1>
-        <p className="text-sm text-ink-soft">Last Updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-xs text-[#81736a]">Last Updated: November 2026 · Snepr Technologies, Bhubaneswar, India</p>
       </div>
 
-      <div className="prose prose-lg mx-auto text-ink-soft">
-        <p className="mb-6">
-          These Terms of Service constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and Snepr ("we," "us" or "our"), concerning your access to and use of our application and website.
+      <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 sm:p-10 space-y-8 text-sm text-[#81736a] leading-relaxed shadow-xs">
+        <p className="text-base text-[#211914] font-medium leading-relaxed">
+          These Terms of Service constitute a legally binding agreement made between you, whether personally or on behalf of an entity ("you") and Snepr ("we," "us" or "our"), concerning your access to and use of the Snepr web and mobile applications.
         </p>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">1. Acceptance of Terms</h2>
-        <p className="mb-6">
-          By accessing or using Snepr, you agree to be bound by these Terms. If you disagree with any part of the terms, then you may not access the service.
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">1. Acceptance of Terms</h2>
+          <p>
+            By accessing or using Snepr, you agree to be bound by these Terms. If you disagree with any part of these terms, you may not access or use our services.
+          </p>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">2. Description of Service</h2>
-        <p className="mb-6">
-          Snepr provides a digital queue management and wait time tracking system for salons and their customers. We are not responsible for the actual services provided by the salons listed on our platform. Wait times are estimates and not guarantees. Salons reserve the right to manage their queues as they see fit.
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">2. Description of Service</h2>
+          <p>
+            Snepr provides a digital queue orchestration and chair wait time discovery platform for salons and customers. Snepr connects customers with nearby salons in Bhubaneswar. We do not provide physical hair styling services and are not liable for service delivery at the individual salon. Estimated wait times are dynamic calculations based on reported salon telemetry.
+          </p>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">3. User Accounts</h2>
-        <p className="mb-6">
-          When you create an account with us, you must provide us information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.
-        </p>
-        <p className="mb-6">
-          You are responsible for safeguarding the password that you use to access the Service and for any activities or actions under your password.
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">3. User Accounts & Fair Use</h2>
+          <p>
+            When registering an account via Google Authentication or Phone OTP, you agree to provide authentic and accurate details. Customers may only hold one active queue token per chair category at a time. Abuse or spamming of digital tokens may result in temporary account restrictions.
+          </p>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">4. Limitation of Liability</h2>
-        <p className="mb-6">
-          In no event shall Snepr, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the Service.
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">4. 0% Haircut Commission Commitment</h2>
+          <p>
+            Snepr never charges customers or salon partners a commission on haircut transactions. All haircuts and services are paid directly to the salon at the physical counter. Salon owners pay flat, transparent monthly software subscription fees for SalonOS.
+          </p>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">5. Changes to Terms</h2>
-        <p className="mb-6">
-          We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material we will try to provide at least 30 days notice prior to any new terms taking effect.
-        </p>
-
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">6. Contact Us</h2>
-        <p className="mb-6">
-          If you have any questions about these Terms, please contact us at:
-          <br />
-          Email: hello@snepr.in
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">5. Contact Information</h2>
+          <p>
+            For questions regarding these Terms of Service, contact our Bhubaneswar legal desk at:
+            <br />
+            Email: <a href="mailto:support@snepr.in" className="text-[#8c4d27] font-semibold underline">support@snepr.in</a>
+          </p>
+        </section>
       </div>
     </div>
   );

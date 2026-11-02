@@ -13,7 +13,7 @@ export function Footer() {
             <p className="bp">Live salon queues and wait times. Know before you go.</p>
           </div>
           <div>
-            <h5>EXPLORE</h5>
+            <h5>SERVICES</h5>
             <ul>
               <li><Link to="/live">Live Queues</Link></li>
               <li><Link to="/live/aistudio">AI Studio</Link></li>

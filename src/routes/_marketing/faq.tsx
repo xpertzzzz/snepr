@@ -50,24 +50,27 @@ const faqs = [
 
 function FAQPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:py-24">
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16 w-full">
       <div className="mb-12 text-center">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c4d27] bg-[#f2e6dc] px-3 py-1 rounded-full">
+          Got questions?
+        </span>
+        <h1 className="mt-3 mb-4 text-3xl sm:text-5xl font-extrabold tracking-tight text-[#211914] font-serif">
           Frequently Asked Questions
         </h1>
-        <p className="text-lg text-ink-soft">
-          Everything you need to know about Snepr and how it works.
+        <p className="text-base text-[#81736a] max-w-xl mx-auto">
+          Everything you need to know about Snepr, live chair queues, and 0% commission operations in Bhubaneswar.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+      <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 shadow-xs sm:p-10 divide-y divide-[#e9dfd5]">
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left text-lg font-medium text-ink hover:text-primary">
+            <AccordionItem key={index} value={`item-${index}`} className="border-b border-[#e9dfd5] py-2">
+              <AccordionTrigger className="text-left text-base sm:text-lg font-bold text-[#211914] hover:text-[#8c4d27] transition-colors py-4">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-base text-ink-soft">
+              <AccordionContent className="text-sm text-[#81736a] leading-relaxed pb-4">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
@@ -75,11 +78,14 @@ function FAQPage() {
         </Accordion>
       </div>
       
-      <div className="mt-16 text-center">
-        <p className="mb-4 text-lg text-ink-soft">Still have questions?</p>
-        <Button asChild size="lg">
-          <Link to="/contact">Contact Support</Link>
-        </Button>
+      <div className="mt-14 text-center space-y-3">
+        <p className="text-base text-[#81736a]">Still have questions or need partner assistance?</p>
+        <Link
+          to="/contact"
+          className="inline-block px-7 py-3.5 rounded-xl bg-[#8c4d27] hover:bg-[#6e3717] text-white text-xs font-bold transition-colors shadow-sm"
+        >
+          Contact Support Desk →
+        </Link>
       </div>
     </div>
   );

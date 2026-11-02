@@ -9,50 +9,57 @@ export const Route = createFileRoute("/_marketing/privacy-policy")({
 
 function PrivacyPolicyPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:py-24">
-      <div className="mb-12">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16 w-full">
+      <div className="mb-10">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c4d27] bg-[#f2e6dc] px-3 py-1 rounded-full">
+          Data Protection
+        </span>
+        <h1 className="mt-3 mb-3 text-3xl sm:text-5xl font-extrabold tracking-tight text-[#211914] font-serif">
           Privacy Policy
         </h1>
-        <p className="text-sm text-ink-soft">Last Updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-xs text-[#81736a]">Last Updated: November 2026 · Snepr Technologies, Bhubaneswar, India</p>
       </div>
 
-      <div className="prose prose-lg mx-auto text-ink-soft">
-        <p className="mb-6">
-          At Snepr, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our application. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the application.
+      <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 sm:p-10 space-y-8 text-sm text-[#81736a] leading-relaxed shadow-xs">
+        <p className="text-base text-[#211914] font-medium leading-relaxed">
+          At Snepr, your privacy and data security are our highest priorities. This Privacy Policy details the transparent policies and procedures governing the collection, use, and disclosure of your personal data when using the Snepr ecosystem.
         </p>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">1. Information We Collect</h2>
-        <p className="mb-6">
-          We may collect information about you in a variety of ways. The information we may collect includes:
-        </p>
-        <ul className="mb-6 list-disc pl-6">
-          <li><strong>Personal Data:</strong> Personally identifiable information, such as your name, email address, and telephone number, that you voluntarily give to us when you register or when you choose to participate in various activities related to the Application.</li>
-          <li><strong>Location Data:</strong> We may request access or permission to and track location-based information from your mobile device, either continuously or while you are using our Application, to provide certain location-based services (like finding nearby salons).</li>
-          <li><strong>Derivative Data:</strong> Information our servers automatically collect when you access the Application, such as your IP address, your browser type, your operating system, your access times, and the pages you have viewed directly before and after accessing the Application.</li>
-        </ul>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">1. Information We Collect</h2>
+          <p>We collect only the minimum necessary information to facilitate seamless salon waitlist and chair operations:</p>
+          <ul className="list-disc pl-6 space-y-2">
+            <li><strong>Authentication Data:</strong> Name, verified email address, or phone number used for login and queue confirmation alerts.</li>
+            <li><strong>Locality Preferences:</strong> Chosen neighborhood (e.g. Patia, KIIT Road, Jaydev Vihar) for discovering relevant salons. We never require continuous background GPS tracking.</li>
+            <li><strong>Queue Telemetry:</strong> Queue tokens joined, services chosen, and arrival check-ins for estimating chair wait times.</li>
+          </ul>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">2. Use of Your Information</h2>
-        <p className="mb-6">
-          Having accurate information about you permits us to provide you with a smooth, efficient, and customized experience. Specifically, we may use information collected about you via the Application to:
-        </p>
-        <ul className="mb-6 list-disc pl-6">
-          <li>Create and manage your account.</li>
-          <li>Compile anonymous statistical data and analysis for use internally.</li>
-          <li>Deliver targeted advertising, coupons, newsletters, and other information regarding promotions to you.</li>
-          <li>Email you regarding your account or order.</li>
-          <li>Fulfill and manage purchases, orders, payments, and other transactions related to the Application.</li>
-          <li>Increase the efficiency and operation of the Application.</li>
-          <li>Notify you of updates to the Application.</li>
-          <li>Request feedback and contact you about your use of the Application.</li>
-        </ul>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">2. How Your Information Is Used</h2>
+          <p>
+            Your information is used strictly to power live queue operations: sending arrival alerts, displaying your token position, and providing anonymized chair analytics to salon operators. We never sell your personal contact information to third-party advertisers.
+          </p>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-2xl font-bold text-ink">3. Contact Us</h2>
-        <p className="mb-6">
-          If you have questions or comments about this Privacy Policy, please contact us at:
-          <br />
-          Email: hello@snepr.in
-        </p>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">3. Data Deletion & Control</h2>
+          <p>
+            You have full control over your data. You may request complete erasure of your profile and history anytime via the{" "}
+            <a href="/delete-account" className="text-[#8c4d27] font-semibold underline">
+              Account Deletion Page
+            </a>.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">4. Contact Data Privacy Officer</h2>
+          <p>
+            Questions or concerns regarding your privacy? Contact our Bhubaneswar privacy desk at:
+            <br />
+            Email: <a href="mailto:support@snepr.in" className="text-[#8c4d27] font-semibold underline">support@snepr.in</a>
+          </p>
+        </section>
       </div>
     </div>
   );

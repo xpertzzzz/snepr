@@ -12,66 +12,55 @@ export const Route = createFileRoute("/_marketing/delete-account")({
 
 function DeleteAccountPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:py-24 font-sans bg-[#FDFBF7] text-[#1C1613]">
-      <div className="mb-12 border-b border-[#E5E0D8] pb-6">
-        <h1 className="mb-4 text-4xl font-serif tracking-tight text-[#1C1613] sm:text-5xl">
-          Account Deletion Request
+    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-16 w-full">
+      <div className="mb-10">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c4d27] bg-[#f2e6dc] px-3 py-1 rounded-full">
+          Data Governance
+        </span>
+        <h1 className="mt-3 mb-3 text-3xl sm:text-5xl font-extrabold tracking-tight text-[#211914] font-serif">
+          Account & Data Deletion
         </h1>
-        <p className="text-sm text-[#6E6761]">Last Updated: {new Date().toLocaleDateString()}</p>
+        <p className="text-xs text-[#81736a]">Last Updated: November 2026 · Snepr Technologies, Bhubaneswar, India</p>
       </div>
 
-      <div className="prose prose-lg mx-auto text-[#6E6761] space-y-6 leading-relaxed">
-        <p>
-          At Snepr, we value your privacy and control over your personal data. If you no longer wish to use our services, you can request the deletion of your account and all associated personal data.
+      <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 sm:p-10 space-y-8 text-sm text-[#81736a] leading-relaxed shadow-xs">
+        <p className="text-base text-[#211914] font-medium leading-relaxed">
+          At Snepr, we value your sovereignty over your personal data. If you choose to stop using Snepr services, you can request immediate and permanent erasure of your account and personal records.
         </p>
 
-        <section className="bg-white p-6 rounded-2xl border border-[#E5E0D8] shadow-xs">
-          <h2 className="mb-3 text-xl font-serif font-bold text-[#1C1613]">
+        <section className="bg-[#f7f3ed] p-6 sm:p-8 rounded-2xl border border-[#e9dfd5] space-y-3">
+          <h2 className="text-base font-bold font-serif text-[#211914]">
             How to Request Account Deletion
           </h2>
-          <p className="mb-4">
-            You can request your account and associated data to be deleted in one of the following ways:
-          </p>
-          <ul className="list-disc pl-6 space-y-2">
+          <ul className="list-disc pl-6 space-y-2 text-sm text-[#81736a]">
             <li>
-              <strong>In-App Deletion:</strong> Log into the Snepr mobile app, navigate to <strong>Profile &gt; Account Settings &gt; Delete Account</strong> and confirm your request.
+              <strong>Instant In-App Deletion:</strong> Log into Snepr, navigate to <strong>Profile → Account Settings → Delete Account</strong>, and confirm your request.
             </li>
             <li>
-              <strong>Email Request:</strong> Send an email from your registered email address to{" "}
-              <a href="mailto:support@snepr.in" className="text-[#D4A373] underline font-medium">
+              <strong>Direct Email Request:</strong> Send an email from your registered email address to{" "}
+              <a href="mailto:support@snepr.in" className="text-[#8c4d27] font-semibold underline">
                 support@snepr.in
               </a>{" "}
-              with the subject line <strong>"Account Deletion Request"</strong>. Please include your username or registered phone number.
+              with the subject line <strong>"Account Deletion Request"</strong>. Include your registered mobile number or email.
             </li>
           </ul>
         </section>
 
-        <h2 className="mb-3 mt-8 text-2xl font-serif text-[#1C1613]">What happens when you delete your account?</h2>
-        <p>
-          Once your deletion request is processed:
-        </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>Your personal profile information (name, email, phone number, password hash) will be permanently deleted from our servers.</li>
-          <li>Your salon business settings and operator details (if you are a salon owner/staff) will be removed.</li>
-          <li>Any active live queue positions or future appointment bookings associated with your account will be cancelled immediately.</li>
-        </ul>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">What happens when your account is deleted?</h2>
+          <ul className="list-disc pl-6 space-y-2">
+            <li>Your personal profile credentials (name, phone number, email address, password hash) are permanently removed from all production databases.</li>
+            <li>Any active queue positions, appointment tokens, or saved salon lists are automatically cancelled and discarded.</li>
+            <li>If you are a salon partner, your salon desk access will be revoked and queued telemetry unlinked.</li>
+          </ul>
+        </section>
 
-        <h2 className="mb-3 mt-8 text-2xl font-serif text-[#1C1613]">Data Retention</h2>
-        <p>
-          Please note that we may retain certain transactional or operational records (such as completed booking history, invoices, and financial ledger data) where required by applicable local laws and tax regulations. This retained data will be completely anonymized and will not be linked back to any personally identifiable information.
-        </p>
-
-        <h2 className="mb-3 mt-8 text-2xl font-serif text-[#1C1613]">Processing Time</h2>
-        <p>
-          Email deletion requests are usually verified and completed within <strong>48 to 72 hours</strong>. In-app deletion requests are processed immediately. You will receive an email confirmation once the process is complete.
-        </p>
-
-        <div className="pt-8 border-t border-[#E5E0D8] text-xs text-[#8E867E]">
-          If you have any questions regarding your data privacy, please reach out to us at{" "}
-          <a href="mailto:support@snepr.in" className="text-[#D4A373] underline">
-            support@snepr.in
-          </a>
-        </div>
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold font-serif text-[#211914]">Processing Time</h2>
+          <p>
+            In-app deletion is executed immediately. Email deletion requests are verified and completed within <strong>24 to 48 hours</strong>.
+          </p>
+        </section>
       </div>
     </div>
   );

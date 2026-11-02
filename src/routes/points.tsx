@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { SneprWordmark } from "@/components/SneprWordmark";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Award, Gift, Sparkles, CheckCircle2, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/points")({
@@ -18,21 +19,11 @@ export function SneprPointsPage() {
   const [points] = useState(150);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410]">
-      {/* Header */}
-      <header className="border-b border-[#E9E1D7] bg-[#FAF7F2] sticky top-0 z-20">
-        <div className="max-w-[760px] h-16 mx-auto px-4 sm:px-6 flex items-center justify-between">
-          <Link to="/" className="flex items-center" aria-label="Snepr home">
-            <SneprWordmark height={30} color="#1B1410" />
-          </Link>
-          <Link to="/profile" className="text-xs font-semibold text-[#7A4B29] hover:underline">
-            My Account
-          </Link>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col justify-between">
+      <Navbar />
 
       {/* Main Content */}
-      <main className="max-w-[760px] mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <main className="max-w-[760px] mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-16 space-y-6 w-full">
         {/* Points Balance Card */}
         <div className="bg-[#1B1410] text-[#FFFDFA] rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden">
           <div className="relative z-10">
@@ -111,6 +102,7 @@ export function SneprPointsPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

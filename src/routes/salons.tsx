@@ -23,10 +23,10 @@ export const Route = createFileRoute("/salons")({
 
 export function ForSalonsPage() {
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410]">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-16 space-y-16 w-full">
         {/* Hero */}
         <div className="text-center max-w-2xl mx-auto space-y-4">
           <span className="inline-block px-3 py-1 rounded-full bg-[#F5EEE7] text-[11px] font-bold uppercase tracking-widest text-[#7A4B29]">

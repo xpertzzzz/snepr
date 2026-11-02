@@ -169,7 +169,7 @@ export function PartnerApplicationStatusPage() {
               to="/live"
               className="px-5 py-3 rounded-xl border border-[#E9E1D7] bg-white hover:bg-[#FAF7F2] text-[#1B1410] text-xs font-semibold transition-colors"
             >
-              Back to Explore
+              Back to Live Queues
             </Link>
           </div>
         </div>

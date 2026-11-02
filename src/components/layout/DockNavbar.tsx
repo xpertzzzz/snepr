@@ -33,7 +33,7 @@ export function DockNavbar({ activeTab }: DockNavbarProps) {
         }`}
       >
         <Compass className="w-5 h-5" />
-        <span className="text-[10px] font-medium tracking-tight">Explore</span>
+        <span className="text-[10px] font-medium tracking-tight">Live</span>
       </Link>
 
       {/* 2. AI STUDIO */}

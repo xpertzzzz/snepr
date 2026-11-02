@@ -14,13 +14,15 @@
     <!-- Global & Buffer browser polyfill -->
     <script>
       (function() {
-        window.global = window;
-        globalThis.global = window;
-        var BufferPolyfill = {
-          isBuffer: function(obj) { return Boolean(obj && obj._isBuffer); },
+        var g = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : this;
+        g.global = g;
+        if (typeof window !== "undefined") window.global = window;
+        var B = {
+          isBuffer: function(obj) { return Boolean(obj && (obj._isBuffer || obj instanceof Uint8Array)); },
           from: function(x) {
             if (typeof x === "string") return new TextEncoder().encode(x);
             if (x instanceof Uint8Array) return x;
+            if (Array.isArray(x)) return new Uint8Array(x);
             return new Uint8Array(x || []);
           },
           alloc: function(n) { return new Uint8Array(n || 0); },
@@ -34,9 +36,11 @@
           },
           byteLength: function(str) { return new TextEncoder().encode(str || "").length; }
         };
-        window.Buffer = window.Buffer || BufferPolyfill;
-        globalThis.Buffer = window.Buffer;
+        g.Buffer = g.Buffer || B;
+        if (typeof window !== "undefined") window.Buffer = g.Buffer;
       })();
+      var Buffer = (typeof window !== "undefined" ? window.Buffer : null);
+      var global = (typeof window !== "undefined" ? window : globalThis);
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

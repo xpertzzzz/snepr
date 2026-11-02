@@ -35,10 +35,10 @@ export function HelpCenterPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410]">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col justify-between">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-10">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 sm:pt-32 pb-16 space-y-10 w-full">
         <div className="text-center max-w-xl mx-auto space-y-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-[#7A4B29] bg-[#F5EEE7] px-3 py-1 rounded-full">
             Support & Knowledgebase

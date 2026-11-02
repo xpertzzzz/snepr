@@ -54,19 +54,22 @@ function ContactPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-24">
-      <div className="mb-16 max-w-2xl">
-        <h1 className="mb-4 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16 w-full">
+      <div className="mb-12 max-w-2xl">
+        <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c4d27] bg-[#f2e6dc] px-3 py-1 rounded-full">
           Get in touch
+        </span>
+        <h1 className="mt-3 mb-4 text-3xl sm:text-4xl font-extrabold tracking-tight text-[#211914] font-serif">
+          We'd love to hear from you.
         </h1>
-        <p className="text-lg text-ink-soft">
-          Have questions about Snepr? Whether you're a salon owner looking to partner with us or a user needing help, our team is here for you.
+        <p className="text-base text-[#81736a]">
+          Have questions about Snepr? Whether you're a salon owner looking to partner with us or a customer with questions, our Bhubaneswar team is here for you.
         </p>
       </div>
 
-      <div className="grid gap-12 lg:grid-cols-2 lg:gap-24">
+      <div className="grid gap-12 lg:grid-cols-2 lg:gap-16">
         {/* Contact Form */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
+        <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 shadow-xs sm:p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid gap-6 sm:grid-cols-2">
@@ -75,9 +78,9 @@ function ContactPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel className="text-xs font-bold text-[#211914]">Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your Name" {...field} />
+                        <Input placeholder="Your Name" className="bg-[#f7f3ed] border-[#e9dfd5] text-[#211914] focus-visible:ring-[#8c4d27]" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -88,9 +91,9 @@ function ContactPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel className="text-xs font-bold text-[#211914]">Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="you@example.com" type="email" {...field} />
+                        <Input placeholder="you@example.com" type="email" className="bg-[#f7f3ed] border-[#e9dfd5] text-[#211914] focus-visible:ring-[#8c4d27]" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -103,9 +106,9 @@ function ContactPage() {
                 name="subject"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Subject</FormLabel>
+                    <FormLabel className="text-xs font-bold text-[#211914]">Subject</FormLabel>
                     <FormControl>
-                      <Input placeholder="How can we help?" {...field} />
+                      <Input placeholder="How can we help?" className="bg-[#f7f3ed] border-[#e9dfd5] text-[#211914] focus-visible:ring-[#8c4d27]" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -117,11 +120,11 @@ function ContactPage() {
                 name="message"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Message</FormLabel>
+                    <FormLabel className="text-xs font-bold text-[#211914]">Message</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Tell us more about your inquiry..."
-                        className="min-h-[120px] resize-y"
+                        className="min-h-[120px] resize-y bg-[#f7f3ed] border-[#e9dfd5] text-[#211914] focus-visible:ring-[#8c4d27]"
                         {...field}
                       />
                     </FormControl>
@@ -130,7 +133,11 @@ function ContactPage() {
                 )}
               />
 
-              <Button type="submit" className="w-full sm:w-auto" disabled={form.formState.isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full sm:w-auto bg-[#8c4d27] hover:bg-[#6e3717] text-white font-bold px-8 py-3 rounded-xl cursor-pointer"
+                disabled={form.formState.isSubmitting}
+              >
                 {form.formState.isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </form>
@@ -138,45 +145,54 @@ function ContactPage() {
         </div>
 
         {/* Contact Information */}
-        <div className="flex flex-col gap-8">
-          <div>
-            <h3 className="mb-6 text-xl font-semibold text-ink">Contact Information</h3>
-            <div className="space-y-6 text-ink-soft">
+        <div className="flex flex-col gap-6">
+          <div className="rounded-3xl border border-[#e9dfd5] bg-[#fffdfa] p-6 sm:p-8 space-y-6 shadow-xs">
+            <h3 className="text-lg font-bold font-serif text-[#211914]">Contact Details</h3>
+            <div className="space-y-5 text-sm text-[#81736a]">
               <div className="flex items-start gap-4">
-                <Mail className="mt-1 h-5 w-5 shrink-0 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-[#f7f3ed] border border-[#e9dfd5] flex items-center justify-center text-[#8c4d27] shrink-0">
+                  <Mail className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="font-medium text-ink">Email Us</p>
-                  <a href="mailto:hello@snepr.in" className="hover:text-primary">hello@snepr.in</a>
+                  <p className="font-bold text-[#211914]">Email Us</p>
+                  <a href="mailto:support@snepr.in" className="hover:text-[#8c4d27] transition-colors">support@snepr.in</a>
                 </div>
               </div>
               
               <div className="flex items-start gap-4">
-                <Phone className="mt-1 h-5 w-5 shrink-0 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-[#f7f3ed] border border-[#e9dfd5] flex items-center justify-center text-[#8c4d27] shrink-0">
+                  <Phone className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="font-medium text-ink">Call Us</p>
-                  <p>Mon-Fri from 9am to 6pm</p>
-                  <a href="tel:+919876543210" className="hover:text-primary">+91 98765 43210</a>
+                  <p className="font-bold text-[#211914]">Customer & Partner Support</p>
+                  <p className="text-xs">Mon–Sat from 9am to 8pm</p>
+                  <a href="tel:+919237362221" className="hover:text-[#8c4d27] transition-colors">+91 92373 62221</a>
                 </div>
               </div>
               
               <div className="flex items-start gap-4">
-                <MapPin className="mt-1 h-5 w-5 shrink-0 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-[#f7f3ed] border border-[#e9dfd5] flex items-center justify-center text-[#8c4d27] shrink-0">
+                  <MapPin className="h-5 w-5" />
+                </div>
                 <div>
-                  <p className="font-medium text-ink">HQ</p>
-                  <p>Bhubaneswar<br />Odisha, India</p>
+                  <p className="font-bold text-[#211914]">City Operations</p>
+                  <p>Patia & KIIT Road Hub<br />Bhubaneswar, Odisha – 751024</p>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="rounded-2xl bg-surface p-6 sm:p-8">
-            <h3 className="mb-2 text-lg font-semibold text-ink">For Salon Owners</h3>
-            <p className="mb-4 text-sm text-ink-soft">
-              Want to see Snepr in action? Schedule a quick 15-minute demo with our team to see how we can help manage your queues.
+          <div className="rounded-3xl border border-[#e9dfd5] bg-[#f2e6dc]/60 p-6 sm:p-8 space-y-3">
+            <h3 className="text-base font-bold font-serif text-[#211914]">For Salon Owners</h3>
+            <p className="text-xs text-[#81736a] leading-relaxed">
+              Want to eliminate waiting rooms and take control of your chairs? Onboarding takes less than 5 minutes.
             </p>
-            <Button variant="outline" className="w-full" onClick={() => toast("Demo scheduling coming soon!")}>
-              Book a Demo
-            </Button>
+            <a
+              href="/partner/register"
+              className="inline-block mt-2 px-6 py-2.5 rounded-xl bg-[#211914] text-white text-xs font-bold hover:bg-[#8c4d27] transition-colors"
+            >
+              Register Your Salon →
+            </a>
           </div>
         </div>
       </div>

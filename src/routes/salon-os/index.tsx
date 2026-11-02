@@ -96,7 +96,7 @@ export function SalonOSPage() {
               to="/live"
               className="py-2 text-xs font-semibold text-[#786B60] hover:text-[#1B1410]"
             >
-              Return to Explore
+              Return to Live Queues
             </Link>
           </div>
         </div>

@@ -236,7 +236,7 @@ export function SalonRegistrationWizard() {
               to="/live"
               className="flex-1 py-3 rounded-xl border border-[#E9E1D7] bg-white hover:bg-[#FAF7F2] text-xs font-bold text-[#1B1410] transition-colors text-center"
             >
-              Back to Explore
+              Back to Live Queues
             </Link>
           </div>
         </div>

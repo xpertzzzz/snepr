@@ -299,7 +299,6 @@ export function SneprLandingPageExact() {
             sn<i>≡</i>pr
           </Link>
           <nav className="links" aria-label="Main">
-            <Link to="/live">Explore</Link>
             <Link to="/live">Live Queues</Link>
             <a href="#ai">AI Studio</a>
             <a href="#how">How it works</a>
@@ -335,9 +334,6 @@ export function SneprLandingPageExact() {
         >
           ✕
         </button>
-        <Link to="/live" onClick={() => setMobileMenuOpen(false)}>
-          Explore
-        </Link>
         <Link to="/live" onClick={() => setMobileMenuOpen(false)}>
           Live Queues
         </Link>
@@ -382,7 +378,7 @@ export function SneprLandingPageExact() {
                       Find a salon near you
                     </Link>
                     <Link className="btn btn-out" to="/live">
-                      Explore live queues
+                      Live queues
                     </Link>
                     <Link className="own" to="/salons">
                       For salon owners ↗
@@ -1262,9 +1258,6 @@ export function SneprLandingPageExact() {
             <div>
               <h5>CUSTOMERS</h5>
               <ul>
-                <li>
-                  <Link to="/live">Explore salons</Link>
-                </li>
                 <li>
                   <Link to="/live">Live queues</Link>
                 </li>
