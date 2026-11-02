@@ -33,3 +33,4 @@ export class SalonsController {
     return this.salonsService.submitClaim(body);
   }
 }
+

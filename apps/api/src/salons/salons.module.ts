@@ -8,3 +8,4 @@ import { SalonsController } from "./salons.controller";
   exports: [SalonsService],
 })
 export class SalonsModule {}
+

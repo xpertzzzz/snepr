@@ -55,3 +55,4 @@ export interface NearbySalonsQueryDto {
   locality?: string;
   query?: string;
 }
+

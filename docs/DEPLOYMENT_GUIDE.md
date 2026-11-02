@@ -83,3 +83,4 @@ All 4 roles are configured for testing and validation on `/login`:
 - **Barber Staff:** `staff@snepr.demo` (Auto-routes to `/staff`)
 - **Super Administrator:** `admin@snepr.demo` (Auto-routes to `/admin`)
 - **Universal Demo Password:** `SneprDemo@2026`
+

@@ -55,3 +55,4 @@ export class QueueController {
     return this.queueService.cancelToken(id, body?.reason);
   }
 }
+

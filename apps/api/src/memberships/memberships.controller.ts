@@ -25,3 +25,4 @@ export class MembershipsController {
     return this.membershipsService.assignChair(id, body.chairId);
   }
 }
+

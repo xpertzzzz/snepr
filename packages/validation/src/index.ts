@@ -85,3 +85,4 @@ export const registerSalonSchema = z.object({
   openTime: z.string().default("09:00"),
   closeTime: z.string().default("21:00"),
 });
+

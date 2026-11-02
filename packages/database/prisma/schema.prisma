@@ -301,3 +301,4 @@ model PointTransaction {
 
   @@map("point_transactions")
 }
+

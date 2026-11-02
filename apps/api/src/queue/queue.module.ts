@@ -8,3 +8,4 @@ import { QueueController } from "./queue.controller";
   exports: [QueueService],
 })
 export class QueueModule {}
+

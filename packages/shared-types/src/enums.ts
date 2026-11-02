@@ -66,3 +66,4 @@ export enum QueueEventType {
   TOKEN_CANCELLED = "TOKEN_CANCELLED",
   CHAIR_REASSIGNED = "CHAIR_REASSIGNED",
 }
+

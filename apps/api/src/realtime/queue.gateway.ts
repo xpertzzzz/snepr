@@ -70,3 +70,4 @@ export class QueueGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.to(`salon:${salonId}`).emit("chair:status_changed", chair);
   }
 }
+

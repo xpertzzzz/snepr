@@ -64,3 +64,4 @@ emailWorker.on("failed", (job, err) => {
 });
 
 console.log("🚀 Snepr BullMQ background worker active and listening on queues: email-queue, notification-queue, analytics-queue.");
+

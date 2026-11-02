@@ -17,7 +17,7 @@ function MarketingLayout() {
   return (
     <>
       <Navbar />
-      <div className="pt-20 sm:pt-24 min-h-screen bg-[#f7f3ed] text-[#211914] flex flex-col">
+      <div className="pt-24 sm:pt-28 min-h-screen bg-[#f7f3ed] text-[#211914] flex flex-col">
         <Outlet />
       </div>
       <Footer />

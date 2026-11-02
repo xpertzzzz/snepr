@@ -7,3 +7,4 @@ import { QueueGateway } from "./queue.gateway";
   exports: [QueueGateway],
 })
 export class RealtimeModule {}
+

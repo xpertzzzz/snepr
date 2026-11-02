@@ -8,3 +8,4 @@ import { ChairsController } from "./chairs.controller";
   exports: [ChairsService],
 })
 export class ChairsModule {}
+

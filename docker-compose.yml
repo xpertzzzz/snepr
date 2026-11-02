@@ -36,3 +36,4 @@ services:
 volumes:
   snepr_pg_data:
   snepr_redis_data:
+

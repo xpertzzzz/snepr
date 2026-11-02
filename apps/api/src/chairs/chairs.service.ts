@@ -88,3 +88,4 @@ export class ChairsService {
     throw new NotFoundException(`Chair '${chairId}' not found`);
   }
 }
+

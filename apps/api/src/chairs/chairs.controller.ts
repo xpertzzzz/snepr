@@ -23,3 +23,4 @@ export class ChairsController {
     return this.chairsService.updateChairStatus(id, body.status, body.minutesRemaining);
   }
 }
+

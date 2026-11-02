@@ -26,3 +26,4 @@ jobs:
 
       - name: Typecheck and Build Web Client
         run: npm run build
+
