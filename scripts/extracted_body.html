@@ -1,0 +1,119 @@
+
+<header class="hero" id="top">
+ <div class="hero-head">
+  <a class="brand" href="#top" aria-label="Snepr home"><img src="/snepr-logo-transparent.png" alt="sn≡pr"></a>
+  <nav class="hero-nav" id="navlinks">
+   <a href="#discover">Explore</a><a href="#discover">Live Queues</a><a href="#ai">AI Studio</a><a href="#how">How it works</a><a href="#salons">For Salons</a><a href="#pricing">Pricing</a>
+  </nav>
+  <div class="head-actions"><a class="btn" href="#signin">Sign in</a><a class="btn fill" href="#discover">Find a Salon ↗</a><button class="menu" id="menu" aria-label="Open navigation">☰</button></div>
+ </div>
+ <div class="hero-main"><div class="hero-content">
+  <div class="eyebrow">Live salon discovery · Bhubaneswar</div>
+  <h1>Never wait in line<br><span>at a salon again.</span></h1>
+  <p class="hero-desc">Check live chair wait times from home. Save your place remotely and arrive when your barber is ready. Know before you go.</p>
+  <div class="hero-ctas"><a class="btn fill" href="#discover">Find a salon near you ↗</a><a class="btn" href="#discover">Explore live queues</a></div>
+  <a class="owner-link" href="#salons">For salon owners ↗</a>
+ </div></div>
+ <div class="hero-art"></div>
+ <div class="hero-bottom wrap"><span>sn≡pr · Bhubaneswar</span><span class="scrollline">Scroll to explore</span><span>Know before you go</span></div>
+</header>
+
+<section class="cut-scene" id="cutScene" aria-label="A pair of scissors follows a curved strand of hair and cuts it as you scroll">
+ <div class="cut-sticky">
+  <div class="cut-backdrop"></div>
+  <div class="cut-label">A little precision. A lot less waiting.</div>
+  <div class="cut-stage">
+   <svg class="hair-svg" viewBox="0 0 1000 590" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <defs><linearGradient id="hairGradient" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#e5c6a7"/><stop offset=".48" stop-color="#a77a58"/><stop offset="1" stop-color="#5d4030"/></linearGradient></defs>
+    <path id="hairPath" class="hair-line" stroke="url(#hairGradient)" d="M80 470 C210 450 235 155 430 185 S650 470 790 350 S850 120 940 115"/>
+    <path class="hair-line thin" d="M80 458 C205 438 246 168 430 197 S650 481 790 362 S852 133 940 128"/>
+    <path class="hair-line thin" d="M82 482 C220 465 225 140 425 173 S648 454 780 337 S846 108 936 101"/>
+    <path id="cutHair" class="hair-cut" d="M80 470 C210 450 235 155 430 185 S650 470 790 350 S850 120 940 115"/>
+    <path id="looseHair" d="M80 470 C210 450 235 155 430 185 S650 470 790 350 S850 120 940 115" fill="none" stroke="#e6c7a7" stroke-width="9" stroke-linecap="round" opacity="0"/>
+   </svg>
+   <div class="scissor-rig" id="scissorRig" aria-hidden="true">
+    <svg viewBox="0 0 190 150">
+     <g class="blade-a" id="bladeA"><circle class="scissor-metal" cx="48" cy="111" r="28"/><circle class="scissor-dark" cx="48" cy="111" r="19"/><path class="scissor-metal" d="M68 94 Q105 62 171 12 Q183 4 187 15 Q190 24 178 31 L80 108"/></g>
+     <g class="blade-b" id="bladeB"><circle class="scissor-metal" cx="48" cy="39" r="28"/><circle class="scissor-dark" cx="48" cy="39" r="19"/><path class="scissor-metal" d="M68 56 Q105 88 171 138 Q183 146 187 135 Q190 126 178 119 L80 42"/></g>
+     <circle cx="79" cy="76" r="7" fill="#c58d65" stroke="#f1e4d5" stroke-width="2"/>
+    </svg>
+   </div>
+  </div>
+  <div class="cut-copy" id="cutCopy"><div class="cut-kicker">Scroll to see the craft</div><h2>One smooth motion.<br><em>A clean cut.</em></h2><p>A small detail can change the whole look. Keep scrolling and watch the scissors trace the curve, close through the strand and leave a clean finish.</p></div>
+  <div class="cut-progress"><i id="cutProgress"></i></div>
+ </div>
+</section>
+
+<main>
+<section class="intro-strip"><div class="wrap"><div class="eyebrow" style="color:#d4a17b">Live salon discovery</div><h2>Salons near you,<br><em>right now.</em></h2><p>Showing salons for Patia, Bhubaneswar. Check chair availability and wait estimates before you leave.</p></div></section>
+<section class="section" id="discover"><div class="wrap">
+ <div class="section-head reveal"><div><div class="eyebrow">⌕ &nbsp; Salons near you, right now</div><h2>Find your <em>salon.</em></h2></div><div class="live-label">● LIVE QUEUE PREVIEW</div></div>
+ <div class="area-bar"><select class="area-select" id="area"><option>Patia, Bhubaneswar</option><option>Saheed Nagar, Bhubaneswar</option><option>Jaydev Vihar, Bhubaneswar</option><option>Chandrasekharpur, Bhubaneswar</option><option>KIIT Square, Bhubaneswar</option></select><button class="btn" id="locate">Use my location</button><span class="live-label">● SAMPLE PREVIEW DATA</span></div>
+ <div class="filters" id="filters"><button class="filter active" data-filter="All">All salons</button><button class="filter" data-filter="Shortest">Shortest wait</button><button class="filter" data-filter="Available">Available now</button><button class="filter" data-filter="Top">Top rated</button><button class="filter" data-filter="Men's">Men's</button><button class="filter" data-filter="Unisex">Unisex</button><button class="filter" data-filter="Premium">Premium</button></div>
+ <div class="salon-grid" id="salonGrid"></div>
+ <p class="sample-note">SAMPLE DATA. In production, salon availability, distances and update times come from verified salon records and the live queue service.</p>
+</div></section>
+<section class="section" style="padding-top:15px"><div class="wrap">
+ <div class="section-head reveal"><div><div class="eyebrow">A closer look</div><h2>See the queue.<br><em>Feel in control.</em></h2></div><p>Switch between the customer view and the salon desk. This preview does not create a real queue entry.</p></div>
+ <div class="demo reveal">
+  <div class="tabs"><button class="tab active" data-tab="customer">Customer view</button><button class="tab" data-tab="desk">SalonOS desk</button></div>
+  <div class="demo-layout">
+   <div class="demo-copy" id="demoCopy"><div class="eyebrow">The customer side</div><h3>Choose your service. Know your place.</h3><p>Pick a service, see its duration and price, then generate a demo token with queue position and estimated wait.</p></div>
+   <div class="phone" id="customerDemo"><div class="phone-head"><b>sn≡pr</b><span>● DEMO · SAMPLE SALON</span></div>
+    <div class="service"><span>Haircut<small>25 min</small></span><b>₹150</b></div><div class="service"><span>Beard trim<small>15 min</small></span><b>₹80</b></div><div class="service"><span>Haircut + Beard<small>40 min</small></span><b>₹200</b></div><div class="service"><span>Facial<small>35 min</small></span><b>₹350</b></div>
+    <button class="btn fill" style="width:100%;margin-top:18px" id="tokenBtn">Generate demo token</button><div class="demo-token" id="token"><div><small>YOUR TOKEN</small><strong>A07</strong></div><div><small>POSITION</small><strong>#3</strong></div><div><small>EST. WAIT</small><strong>15 min</strong></div></div>
+   </div>
+   <div class="phone" id="deskDemo" style="display:none;background:#24211d;color:#f5f1e9"><div class="phone-head" style="border-color:#ffffff22"><b>SalonOS · Overview</b><span style="color:#d4a17b">● DEMO DATA</span></div><div class="metrics"><div class="metric"><small>Active chairs</small><strong>3</strong></div><div class="metric"><small>Waiting</small><strong>3</strong></div><div class="metric"><small>Next token</small><strong>A06</strong></div></div><div class="queue-row"><span>#A05 · Chair 1</span><span>In service</span></div><div class="queue-row"><span>#A06</span><span>Next</span></div><div class="queue-row"><span>#A07</span><span>Just joined</span></div><p style="font-size:10px;color:#b8afa3;line-height:1.7;margin:17px 0 0">A customer picks a service on Snepr and joins the queue for a chair.</p></div>
+  </div>
+ </div>
+</div></section>
+<section class="section" id="how"><div class="wrap">
+ <div class="section-head reveal"><div><div class="eyebrow">Simple by design</div><h2>From your couch<br>to the <em>barber chair.</em></h2></div><p>Three simple steps to make your salon visit easier.</p></div>
+ <div class="steps"><article class="step reveal"><span class="n">01</span><h3>Check the wait</h3><p>See live availability and wait estimates before you travel.</p></article><article class="step reveal delay"><span class="n">02</span><h3>Save your chair</h3><p>Select a service and join the digital queue from your phone.</p></article><article class="step reveal delay2"><span class="n">03</span><h3>Walk straight in</h3><p>Follow your token and arrive when your turn is close.</p></article></div>
+</div></section>
+<section class="ai-band" id="ai"><div class="wrap ai-layout">
+ <div class="ai-copy reveal"><div class="eyebrow" style="color:#d4a17b">AI Hair Studio · Concept</div><h2>Try the look<br>before the <em>cut.</em></h2><p>Explore hairstyles and prepare a clearer conversation with your barber.</p><ul class="ai-list"><li>Hairstyle discovery and personalised suggestions</li><li>Share a preferred style with your barber</li><li>Connect styles to salon services and pricing</li></ul><a class="btn" href="#contact" style="border-color:#d4a17b;color:#f5f1e9">Join the AI Studio waitlist ↗</a><p style="font-size:10px;color:#8f877d;margin-top:18px">Illustrated concept only, not a real AI render. Capabilities are described only once they ship.</p></div>
+ <div class="style-orbit reveal delay"><div class="style-disc"></div></div>
+</div></section>
+<section class="owner" id="salons"><div class="wrap">
+ <div class="section-head reveal"><div><div class="eyebrow">For salon owners · SalonOS</div><h2>Your salon. Your chairs.<br><em>Your customers.</em></h2></div><p>A salon operations system, separate from the free customer product. Follow one customer through a working day.</p></div>
+ <div class="owner-flow reveal"><span>01 &nbsp; Customer joins</span><i>→</i><span>02 &nbsp; Token appears</span><i>→</i><span>03 &nbsp; Barber calls next</span><i>→</i><span>04 &nbsp; Customer notified</span><i>→</i><span>05 &nbsp; Service completes</span><i>→</i><span>06 &nbsp; Review and points</span></div>
+ <div class="owner-grid reveal"><div class="owner-feature"><b>Digital queue</b>Automatic tokens</div><div class="owner-feature"><b>Chair availability</b>Service and staff assignment</div><div class="owner-feature"><b>Customer history</b>Reviews and points</div><div class="owner-feature"><b>Salon insights</b>Analytics and multi branch support</div></div>
+ <div class="owner-dashboard reveal"><div class="dash-top"><b>SalonOS · Overview</b><span style="color:#d4a17b">● DEMO DATA</span></div><div class="metrics"><div class="metric"><small>Active chairs</small><strong>3</strong></div><div class="metric"><small>Waiting</small><strong>3</strong></div><div class="metric"><small>Next token</small><strong>A06</strong></div></div><div class="queue-row"><span>#A05 · Chair 1</span><span>In service</span></div><div class="queue-row"><span>#A06</span><span>Next</span></div><div class="queue-row"><span>#A07</span><span>Just joined</span></div></div>
+ <p class="sample-note">Dashed or future capabilities are shown only if built in the backend. This is a visual product preview.</p>
+</div></section>
+<section class="section" id="points" style="padding-top:20px"><div class="wrap">
+ <div class="points reveal"><div><div class="eyebrow">Verified reviews · Snepr Points</div><h2>Reviews you can trust.<br><em>Points you can spend.</em></h2><p>Rewards are tied to verified completed visits, not the rating a customer leaves.</p><div class="wallet"><small style="font-size:9px;letter-spacing:.15em;color:#8b8176">DEMO WALLET</small><br><strong>₹0</strong><div class="stars">★★★★★</div><button class="btn fill" id="reviewBtn">Submit demo review</button><p id="reviewMsg" style="margin:12px 0 0;font-size:10px">Choose any rating. You earn 10 points either way.</p></div></div>
+ <div class="point-rules"><div class="rule"><b>01</b><span>Only verified, completed customers can review.</span></div><div class="rule"><b>02</b><span>Each eligible review earns 10 Snepr Points. 1 point = ₹1.</span></div><div class="rule"><b>03</b><span>Points can be redeemed as a service discount, up to 20% of the bill.</span></div><div class="rule"><b>04</b><span>The reward does not depend on the rating. One star earns the same as five.</span></div><p class="sample-note">PROPOSED MODEL. Verification and redemption scope to be confirmed against the backend before launch.</p></div></div>
+</div></section>
+<section class="section" id="pricing"><div class="wrap">
+ <div class="section-head reveal"><div><div class="eyebrow">SalonOS plans</div><h2>Simple pricing.<br><em>No haircut commissions.</em></h2></div><p>Monthly plans. An annual option appears only once billing supports it.</p></div>
+ <div class="pricing">
+ <article class="plan reveal"><div class="plan-tag">Base · 1 chair</div><h3>Single barber</h3><p>For independent barbers and single chair studios.</p><div class="plan-price">₹199 <small>/ month</small></div><ul><li>One active stylist chair</li><li>Real time chair countdown</li><li>Digital queue</li><li>QR standee</li><li>Basic customer alerts</li><li>Verified reviews</li></ul><a class="btn" href="#contact">Start with Base ↗</a></article>
+ <article class="plan popular reveal delay"><div class="plan-tag">Most popular · Up to 3 chairs</div><h3>Intermediate</h3><p>For growing neighbourhood salons.</p><div class="plan-price">₹400 <small>/ month</small></div><ul><li>Everything in Base</li><li>Multiple staff logins</li><li>Multi barber queue routing</li><li>WhatsApp notifications</li><li>Snepr Points loyalty listing</li><li>Peak hour analytics</li><li>Wait duration tracking</li><li>Zero commission on service revenue</li></ul><a class="btn" href="#contact">Choose Intermediate ↗</a></article>
+ <article class="plan reveal delay2"><div class="plan-tag">Pro · Unlimited chairs</div><h3>Pro</h3><p>For larger salons and multi chair operations.</p><div class="plan-price">₹449 <small>/ month</small></div><ul><li>Everything in Intermediate</li><li>Advanced AI Studio integration</li><li>Advanced analytics</li><li>Stylist performance</li><li>Revenue reporting</li><li>Featured Explore placement</li><li>Priority support</li></ul><a class="btn" href="#contact">Go Pro ↗</a></article>
+ </div><p class="sample-note">Feature lists must match backend entitlements before launch.</p>
+ <div class="calc reveal"><h3>Salon economics</h3><p>See what commission based platforms could cost your salon.</p>
+ <div class="calc-grid"><div class="field"><label>Average daily customers <b id="custVal">35</b></label><input id="customers" type="range" min="5" max="100" value="35"></div><div class="field"><label>Average service ticket <b id="ticketVal">₹350</b></label><input id="ticket" type="range" min="100" max="1500" step="50" value="350"></div><div class="field"><label>Working days per month <b id="daysVal">26</b></label><input id="days" type="range" min="10" max="31" value="26"></div></div>
+ <div class="field" style="margin-top:24px"><label>Comparison commission rate <b id="rateVal">25%</b></label><input id="rate" type="range" min="5" max="35" value="25"></div>
+ <div class="result"><div><small>Estimated monthly revenue</small><strong id="revenue">₹3,18,500</strong></div><div><small>Modelled commission</small><strong id="commission">₹79,625</strong></div><div><small>Modelled difference</small><strong id="saving">₹79,225</strong></div></div><p style="margin:14px 0 0">Illustrative model, not a guarantee of additional profit. Revenue = customers × ticket × days. Difference = modelled commission less subscription.</p>
+ </div>
+ <div class="reveal"><table class="compare"><thead><tr><th>Salon economics</th><th>Commission based platforms</th><th>Snepr SalonOS</th></tr></thead><tbody><tr><td>Pricing</td><td>Percentage of bookings</td><td>Fixed monthly subscription</td></tr><tr><td>Service revenue</td><td>Commission varies</td><td>No percentage deducted under stated plans</td></tr><tr><td>Customer relationship</td><td>Varies by platform</td><td>Direct between salon and customer</td></tr><tr><td>Queue visibility</td><td>Often appointment focused</td><td>Chair level live queue</td></tr><tr><td>Customer access</td><td>Frequently app based</td><td>Browser based, no download needed</td></tr></tbody></table></div>
+</div></section>
+<section class="section" id="faq" style="padding-top:30px"><div class="wrap faq">
+ <div class="reveal"><div class="eyebrow">Help</div><h2>Good to<br><em>know.</em></h2><p style="font-size:12px;color:var(--muted);line-height:1.8">Answers marked TBC need your real product rules before launch.</p></div>
+ <div class="faq-list reveal delay"><details><summary>Do I need to download an app?</summary><p>No. Customers can use Snepr in a browser. A native app can be offered when available.</p></details><details><summary>How do I join a live queue?</summary><p>Choose a salon and service, then join the digital queue where that salon has enabled queue joining.</p></details><details><summary>How are wait times calculated?</summary><p>Wait estimates should use the salon's active chairs, queue position and service duration. Actual wait can change as the salon operates.</p></details><details><summary>Can I cancel my token?</summary><p>Cancellation rules depend on the salon's configured queue policy. Confirm the final policy before launch.</p></details><details><summary>How do I redeem Snepr Points?</summary><p>Eligible points can be applied as a service discount under the proposed redemption rules. Final redemption flow is subject to backend support.</p></details></div>
+</div></section>
+<section class="final-cta" id="contact"><div class="wrap"><div class="eyebrow">Know before you go</div><h2>Your time is worth<br><em>more than a wait.</em></h2><p>Find a salon and check the queue. Owners can list, claim or explore SalonOS.</p><div class="final-actions"><a class="btn fill" href="#discover">Find a salon near you ↗</a><a class="btn" href="#salons">Register your salon</a><a class="btn" href="#salons">Claim your salon</a></div></div></section>
+</main>
+<footer id="footer"><div class="wrap">
+ <div class="foot-top">
+  <div class="foot-brand"><img src="/snepr-logo-transparent.png" alt="sn≡pr"><p>Live salon queues and wait times.<br>Know before you go.</p></div>
+  <div class="foot-col"><b>Customers</b><a href="#discover">Explore salons</a><a href="#discover">Live queues</a><a href="#how">Join queue</a><a href="#ai">AI Studio</a><a href="#points">Snepr Points</a></div>
+  <div class="foot-col"><b>Salon owners</b><a href="#salons">List your salon</a><a href="#salons">Claim your salon</a><a href="#salons">SalonOS</a><a href="#pricing">Pricing</a><a href="#contact">Partner dashboard</a></div>
+  <div class="foot-col"><b>Company</b><a href="#top">About Snepr</a><a href="#contact">Contact</a><a href="#faq">Help center</a></div>
+  <div class="foot-col"><b>Legal and social</b><a href="#privacy">Privacy policy</a><a href="#terms">Terms of service</a><a href="#instagram">Instagram</a></div>
+ </div>
+ <div class="foot-bottom"><span>© 2026 Snepr Technologies Inc. · Bhubaneswar</span><span>Made in Bhubaneswar</span></div>
+</div></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>

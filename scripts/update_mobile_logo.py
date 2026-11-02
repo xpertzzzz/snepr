@@ -55,3 +55,4 @@ with open('app/app/(tabs)/index.tsx', 'w', encoding='utf-8') as f:
     f.write(c_norm)
 
 print("Updated app/app/(tabs)/index.tsx with new logo image!")
+
