@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { REAL_SALONS_DATA, RealSalon } from "@/lib/real-salons";
 import "@/styles/snepr-final.css";
 
 export const Route = createFileRoute("/_marketing/")({
   head: () => ({
-    title: "sn≡pr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times",
+    title: "Snepr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times",
     meta: [
       {
         name: "description",
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/_marketing/")({
         content:
           "Salons in Bhubaneswar, Best salons in Bhubaneswar, Salon near me, Live salon queue, Salon waiting time, Barber shops in Bhubaneswar, Haircut Bhubaneswar, SalonOS",
       },
-      { property: "og:title", content: "sn≡pr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times" },
+      { property: "og:title", content: "Snepr | Best Salons in Bhubaneswar | Live Salon Queue and Waiting Times" },
       {
         property: "og:description",
         content:
@@ -30,163 +31,6 @@ export const Route = createFileRoute("/_marketing/")({
   }),
   component: SneprLandingPage,
 });
-
-interface SalonItem {
-  id: string;
-  name: string;
-  area: string;
-  locality: string;
-  type: "Men's" | "Unisex" | "Premium";
-  rating: number;
-  reviewCount: number;
-  address: string;
-  freeChairsText: string;
-  freeChairsCount: number;
-  queueCount: number;
-  waitTimeMins: number;
-  letter: string;
-  isVerified: boolean;
-  services: string[];
-}
-
-const BHUBANESWAR_SALONS: SalonItem[] = [
-  {
-    id: "scissors-edge",
-    name: "The Scissors Edge",
-    area: "Saheed Nagar",
-    locality: "Saheed Nagar",
-    type: "Unisex",
-    rating: 4.8,
-    reviewCount: 142,
-    address: "Plot 124, Janpath Road, Saheed Nagar, Bhubaneswar",
-    freeChairsText: "2 of 3 chairs free",
-    freeChairsCount: 2,
-    queueCount: 1,
-    waitTimeMins: 5,
-    letter: "T",
-    isVerified: true,
-    services: ["Haircut", "Beard Trim", "Hair Spa", "Facial"],
-  },
-  {
-    id: "urban-look",
-    name: "Urban Look Salon",
-    area: "Jaydev Vihar",
-    locality: "Jaydev Vihar",
-    type: "Men's",
-    rating: 4.6,
-    reviewCount: 98,
-    address: "Near Pal Heights, Jaydev Vihar, Bhubaneswar",
-    freeChairsText: "1 of 2 chairs free",
-    freeChairsCount: 1,
-    queueCount: 3,
-    waitTimeMins: 10,
-    letter: "U",
-    isVerified: true,
-    services: ["Barber Cut", "Beard Styling", "Head Massage"],
-  },
-  {
-    id: "style-studio",
-    name: "Style Studio by Jawed Habib",
-    area: "Patia",
-    locality: "Patia",
-    type: "Premium",
-    rating: 4.7,
-    reviewCount: 215,
-    address: "Near KIIT Square, Patia, Bhubaneswar",
-    freeChairsText: "All chairs busy",
-    freeChairsCount: 0,
-    queueCount: 5,
-    waitTimeMins: 15,
-    letter: "S",
-    isVerified: true,
-    services: ["Designer Cut", "Global Color", "Keratin", "Beard Grooming"],
-  },
-  {
-    id: "lakme-patia",
-    name: "Lakmé Salon",
-    area: "Patia",
-    locality: "Patia",
-    type: "Unisex",
-    rating: 4.9,
-    reviewCount: 310,
-    address: "District Center, Chandrasekharpur, Patia, Bhubaneswar",
-    freeChairsText: "2 chairs free",
-    freeChairsCount: 2,
-    queueCount: 0,
-    waitTimeMins: 0,
-    letter: "L",
-    isVerified: true,
-    services: ["Precision Haircut", "Bridal", "Facials", "Styling"],
-  },
-  {
-    id: "nvn-salon",
-    name: "NVN Unisex Salon",
-    area: "Patia",
-    locality: "Patia",
-    type: "Unisex",
-    rating: 4.6,
-    reviewCount: 84,
-    address: "Infocity Road, Patia, Bhubaneswar",
-    freeChairsText: "1 chair free",
-    freeChairsCount: 1,
-    queueCount: 2,
-    waitTimeMins: 5,
-    letter: "N",
-    isVerified: true,
-    services: ["Haircut", "Beard Grooming", "Cleanup"],
-  },
-  {
-    id: "green-trends",
-    name: "Green Trends Salon",
-    area: "Chandrasekharpur",
-    locality: "Chandrasekharpur",
-    type: "Unisex",
-    rating: 4.7,
-    reviewCount: 167,
-    address: "Damana Square, Chandrasekharpur, Bhubaneswar",
-    freeChairsText: "1 chair free",
-    freeChairsCount: 1,
-    queueCount: 4,
-    waitTimeMins: 12,
-    letter: "G",
-    isVerified: true,
-    services: ["Organic Hair Spa", "Haircut", "Beard Spa"],
-  },
-  {
-    id: "royale-barber",
-    name: "Royale Barber Club",
-    area: "KIIT Square",
-    locality: "KIIT Square",
-    type: "Men's",
-    rating: 4.8,
-    reviewCount: 112,
-    address: "Opposite Campus 3, KIIT Square, Bhubaneswar",
-    freeChairsText: "3 of 4 chairs free",
-    freeChairsCount: 3,
-    queueCount: 1,
-    waitTimeMins: 4,
-    letter: "R",
-    isVerified: true,
-    services: ["Fade and Taper", "Hot Towel Shave", "Beard Oil Spa"],
-  },
-  {
-    id: "ozone-studio",
-    name: "Ozone Studio and Spa",
-    area: "Nayapalli",
-    locality: "Nayapalli",
-    type: "Premium",
-    rating: 4.7,
-    reviewCount: 139,
-    address: "Near IRC Village, Nayapalli, Bhubaneswar",
-    freeChairsText: "2 chairs free",
-    freeChairsCount: 2,
-    queueCount: 2,
-    waitTimeMins: 8,
-    letter: "O",
-    isVerified: true,
-    services: ["Men Grooming", "Hair Therapy", "Detox Facial"],
-  },
-];
 
 export function SneprLandingPage() {
   const [navOpen, setNavOpen] = useState(false);
@@ -203,12 +47,12 @@ export function SneprLandingPage() {
 
   // ─── Discovery Controls ───
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocality, setSelectedLocality] = useState("All Localities");
+  const [selectedLocality, setSelectedLocality] = useState("All localities");
   const [currentFilter, setCurrentFilter] = useState("All");
   const [locating, setLocating] = useState(false);
 
   // ─── Selected Salon & Live Token Simulation State ───
-  const [selectedSalon, setSelectedSalon] = useState<SalonItem>(BHUBANESWAR_SALONS[0]);
+  const [selectedSalon, setSelectedSalon] = useState<RealSalon>(REAL_SALONS_DATA[0]);
   const [demoTab, setDemoTab] = useState<"customer" | "desk">("customer");
 
   // Dynamic Customer Token Journey State
@@ -217,7 +61,7 @@ export function SneprLandingPage() {
   const [tokenCode, setTokenCode] = useState<string>("A07");
   const [tokenAhead, setTokenAhead] = useState<number>(2);
   const [tokenWait, setTokenWait] = useState<number>(12);
-  const [assignedChair, setAssignedChair] = useState<string>("Chair 02");
+  const assignedChair = "Chair 02";
 
   // Dynamic SalonOS Desk State
   const [deskChair2Status, setDeskChair2Status] = useState<"ready" | "serving">("ready");
@@ -229,18 +73,15 @@ export function SneprLandingPage() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistSubmitted, setWaitlistSubmitted] = useState(false);
 
-  // ─── Rewards Calculator State ───
-  const [calcSpend, setCalcSpend] = useState(400);
-
-  // Filter salons logic
+  // Filter salons logic using real backend data store
   const displayedSalons = useMemo(() => {
-    let list = [...BHUBANESWAR_SALONS];
+    let list = [...REAL_SALONS_DATA];
 
-    if (selectedLocality !== "All Localities") {
-      list = list.filter(
-        (s) =>
-          s.locality.toLowerCase() === selectedLocality.toLowerCase() ||
-          s.area.toLowerCase() === selectedLocality.toLowerCase()
+    if (selectedLocality !== "All localities") {
+      const target = selectedLocality.toLowerCase();
+      list = list.filter((s) =>
+        s.areaName.toLowerCase().includes(target) ||
+        s.areaSlug.toLowerCase().includes(target)
       );
     }
 
@@ -249,20 +90,25 @@ export function SneprLandingPage() {
       list = list.filter(
         (s) =>
           s.name.toLowerCase().includes(q) ||
-          s.area.toLowerCase().includes(q) ||
-          s.type.toLowerCase().includes(q) ||
-          s.services.some((srv) => srv.toLowerCase().includes(q))
+          s.areaName.toLowerCase().includes(q) ||
+          s.category.toLowerCase().includes(q) ||
+          (s.address && s.address.toLowerCase().includes(q)) ||
+          s.services.some((srv) => srv.name.toLowerCase().includes(q))
       );
     }
 
     if (currentFilter === "Shortest") {
-      list.sort((a, b) => a.waitTimeMins - b.waitTimeMins);
+      list.sort((a, b) => a.waitTime - b.waitTime);
     } else if (currentFilter === "Top") {
-      list.sort((a, b) => b.rating - a.rating);
+      list.sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
     } else if (currentFilter === "Available") {
-      list = list.filter((s) => s.waitTimeMins === 0 || s.freeChairsCount > 0);
-    } else if (["Men's", "Unisex", "Premium"].includes(currentFilter)) {
-      list = list.filter((s) => s.type === currentFilter);
+      list = list.filter((s) => s.availableChairs > 0 || s.waitTime === 0);
+    } else if (currentFilter === "Men\'s") {
+      list = list.filter((s) => s.category.toLowerCase().includes("men") || s.name.toLowerCase().includes("barber"));
+    } else if (currentFilter === "Unisex") {
+      list = list.filter((s) => s.category.toLowerCase().includes("unisex"));
+    } else if (currentFilter === "Premium") {
+      list = list.filter((s) => s.category.toLowerCase().includes("premium") || s.category.toLowerCase().includes("spa") || parseFloat(s.rating || "0") >= 4.8);
     }
 
     return list;
@@ -290,15 +136,16 @@ export function SneprLandingPage() {
   };
 
   // Join Queue action: updates selected salon & opens customer demo
-  const handleJoinQueue = (salon: SalonItem) => {
+  const handleJoinQueue = (salon: RealSalon) => {
     setSelectedSalon(salon);
-    const newCode = salon.letter + "0" + (salon.queueCount + 1);
+    const initial = salon.name.charAt(0).toUpperCase() || "A";
+    const newCode = initial + "0" + ((salon.waitingCount || 0) + 1);
     setTokenCode(newCode);
-    setTokenAhead(salon.queueCount);
-    setTokenWait(salon.waitTimeMins || 5);
+    setTokenAhead(salon.waitingCount || 0);
+    setTokenWait(salon.waitTime || 5);
     setCustomerJourneyStage(2);
     setDemoTab("customer");
-    notify(`Joined queue at ${salon.name}! Generated token #${newCode}. See live token card below.`);
+    notify(`Joined queue at ${salon.name}! Generated Demo Token #${newCode}. See live token card below.`);
 
     const demoSection = document.getElementById("demoSection");
     if (demoSection) {
@@ -306,9 +153,9 @@ export function SneprLandingPage() {
     }
   };
 
-  // Generate New Demo Token
+  // Generate New Demo Token: generates different sequential/varied token
   const handleGenerateNewToken = () => {
-    const letters = ["A", "B", "C", "S"];
+    const letters = ["A", "B", "C", "S", "R"];
     const rndLetter = letters[Math.floor(Math.random() * letters.length)];
     const rndNum = Math.floor(Math.random() * 9) + 1;
     const newCode = `${rndLetter}0${rndNum}`;
@@ -319,36 +166,52 @@ export function SneprLandingPage() {
     setTokenAhead(newAhead);
     setTokenWait(newWait);
     setCustomerJourneyStage(2);
-    notify(`New token #${newCode} created for ${selectedSalon.name}. Estimated wait is ${newWait} minutes.`);
+    notify(`Generated Demo Token #${newCode} for ${selectedSalon.name}. Estimated wait is ${newWait} minutes.`);
   };
 
-  // Simulate Barber Call: advances journey
+  // Simulate Barber Call: advances customer queue journey
   const handleSimulateBarberCall = () => {
     if (customerJourneyStage === 2) {
       setCustomerJourneyStage(3); // Your turn / Barber calling
-      notify(`Stylist at ${assignedChair} is calling Token #${tokenCode}! Demo alert: In production, customer receives instant SMS and WhatsApp notice.`);
+      setTokenAhead(0);
+      setTokenWait(0);
+      notify("Demo: Customer called to Chair 02.");
     } else if (customerJourneyStage === 3) {
       setCustomerJourneyStage(4); // In chair
-      notify(`Token #${tokenCode} is seated in ${assignedChair}. Service in progress.`);
+      notify(`Demo: Token #${tokenCode} is seated in ${assignedChair}. Service in progress.`);
+    } else if (customerJourneyStage === 4) {
+      setCustomerJourneyStage(5); // Completed
+      notify("Demo: Service completed! Customer eligible for 10 Snepr Points.");
     } else {
       setCustomerJourneyStage(2);
-      notify(`Reset demo journey to Waiting for Token #${tokenCode}.`);
+      setTokenAhead(2);
+      setTokenWait(12);
+      notify(`Demo: Reset queue state to waiting for Token #${tokenCode}.`);
     }
   };
 
-  // SalonOS Desk: Call Next Token
+  // SalonOS Desk: Call Next Token (syncs customer demo & updates desk)
   const handleDeskCallNextToken = () => {
     if (deskChair2Status === "ready") {
       setDeskChair2Status("serving");
       setDeskChair2Client(`Prakash Jena serving #${deskNextToken}`);
       setDeskServedCount((prev) => prev + 1);
-      setCustomerJourneyStage(3); // Syncs customer view!
-      notify(`Chair 02 called Token #${deskNextToken}! Customer phone notified to step in.`);
-      setDeskNextToken("A08");
+      // Sync customer view
+      setTokenCode(deskNextToken);
+      setCustomerJourneyStage(3);
+      setTokenAhead(0);
+      setTokenWait(0);
+      notify("Demo: Customer called to Chair 02.");
+
+      // Advance desk next token
+      const nextDeskList = ["A08", "A09", "B01", "B02", "C01"];
+      const nextT = nextDeskList[(deskServedCount) % nextDeskList.length];
+      setDeskNextToken(nextT);
     } else {
       setDeskChair2Status("ready");
       setDeskChair2Client("Ready for next customer");
-      notify("Chair 02 completed service. Chair is now open for next customer.");
+      setCustomerJourneyStage(4);
+      notify("Demo: Chair 02 service completed. Chair is now open for next customer.");
     }
   };
 
@@ -360,84 +223,100 @@ export function SneprLandingPage() {
   const bladeBRef = useRef<SVGGElement>(null);
   const cutHairRef = useRef<SVGPathElement>(null);
   const looseHairRef = useRef<SVGPathElement>(null);
-  const cutProgressRef = useRef<HTMLElement>(null);
   const cutCopyRef = useRef<HTMLDivElement>(null);
+  const cutProgressRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const scene = cutSceneRef.current;
     const path = hairPathRef.current;
     const rig = scissorRigRef.current;
-    const a = bladeARef.current;
-    const b = bladeBRef.current;
-    const cut = cutHairRef.current;
-    const loose = looseHairRef.current;
-    const progressBar = cutProgressRef.current;
+    const bladeA = bladeARef.current;
+    const bladeB = bladeBRef.current;
+    const cutHair = cutHairRef.current;
+    const looseHair = looseHairRef.current;
     const copy = cutCopyRef.current;
+    const progress = cutProgressRef.current;
 
-    if (!scene || !path || !rig || !a || !b || !cut || !loose || !progressBar || !copy) return;
-
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      const len = path.getTotalLength();
-      cut.style.strokeDasharray = String(len);
-      cut.style.strokeDashoffset = "0";
+    if (!scene || !path || !rig || !bladeA || !bladeB || !cutHair || !looseHair || !copy || !progress) {
       return;
     }
 
-    const length = path.getTotalLength();
-    cut.style.strokeDasharray = String(length);
-    cut.style.strokeDashoffset = String(length);
+    const totalLen = path.getTotalLength();
+    cutHair.style.strokeDasharray = `${totalLen}`;
+    cutHair.style.strokeDashoffset = "0";
 
-    let scheduled = false;
+    let rafId: number | null = null;
 
-    function frame() {
-      if (!scene || !path || !rig || !a || !b || !cut || !loose || !progressBar || !copy) return;
-      const rect = scene.getBoundingClientRect();
-      const travel = scene.offsetHeight - window.innerHeight;
-      if (travel <= 0) return;
+    const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
-      const p = Math.max(0, Math.min(1, -rect.top / travel));
-      const travelP = Math.max(0, Math.min(1, (p - 0.08) / 0.76));
-      const point = path.getPointAtLength(length * travelP);
-      const ahead = path.getPointAtLength(Math.min(length, length * travelP + 2));
-      const angle = (Math.atan2(ahead.y - point.y, ahead.x - point.x) * 180) / Math.PI;
+    const update = () => {
+      if (rafId) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        const rect = scene.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const range = rect.height - vh;
+        const rawP = range > 0 ? (0 - rect.top) / range : 0;
+        const p = clamp(rawP, 0, 1);
 
-      const stage = scene.querySelector(".cut-stage");
-      if (stage) {
-        const box = stage.getBoundingClientRect();
-        const scaleX = box.width / 1000;
-        const scaleY = box.height / 590;
-        const x = point.x * scaleX - 95;
-        const y = point.y * scaleY - 75;
-        rig.style.transform = `translate(${x}px,${y}px) rotate(${angle}deg)`;
-      }
+        progress.style.width = `${p * 100}%`;
 
-      const cutStart = Math.max(0, Math.min(length, length * (travelP - 0.035)));
-      cut.style.strokeDashoffset = String(length - cutStart);
+        // Hair length and position
+        const cutPoint = totalLen * clamp(p * 1.05, 0, 1);
+        cutHair.style.strokeDashoffset = `${cutPoint}`;
 
-      const snip = Math.max(0, Math.min(1, (p - 0.48) / 0.18));
-      const open = 1 - snip;
-      a.style.transform = `rotate(${-24 * open}deg)`;
-      b.style.transform = `rotate(${24 * open}deg)`;
+        const point = path.getPointAtLength(cutPoint);
+        const nextPoint = path.getPointAtLength(Math.min(cutPoint + 4, totalLen));
+        const angle = (Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * 180) / Math.PI;
 
-      loose.style.opacity = String(Math.max(0, (p - 0.66) * 2.5));
-      progressBar.style.height = p * 100 + "%";
-      copy.style.opacity = String(Math.max(0.25, 1 - Math.max(0, p - 0.7) * 2.5));
-      copy.style.transform = `translateY(${Math.max(0, p - 0.55) * -24}px)`;
+        // Position Scissor
+        const svgW = 1000;
+        const svgH = 590;
+        const leftPct = (point.x / svgW) * 100;
+        const topPct = (point.y / svgH) * 100;
 
-      scheduled = false;
-    }
+        rig.style.left = `${leftPct}%`;
+        rig.style.top = `${topPct}%`;
 
-    function update() {
-      if (!scheduled) {
-        window.requestAnimationFrame(frame);
-        scheduled = true;
-      }
-    }
+        // Blade Angle calculations
+        const cutStart = 0.55;
+        const cutPeak = 0.82;
+        let bladeRot = 18;
+
+        if (p >= cutStart && p <= cutPeak) {
+          const cutPhase = (p - cutStart) / (cutPeak - cutStart);
+          const closeMotion = Math.sin(cutPhase * Math.PI);
+          bladeRot = 18 - closeMotion * 17;
+        } else if (p > cutPeak) {
+          bladeRot = 2;
+        }
+
+        rig.style.transform = `translate(-50%, -50%) rotate(${angle - 15}deg)`;
+        bladeA.style.transform = `rotate(${-bladeRot}deg)`;
+        bladeB.style.transform = `rotate(${bladeRot}deg)`;
+
+        // Falling loose hair effect after cut
+        if (p > 0.78) {
+          const fall = (p - 0.78) / 0.22;
+          looseHair.style.opacity = `${clamp(1 - fall * 0.4, 0, 1)}`;
+          looseHair.style.transform = `translate(${fall * 24}px, ${fall * 95}px) rotate(${fall * 14}deg)`;
+        } else {
+          looseHair.style.opacity = "0";
+          looseHair.style.transform = "none";
+        }
+
+        // Text reveal sync
+        if (p > 0.25) {
+          copy.classList.add("visible");
+        } else {
+          copy.classList.remove("visible");
+        }
+      });
+    };
 
     window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    frame();
+    window.addEventListener("resize", update, { passive: true });
+    update();
 
     return () => {
       window.removeEventListener("scroll", update);
@@ -447,7 +326,7 @@ export function SneprLandingPage() {
 
   return (
     <>
-      {/* ─── 1. NAVIGATION HEADER ─── */}
+      {/* ─── 1. NAVBAR ─── */}
       <header className="hero" id="top">
         <div className="hero-head">
           <a className="brand" href="#top" aria-label="Snepr home">
@@ -495,7 +374,7 @@ export function SneprLandingPage() {
         <div className="hero-main">
           <div className="hero-content">
             <div className="eyebrow" style={{ letterSpacing: "0.15em", color: "#80543a", fontWeight: 700 }}>
-              Live Salon Discovery | Bhubaneswar
+              Live Salon Discovery in Bhubaneswar
             </div>
             <h1>
               Never wait in line<br />
@@ -602,7 +481,6 @@ export function SneprLandingPage() {
           </div>
 
           <div className="cut-copy" id="cutCopy" ref={cutCopyRef}>
-            <div className="cut-kicker">Scroll to see the craft</div>
             <h2>
               One smooth motion.<br />
               <em>A clean cut.</em>
@@ -628,7 +506,7 @@ export function SneprLandingPage() {
                   Find your salon. <em>Know the wait.</em>
                 </h2>
                 <p style={{ marginTop: "8px", maxWidth: "680px" }}>
-                  Explore verified salons across Bhubaneswar. Check real time chair availability and join digital queues before stepping out.
+                  Explore verified salons across Bhubaneswar. Check live chair availability and join digital queues before stepping out.
                 </p>
               </div>
             </div>
@@ -654,13 +532,15 @@ export function SneprLandingPage() {
                 onChange={(e) => setSelectedLocality(e.target.value)}
                 aria-label="Select Bhubaneswar locality"
               >
-                <option value="All Localities">All Localities | Bhubaneswar</option>
-                <option value="Patia">Patia, Bhubaneswar</option>
-                <option value="Saheed Nagar">Saheed Nagar, Bhubaneswar</option>
-                <option value="Jaydev Vihar">Jaydev Vihar, Bhubaneswar</option>
-                <option value="KIIT Square">KIIT Square, Bhubaneswar</option>
-                <option value="Chandrasekharpur">Chandrasekharpur, Bhubaneswar</option>
-                <option value="Nayapalli">Nayapalli, Bhubaneswar</option>
+                <option value="All localities">All localities</option>
+                <option value="Patia">Patia & KIIT Square</option>
+                <option value="Chandrasekharpur">Chandrasekharpur & Niladri Vihar</option>
+                <option value="Jayadev Vihar">Jayadev Vihar</option>
+                <option value="Gajapati Nagar">Gajapati Nagar</option>
+                <option value="Saheed Nagar">Saheed Nagar</option>
+                <option value="Nayapalli">Nayapalli</option>
+                <option value="Rasulgarh">Rasulgarh</option>
+                <option value="Khandagiri">Khandagiri</option>
               </select>
 
               <button className="btn" id="locate" onClick={handleLocate}>
@@ -696,46 +576,79 @@ export function SneprLandingPage() {
                   <article className="salon" key={s.id}>
                     <div className="salon-top">
                       <div className="avatar flex items-center justify-center relative">
-                        <span className="font-bold text-lg">{s.letter}</span>
-                        <img
-                          src="/snepr-logo-square-transparent.png"
-                          alt="Verified Snepr Salon"
-                          className="w-4 h-4 absolute -bottom-1 -right-1 rounded-full bg-[#1d1b17]/10"
-                        />
+                        <span className="font-bold text-lg">{s.name.charAt(0)}</span>
+                        {s.verificationStatus === "verified" && (
+                          <img
+                            src="/snepr-logo-square-transparent.png"
+                            alt="Verified Snepr Salon"
+                            title="Verified Snepr Salon"
+                            className="w-4 h-4 absolute -bottom-1 -right-1 rounded-full bg-[#1d1b17]/10"
+                          />
+                        )}
                       </div>
-                      <span className="open" style={{ fontWeight: 700 }}>● Open</span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        {s.verificationStatus === "verified" && (
+                          <span style={{ fontSize: "11px", fontWeight: 700, padding: "2px 8px", borderRadius: "99px", background: "rgba(112, 71, 47, 0.1)", color: "#70472f" }}>
+                            Verified
+                          </span>
+                        )}
+                        <span className={s.operationalStatus === "active" ? "open" : "closed"} style={{ fontWeight: 700 }}>
+                          {s.operationalStatus === "active" ? "● Open" : "● Closed"}
+                        </span>
+                      </div>
                     </div>
-                    <h3><a href={`/salon/${s.id}`} style={{ color: "inherit", textDecoration: "none" }}>{s.name}</a></h3>
+                    <h3>
+                      <a href={`/salon/${s.slug}`} style={{ color: "inherit", textDecoration: "none" }}>
+                        {s.name}
+                      </a>
+                    </h3>
                     <div className="salon-meta">
-                      {s.area} · {s.type} · ★ {s.rating.toFixed(1)} ({s.reviewCount})
+                      {s.areaName} · {s.category} · ★ {s.rating || "4.8"} {s.reviewCount ? `(${s.reviewCount})` : ""}
                     </div>
-                    <div style={{ fontSize: "12px", color: "#6b5e52", marginBottom: "12px" }}>
-                      {s.address}
+                    <div style={{ fontSize: "12px", color: "#6b5e52", margin: "6px 0 12px", lineHeight: "1.5" }}>
+                      {s.address || "Address unavailable"}
                     </div>
                     <div className="salon-stats">
                       <div>
-                        <strong>{s.freeChairsCount}</strong>
+                        <strong>{s.availableChairs !== undefined ? s.availableChairs : "—"}</strong>
                         <span>Chairs free</span>
                       </div>
                       <div>
-                        <strong>{s.queueCount}</strong>
+                        <strong>{s.waitingCount !== undefined ? s.waitingCount : "—"}</strong>
                         <span>In queue</span>
                       </div>
                       <div>
-                        <strong>{s.waitTimeMins} min</strong>
+                        <strong>{s.waitTime !== undefined ? (s.waitTime === 0 ? "0 min" : `${s.waitTime} min`) : "—"}</strong>
                         <span>Wait time</span>
                       </div>
                     </div>
-                    <div className="salon-foot">
-                      <small style={{ fontSize: "12px", fontWeight: 600, color: "#6b5e52" }}>
-                        {s.freeChairsText}
-                      </small>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px", fontSize: "11px", color: "#6b5e52" }}>
+                      <span>
+                        {s.availableChairs !== undefined && s.totalChairs !== undefined
+                          ? s.availableChairs > 0
+                            ? `${s.availableChairs} of ${s.totalChairs} chairs free`
+                            : "All chairs busy"
+                          : "Chair data unavailable"}
+                      </span>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4c805e", display: "inline-block" }}></span>
+                        Live sync
+                      </span>
+                    </div>
+                    <div className="salon-foot" style={{ display: "flex", gap: "8px", marginTop: "14px", paddingTop: "12px", borderTop: "1px solid var(--line)" }}>
+                      <a
+                        href={`/salon/${s.slug}`}
+                        className="btn"
+                        style={{ flex: 1, padding: "8px 10px", fontSize: "12px", textAlign: "center", textDecoration: "none" }}
+                      >
+                        View Salon
+                      </a>
                       <button
-                        className="join"
-                        data-salon={s.name}
+                        className="btn fill"
+                        style={{ flex: 1, padding: "8px 10px", fontSize: "12px", textAlign: "center" }}
                         onClick={() => handleJoinQueue(s)}
                       >
-                        Join queue ↗
+                        Join Queue ↗
                       </button>
                     </div>
                   </article>
@@ -750,7 +663,7 @@ export function SneprLandingPage() {
                     style={{ marginTop: "14px" }}
                     onClick={() => {
                       setSearchQuery("");
-                      setSelectedLocality("All Localities");
+                      setSelectedLocality("All localities");
                       setCurrentFilter("All");
                     }}
                   >
@@ -764,7 +677,7 @@ export function SneprLandingPage() {
             <div className="demo" id="demoSection" style={{ marginTop: "50px" }}>
               <div style={{ textAlign: "center", marginBottom: "20px" }}>
                 <span style={{ fontSize: "11px", fontWeight: 700, padding: "4px 12px", borderRadius: "99px", background: "rgba(112, 71, 47, 0.1)", color: "#70472f", letterSpacing: "0.1em" }}>
-                  INTERACTIVE DEMO PREVIEW
+                  Interactive Demo
                 </span>
               </div>
 
@@ -773,13 +686,13 @@ export function SneprLandingPage() {
                   className={`tab ${demoTab === "customer" ? "active" : ""}`}
                   onClick={() => setDemoTab("customer")}
                 >
-                  Customer view (Mobile App)
+                  Customer Experience
                 </button>
                 <button
                   className={`tab ${demoTab === "desk" ? "active" : ""}`}
                   onClick={() => setDemoTab("desk")}
                 >
-                  SalonOS desk (Owner System)
+                  SalonOS Dashboard
                 </button>
               </div>
 
@@ -812,6 +725,8 @@ export function SneprLandingPage() {
                             ? "Simulate Barber Call"
                             : customerJourneyStage === 3
                             ? "Simulate Seated in Chair"
+                            : customerJourneyStage === 4
+                            ? "Simulate Service Completed"
                             : "Reset Journey to Waiting"}
                         </button>
                       </div>
@@ -867,7 +782,7 @@ export function SneprLandingPage() {
                           <img src="/snepr-logo-square-transparent.png" alt="Snepr" style={{ width: "24px", height: "24px" }} />
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: 800, color: "#2b211a", lineHeight: 1 }}>{selectedSalon.name}</div>
-                            <small style={{ fontSize: "10px", color: "#8b7d70" }}>{selectedSalon.area}, Bhubaneswar</small>
+                            <small style={{ fontSize: "10px", color: "#8b7d70" }}>{selectedSalon.areaName}, Bhubaneswar</small>
                           </div>
                         </div>
                         <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", background: "#e8efe9", color: "#4c805e", borderRadius: "99px" }}>
@@ -893,6 +808,9 @@ export function SneprLandingPage() {
                             ? "In service at chair"
                             : "Service completed"}
                         </div>
+                        <small style={{ display: "block", fontSize: "10px", color: "#8b7d70", marginTop: "8px" }}>
+                          Demo preview only. Join live queues above for actual salon tokens.
+                        </small>
                       </div>
 
                       {/* 5-Stage Live Queue Journey */}
@@ -943,10 +861,10 @@ export function SneprLandingPage() {
                       <div style={{ background: "#ffffff", border: "1px solid #eee4d8", padding: "12px", borderRadius: "16px", marginTop: "4px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
-                            <div style={{ fontSize: "13px", fontWeight: 700, color: "#2b211a" }}>Haircut and Grooming</div>
-                            <small style={{ fontSize: "11px", color: "#8b7d70" }}>Stylist: Rahul Sharma · 30 min</small>
+                            <div style={{ fontSize: "13px", fontWeight: 700, color: "#2b211a" }}>Haircut and Beard Sculpt</div>
+                            <small style={{ fontSize: "11px", color: "#8b7d70" }}>Stylist: Prakash Jena · 30 min</small>
                           </div>
-                          <span style={{ fontSize: "14px", fontWeight: 800, color: "#80543a" }}>₹200</span>
+                          <span style={{ fontSize: "14px", fontWeight: 800, color: "#80543a" }}>₹250</span>
                         </div>
                       </div>
 
@@ -984,7 +902,7 @@ export function SneprLandingPage() {
                           </div>
                         </div>
                         <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", background: "rgba(198, 154, 92, 0.2)", color: "#c69a5c", borderRadius: "99px" }}>
-                          3 Chairs
+                          3 Active Chairs
                         </span>
                       </div>
 
@@ -997,7 +915,7 @@ export function SneprLandingPage() {
                               <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 01</span>
                               <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                             </div>
-                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Rahul S. serving #S104</div>
+                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Rahul Sharma serving #S104</div>
                           </div>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>14m in</span>
                         </div>
@@ -1008,7 +926,7 @@ export function SneprLandingPage() {
                             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                               <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 02</span>
                               <span style={{ fontSize: "9px", color: deskChair2Status === "ready" ? "#c69a5c" : "#4c805e", fontWeight: 700 }}>
-                                {deskChair2Status === "ready" ? "● READY" : "● SERVING"}
+                                {deskChair2Status === "ready" ? "● Ready for Next Customer" : "● SERVING"}
                               </span>
                             </div>
                             <div style={{ fontSize: "11px", color: "#ddd", marginTop: "2px" }}>{deskChair2Client}</div>
@@ -1028,7 +946,7 @@ export function SneprLandingPage() {
                               <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 03</span>
                               <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                             </div>
-                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Amit S. serving #S103</div>
+                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Amit Swain serving #S103</div>
                           </div>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>8m in</span>
                         </div>
@@ -1058,8 +976,8 @@ export function SneprLandingPage() {
                           <div style={{ fontSize: "13px", fontWeight: 800, color: "#fff" }}>{deskServedCount} clients</div>
                         </div>
                         <div>
-                          <small style={{ fontSize: "9px", color: "#888" }}>Commissions Deducted</small>
-                          <div style={{ fontSize: "13px", fontWeight: 800, color: "#4c805e" }}>₹0 (Zero)</div>
+                          <small style={{ fontSize: "9px", color: "#888" }}>Stylists Active</small>
+                          <div style={{ fontSize: "13px", fontWeight: 800, color: "#d4a17b" }}>3 Barbers</div>
                         </div>
                       </div>
                     </div>
@@ -1102,12 +1020,12 @@ export function SneprLandingPage() {
           </div>
         </section>
 
-        {/* ─── 7. AI HAIR STUDIO (Positioned as Upcoming Feature) ─── */}
+        {/* ─── 7. AI HAIR STUDIO ─── */}
         <section className="ai-band" id="ai">
           <div className="wrap ai-layout">
             <div className="ai-copy">
               <div className="eyebrow" style={{ color: "#d4a17b", fontWeight: 700 }}>
-                Coming Soon | Concept Preview
+                Coming Soon
               </div>
               <h2>
                 Try the look<br />
@@ -1224,7 +1142,7 @@ export function SneprLandingPage() {
                   </div>
                 </span>
                 <span style={{ fontSize: "11px", fontWeight: 700, padding: "5px 12px", borderRadius: "99px", background: "rgba(198, 154, 92, 0.2)", color: "#d4a17b" }}>
-                  ● 3 CHAIRS ACTIVE
+                  ● 3 Active Chairs
                 </span>
               </div>
 
@@ -1243,14 +1161,14 @@ export function SneprLandingPage() {
                 <div style={{ background: "#2c251f", border: "1px solid #c69a5c", padding: "16px", borderRadius: "18px" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
                     <strong style={{ fontSize: "14px", color: "#fff" }}>Chair 02</strong>
-                    <span style={{ fontSize: "11px", color: "#c69a5c", fontWeight: 700 }}>● READY TO CALL</span>
+                    <span style={{ fontSize: "11px", color: "#c69a5c", fontWeight: 700 }}>● Ready for Next Customer</span>
                   </div>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>Stylist: Prakash Jena</div>
                   <div style={{ fontSize: "12px", color: "#ddd", marginTop: "4px" }}>Available for next client</div>
                   <button
                     className="btn fill"
                     style={{ width: "100%", marginTop: "10px", padding: "8px", fontSize: "11px" }}
-                    onClick={() => notify("Calling customer to Chair 02. In production, automated SMS and WhatsApp alerts are dispatched.")}
+                    onClick={() => notify("Demo: Customer called to Chair 02.")}
                   >
                     Call Next Token ↗
                   </button>
@@ -1278,8 +1196,8 @@ export function SneprLandingPage() {
                   <strong style={{ fontSize: "22px", color: "#d4a17b" }}>3</strong>
                 </div>
                 <div className="metric">
-                  <small style={{ fontSize: "11px", color: "#aaa" }}>Commission Deducted</small>
-                  <strong style={{ fontSize: "22px", color: "#4c805e" }}>₹0 (0%)</strong>
+                  <small style={{ fontSize: "11px", color: "#aaa" }}>Completed Today</small>
+                  <strong style={{ fontSize: "22px", color: "#4c805e" }}>28 clients</strong>
                 </div>
               </div>
             </div>
@@ -1298,59 +1216,42 @@ export function SneprLandingPage() {
             <div className="points">
               <div>
                 <div className="eyebrow" style={{ color: "#80543a", fontWeight: 700 }}>
-                  Verified reviews | Snepr Points
+                  Verified Visits and Rewards
                 </div>
                 <h2>
-                  Reviews you can trust,<br />
-                  <em>points you can spend.</em>
+                  Reviews you can trust.<br />
+                  <em>Points you can spend.</em>
                 </h2>
-                <p>Rewards in Bhubaneswar are tied directly to verified completed visits, never manipulated ratings.</p>
+                <p style={{ fontSize: "16px", color: "#4a3e35", lineHeight: 1.7, marginTop: "10px" }}>
+                  Earn Snepr Points through eligible verified visits and redeem them on future salon services.
+                </p>
 
-                {/* Clear Rewards Illustration */}
-                <div style={{ background: "#fff", border: "1px solid #ebd9c2", borderRadius: "20px", padding: "20px", marginTop: "20px", boxShadow: "0 8px 24px rgba(112, 71, 47, 0.06)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                    <img src="/snepr-logo-square.png" alt="Snepr Points" style={{ width: "32px", height: "32px", borderRadius: "50%" }} />
-                    <div>
-                      <strong style={{ fontSize: "14px", color: "#2b211a" }}>Points Rewards Example</strong>
-                      <div style={{ fontSize: "12px", color: "#8b7d70" }}>1 Point = ₹1 Service Discount</div>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "13px", color: "#4a3e35", lineHeight: "1.6" }}>
-                    Spent <b>₹{calcSpend}</b> on your haircut → Earn <b>10 Snepr Points</b> upon verified visit completion → Redeem up to <b>20%</b> discount on your next visit!
-                  </div>
-                  <div style={{ marginTop: "14px", display: "flex", gap: "8px" }}>
-                    {[200, 400, 800].map((amt) => (
-                      <button
-                        key={amt}
-                        onClick={() => setCalcSpend(amt)}
-                        style={{ padding: "6px 12px", borderRadius: "99px", border: calcSpend === amt ? "1px solid #70472f" : "1px solid #eee4d8", background: calcSpend === amt ? "#70472f" : "#fff", color: calcSpend === amt ? "#fff" : "#2b211a", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}
-                      >
-                        Bill ₹{amt}
-                      </button>
-                    ))}
-                  </div>
+                <div style={{ marginTop: "24px" }}>
+                  <a className="btn fill" href="/points">
+                    Explore Snepr Points ↗
+                  </a>
                 </div>
               </div>
 
               <div className="point-rules">
                 <div className="rule">
                   <b>01</b>
-                  <span>Only customers with completed digital visits can generate verified reviews.</span>
+                  <span>Eligible completed visits allow verified reviews.</span>
                 </div>
                 <div className="rule">
                   <b>02</b>
-                  <span>Each eligible review earns 10 Snepr Points. 1 point equals ₹1 discount.</span>
+                  <span>Eligible reviews earn 10 points.</span>
                 </div>
                 <div className="rule">
                   <b>03</b>
-                  <span>Redeem points toward future haircuts or grooming services up to 20% of your bill.</span>
+                  <span>One point equals ₹1 in discount value.</span>
                 </div>
                 <div className="rule">
                   <b>04</b>
-                  <span>Rewards are never influenced by star rating. Honest feedback is always honored.</span>
+                  <span>Redeem up to 20% of an eligible bill.</span>
                 </div>
                 <p className="sample-note" style={{ marginTop: "16px" }}>
-                  VERIFIED FIDELITY. Loyalty discount redemption is honored at participating partner salons in Bhubaneswar.
+                  Verified Visits and Rewards. Loyalty discount redemption is honored at participating partner salons in Bhubaneswar.
                 </p>
               </div>
             </div>
@@ -1424,7 +1325,7 @@ export function SneprLandingPage() {
               <a className="btn fill" href="#discover">
                 Find a salon near you ↗
               </a>
-              <a className="btn" href="/pricing">
+              <a className="btn" href="/register-salon">
                 Register your salon ↗
               </a>
             </div>
@@ -1475,48 +1376,32 @@ export function SneprLandingPage() {
 
             <div className="foot-col">
               <b>Customers</b>
-              <a href="#discover">Explore salons</a>
-              <a href="#discover">Live queues</a>
-              <a href="#how">How it works</a>
-              <a href="#ai">AI Studio</a>
-              <a href="#points">Snepr Points</a>
+              <a href="/explore">Explore salons</a>
+              <a href="/live">Live queues</a>
+              <a href="/#how-it-works">How it works</a>
+              <a href="/ai-studio">AI Studio</a>
+              <a href="/points">Snepr Points</a>
             </div>
 
             <div className="foot-col">
               <b>Salon owners</b>
-              <a href="/pricing">SalonOS</a>
+              <a href="/salonos">SalonOS</a>
               <a href="/pricing">Plans and pricing</a>
-              <a href="/login">Salon desk login</a>
-              <a href="/pricing">Register a salon</a>
+              <a href="/login">Salon login</a>
+              <a href="/register-salon">Register a salon</a>
             </div>
 
             <div className="foot-col">
               <b>Company</b>
-              <a href="#top">About Snepr</a>
-              <a href="/contact">Contact</a>
-              <a href="/help">Help center</a>
+              <a href="/#how-it-works">About Snepr</a>
+              <a href="mailto:support@snepr.com">Contact</a>
+              <a href="/#faq">Help center</a>
             </div>
 
             <div className="foot-col">
               <b>Legal</b>
               <a href="/privacy-policy">Privacy policy</a>
               <a href="/partner-terms">Terms of service</a>
-              <div style={{ marginTop: "12px" }}>
-                <a
-                  href="https://www.instagram.com/sneprofficial/"
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Instagram"
-                  style={{ color: "#d4a17b", display: "inline-flex", alignItems: "center", gap: "6px" }}
-                >
-                  <svg style={{ width: "18px", height: "18px" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
-                  </svg>
-                  <span style={{ fontSize: "12px" }}>Instagram</span>
-                </a>
-              </div>
             </div>
           </div>
 
