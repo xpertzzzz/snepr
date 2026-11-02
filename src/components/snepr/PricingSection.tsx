@@ -19,7 +19,7 @@ export function PricingSection() {
   const netAnnualSavings = netMonthlySavings * 12;
 
   return (
-    <section id="pricing" className="px-4 py-16 sm:px-6 sm:py-24 bg-[#FAF7F2] text-[#2C2420] relative overflow-hidden">
+    <section id="pricing" className="px-4 pt-28 pb-20 sm:px-6 sm:pt-36 sm:pb-28 bg-[#FAF7F2] text-[#2C2420] relative overflow-hidden">
       <div className="mx-auto max-w-6xl relative z-10">
         {/* Section Header */}
         <div className="mx-auto max-w-2xl text-center">
@@ -35,23 +35,25 @@ export function PricingSection() {
           </p>
 
           {/* Billing Switcher */}
-          <div className="mt-8 inline-flex items-center p-1 bg-white border border-[#E8E1D7] rounded-full shadow-sm">
+          <div className="mt-8 inline-flex items-center p-1.5 bg-white border border-[#E8E1D7] rounded-full shadow-sm gap-1">
             <button
+              type="button"
               onClick={() => setBillingCycle("monthly")}
-              className={`px-5 py-2 rounded-full text-[13.5px] font-bold transition-all ${
+              className={`px-5 py-2 rounded-full text-[13.5px] font-bold transition-all border-0 cursor-pointer ${
                 billingCycle === "monthly"
                   ? "bg-[#1B1410] text-white shadow-sm"
-                  : "text-[#6E6159] hover:text-[#1B1410]"
+                  : "bg-transparent text-[#6E6159] hover:text-[#1B1410]"
               }`}
             >
               Monthly Billing
             </button>
             <button
+              type="button"
               onClick={() => setBillingCycle("annual")}
-              className={`px-5 py-2 rounded-full text-[13.5px] font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-5 py-2 rounded-full text-[13.5px] font-bold transition-all border-0 cursor-pointer flex items-center gap-1.5 ${
                 billingCycle === "annual"
                   ? "bg-[#8A4C24] text-white shadow-sm"
-                  : "text-[#6E6159] hover:text-[#8A4C24]"
+                  : "bg-transparent text-[#6E6159] hover:text-[#8A4C24]"
               }`}
             >
               <span>Annual Billing</span>
@@ -154,8 +156,8 @@ export function PricingSection() {
           {/* TIER 2: INTERMEDIATE PLAN (FEATURED / MOST POPULAR) */}
           <ScrollCardReveal delay={0.22} direction="scale" className="flex flex-col h-full rounded-[36px]">
           <Tilt3D maxAngle={5} scale={1.025} glare={true} className="flex flex-col h-full rounded-[36px]">
-            <div className="relative flex flex-col h-full justify-between rounded-[36px] border-2 border-[#8A4C24] bg-white p-7 shadow-xl sm:p-8">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-[#8A4C24] px-4 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm">
+            <div className="relative flex flex-col h-full justify-between rounded-[36px] border-2 border-[#8A4C24] bg-white p-7 pt-10 shadow-xl sm:p-8 sm:pt-11">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10 rounded-full bg-[#8A4C24] px-4 py-1 text-[11px] font-bold uppercase tracking-wider text-white shadow-md whitespace-nowrap">
                 Most Popular
               </div>
 
@@ -321,7 +323,7 @@ export function PricingSection() {
         </div>
 
         {/* ─── INTERACTIVE COMMISSION ROI CALCULATOR ─── */}
-        <div className="mt-20">
+        <div className="mt-20 pt-10 border-t border-[#ECD9BE]/60">
           <Tilt3D maxAngle={3} scale={1.01} glare={false} className="rounded-[40px]">
             <div className="rounded-[40px] border border-[#ECD9BE] bg-[#FFFFFF] p-8 shadow-md sm:p-12">
               <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:items-center">

@@ -178,8 +178,8 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AppPromoManager />
 
-      <div className="flex min-h-screen flex-col bg-background font-sans text-ink selection:bg-primary/20">
-        <main className="flex-1">
+      <div className="flex min-h-screen w-full flex-col bg-background font-sans text-ink selection:bg-primary/20">
+        <main className="flex-1 w-full">
           <Outlet />
         </main>
       </div>
