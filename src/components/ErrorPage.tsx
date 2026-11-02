@@ -4,6 +4,7 @@ import { SneprWordmark } from "./SneprWordmark";
 
 interface ErrorPageProps {
   code?: string;
+  title?: string;
   message?: string;
   onRetry?: () => void;
 }

@@ -4,7 +4,7 @@ import { SneprWordmark } from "@/components/SneprWordmark";
 import {
   Building2, Users, MapPin, CheckCircle2, XCircle, AlertTriangle,
   Plus, Edit, Eye, Filter, Search, BarChart3, ShieldCheck,
-  TrendingUp, RefreshCw, Armchair, Clock, ChevronRight, Check, X
+  TrendingUp, RefreshCw, Armchair, Clock, ChevronRight, Check, X, Store
 } from "lucide-react";
 import { BHUBANESWAR_AREAS, REAL_SALONS_DATA, RealSalon, Area } from "@/lib/real-salons";
 import { toast } from "sonner";

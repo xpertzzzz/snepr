@@ -361,6 +361,64 @@ export function SalonOSWorkspace({
     );
   };
 
+  const handleAdvanceQueue = (queueId: number) => {
+    const item = queues.find((q) => q.id === queueId);
+    if (!item) return;
+    const freeChair = chairs.find((c) => c.status === "AVAILABLE");
+    const chairNum = freeChair?.number || 1;
+
+    setQueues((prev) =>
+      prev.map((q) =>
+        q.id === queueId ? { ...q, status: "SERVING", chairAssigned: chairNum } : q
+      )
+    );
+
+    setChairs((prev) =>
+      prev.map((c) =>
+        c.number === chairNum
+          ? {
+              ...c,
+              status: "OCCUPIED",
+              currentCustomer: item.customerName,
+              currentService: item.serviceName,
+              elapsedMins: 0,
+            }
+          : c
+      )
+    );
+
+    toast.success(`Token #${item.tokenNumber} (${item.customerName}) is now being served at Chair ${chairNum}!`);
+  };
+
+  const handleCompleteQueue = (queueId: number) => {
+    handleCompleteService(queueId);
+  };
+
+  const handleCancelQueue = (queueId: number) => {
+    const item = queues.find((q) => q.id === queueId);
+    setQueues((prev) =>
+      prev.map((q) => (q.id === queueId ? { ...q, status: "CANCELLED" } : q))
+    );
+
+    if (item?.chairAssigned) {
+      setChairs((prev) =>
+        prev.map((c) =>
+          c.number === item.chairAssigned
+            ? {
+                ...c,
+                status: "AVAILABLE",
+                currentCustomer: undefined,
+                currentService: undefined,
+                elapsedMins: undefined,
+              }
+            : c
+        )
+      );
+    }
+
+    toast.info(`Token #${item?.tokenNumber || queueId} has been cancelled.`);
+  };
+
   const handleAddWalkIn = (e: React.FormEvent) => {
     e.preventDefault();
     if (!walkInName.trim()) {
