@@ -99,20 +99,17 @@ export function SneprLandingPage() {
 
     if (currentFilter === "Shortest") {
       list.sort((a, b) => a.waitTime - b.waitTime);
-    } else if (currentFilter === "Top") {
-      list.sort((a, b) => parseFloat(b.rating || "0") - parseFloat(a.rating || "0"));
     } else if (currentFilter === "Available") {
       list = list.filter((s) => s.availableChairs > 0 || s.waitTime === 0);
-    } else if (currentFilter === "Men\'s") {
-      list = list.filter((s) => s.category.toLowerCase().includes("men") || s.name.toLowerCase().includes("barber"));
-    } else if (currentFilter === "Unisex") {
-      list = list.filter((s) => s.category.toLowerCase().includes("unisex"));
-    } else if (currentFilter === "Premium") {
-      list = list.filter((s) => s.category.toLowerCase().includes("premium") || s.category.toLowerCase().includes("spa") || parseFloat(s.rating || "0") >= 4.8);
     }
 
     return list;
   }, [searchQuery, selectedLocality, currentFilter]);
+
+  // Featured Salons: Display only 2-3 featured cards on the homepage to keep page compact
+  const featuredSalons = useMemo(() => {
+    return displayedSalons.slice(0, 3);
+  }, [displayedSalons]);
 
   // Geolocation Handler
   const handleLocate = () => {
@@ -404,6 +401,7 @@ export function SneprLandingPage() {
       <section
         className="cut-scene"
         id="cutScene"
+        style={{ height: "160vh", minHeight: "150vh" }}
         ref={cutSceneRef}
         aria-label="A pair of scissors follows a curved strand of hair and cuts it as you scroll"
       >
@@ -498,7 +496,7 @@ export function SneprLandingPage() {
 
       {/* ─── 4. CORE FEATURE: SALON DISCOVERY & LIVE QUEUES ─── */}
       <main>
-        <section className="section" id="discover">
+        <section className="section" id="discover" style={{ paddingTop: "32px", paddingBottom: "36px" }}>
           <div className="wrap">
             <div className="section-head">
               <div>
@@ -548,9 +546,9 @@ export function SneprLandingPage() {
               </button>
             </div>
 
-            {/* Filter Pills */}
-            <div className="filters" id="filters">
-              {["All", "Shortest", "Available", "Top", "Men's", "Unisex", "Premium"].map((f) => (
+            {/* Essential Filter Pills */}
+            <div className="filters" id="filters" style={{ marginBottom: "26px" }}>
+              {["All", "Available", "Shortest"].map((f) => (
                 <button
                   key={f}
                   className={`filter ${currentFilter === f ? "active" : ""}`}
@@ -558,21 +556,17 @@ export function SneprLandingPage() {
                 >
                   {f === "All"
                     ? "All salons"
-                    : f === "Shortest"
-                    ? "Shortest wait"
                     : f === "Available"
                     ? "Available now"
-                    : f === "Top"
-                    ? "Top rated"
-                    : f}
+                    : "Shortest wait"}
                 </button>
               ))}
             </div>
 
-            {/* Live Salon Grid */}
+            {/* Featured 3 Salon Cards Grid */}
             <div className="salon-grid" id="salonGrid">
-              {displayedSalons.length > 0 ? (
-                displayedSalons.map((s) => (
+              {featuredSalons.length > 0 ? (
+                featuredSalons.map((s) => (
                   <article className="salon" key={s.id}>
                     <div className="salon-top">
                       <div className="avatar flex items-center justify-center relative">
@@ -671,6 +665,28 @@ export function SneprLandingPage() {
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Prominent Explore All Salons CTA Button */}
+            <div style={{ textAlign: "center", marginTop: "32px", marginBottom: "16px" }}>
+              <a
+                href="/explore"
+                className="btn fill"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "14px 34px",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  borderRadius: "14px",
+                  boxShadow: "0 8px 24px rgba(112, 71, 47, 0.16)",
+                  textDecoration: "none",
+                }}
+              >
+                <span>Explore All Salons in Bhubaneswar ({REAL_SALONS_DATA.length})</span>
+                <span style={{ fontSize: "16px" }}>↗</span>
+              </a>
             </div>
 
             {/* ─── 5. INTERACTIVE DEMO SIMULATOR ─── */}

@@ -444,3 +444,25 @@ body {
   0% { left: -160%; }
   100% { left: 190%; }
 }
+
+/* ─── Snepr Cut Scene & Discovery Section Spacing Tightening ─── */
+.cut-scene {
+  height: 160vh !important;
+  border-radius: 0 0 36px 36px !important;
+}
+
+@media (max-width: 768px) {
+  .cut-scene {
+    height: 145vh !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+}
+
+#discover.section {
+  padding-top: 32px !important;
+  padding-bottom: 40px !important;
+}
+
+#discover .section-head {
+  margin-bottom: 22px !important;
+}
