@@ -295,8 +295,8 @@ export function SneprLandingPageExact() {
       {/* ─── 1. FIXED HEADER ─── */}
       <header id="hd" className={isHeaderScrolled ? "s" : ""}>
         <div className="wrap nav">
-          <Link to="/" className="logo" aria-label="Snepr home">
-            sn<i>≡</i>pr
+          <Link to="/" className="flex items-center" aria-label="Snepr home">
+            <img src="/snepr-logo-transparent.png" alt="Snepr" className="h-9 w-auto object-contain hover:opacity-90 transition-opacity" />
           </Link>
           <nav className="links" aria-label="Main">
             <Link to="/live">Live Queues</Link>
@@ -1250,8 +1250,8 @@ export function SneprLandingPageExact() {
         <div className="wrap">
           <div className="fg">
             <div>
-              <a className="logo" href="#top">
-                sn<i>≡</i>pr
+              <a href="#top" className="inline-block" aria-label="Snepr home">
+                <img src="/snepr-logo-white-transparent.png" alt="Snepr" className="h-8 w-auto object-contain opacity-95 hover:opacity-100 transition-opacity" />
               </a>
               <p className="bp">Live salon queues and wait times. Know before you go.</p>
             </div>

@@ -362,9 +362,11 @@ export default function SneprApp() {
         <ScrollView contentContainerStyle={s.authScreenScroll} showsVerticalScrollIndicator={false}>
           {/* Brand Vector Logo & Header */}
           <View style={s.authScreenBrandHeader}>
-            <Text style={s.authScreenWordmark}>
-              snepr<Text style={{ color: C.brown }}>.</Text>
-            </Text>
+            <Image
+              source={require('../../assets/images/snepr-logo-transparent.png')}
+              style={s.authScreenLogoImg}
+              resizeMode="contain"
+            />
             <View style={s.authCityBadge}>
               <Text style={s.authCityBadgeText}>✦ Bhubaneswar Launch Edition</Text>
             </View>
@@ -546,9 +548,11 @@ export default function SneprApp() {
       {/* ─── TOP HEADER BAR ─── */}
       <View style={s.header}>
         <View style={s.headerLeft}>
-          <Text style={s.wordmark}>
-            snepr<Text style={{ color: C.brown }}>.</Text>
-          </Text>
+          <Image
+            source={require('../../assets/images/snepr-logo-transparent.png')}
+            style={s.headerLogoImg}
+            resizeMode="contain"
+          />
 
           {role === 'customer' ? (
             <TouchableOpacity
@@ -1656,6 +1660,8 @@ const s = StyleSheet.create({
   },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 },
   wordmark: { fontSize: 26, fontWeight: '900', color: C.espresso, letterSpacing: -1 },
+  headerLogoImg: { width: 92, height: 30 },
+  authScreenLogoImg: { width: 170, height: 56, marginBottom: 6 },
   areaPill: {
     flexDirection: 'row',
     alignItems: 'center',

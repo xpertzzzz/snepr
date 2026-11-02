@@ -189,7 +189,7 @@ function RootComponent() {
           className={`fixed inset-0 z-[9999] bg-[#1C1613] flex items-center justify-center transition-opacity duration-500 ${fadeSplash ? 'opacity-0' : 'opacity-100'}`}
         >
           <div className="flex flex-col items-center gap-6 animate-pulse">
-            <img src="/snepr-logo.png" alt="Snepr" className="h-14 w-auto object-contain rounded-xl" />
+            <img src="/snepr-logo-white-transparent.png" alt="Snepr" className="h-14 w-auto object-contain" />
           </div>
         </div>
       )}

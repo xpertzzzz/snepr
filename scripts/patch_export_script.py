@@ -50,3 +50,4 @@ with open("scripts/export_final_apk.py", "w", encoding="utf-8") as f:
     f.write(text_norm)
 
 print("export_final_apk.py patched successfully!")
+

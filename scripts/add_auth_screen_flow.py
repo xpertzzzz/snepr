@@ -477,3 +477,4 @@ with open('app/app/(tabs)/index.tsx', 'w', encoding='utf-8') as f:
     f.write(code)
 
 print("Successfully integrated initial Sign In / Sign Up Screen into app/app/(tabs)/index.tsx!")
+
