@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FAF7F2">
+<title>Page unavailable | Snepr</title>
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#1b1410;--muted:#75685e;--brown:#7a4b29;--gold:#c8993e;--line:#e8e1d7;--green:#2e7d4f}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif;display:flex;flex-direction:column}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;padding:0 max(24px,calc((100vw - 1120px)/2));border-bottom:1px solid #eae3da;background:#faf7f2}
+.logo{font-size:28px;font-weight:800;letter-spacing:-1.8px;text-decoration:none;color:var(--ink)}
+.logo span{color:var(--brown)}
+.header-label{font-size:11px;color:#8b7c70;letter-spacing:1.4px;text-transform:uppercase}
+main{width:min(100% - 40px,980px);margin:auto;padding:55px 0;display:grid;grid-template-columns:1fr 350px;gap:55px;align-items:center}
+.copy{max-width:570px}
+.small-label{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--brown);font-weight:700}
+h1{font-family:Georgia,serif;font-size:clamp(45px,6vw,68px);font-weight:500;letter-spacing:-2px;line-height:1.05;margin:17px 0 15px}
+h1 span{color:var(--brown)}
+.description{font-size:16px;line-height:1.7;color:var(--muted);max-width:490px;margin:0}
+.error-details{margin-top:22px;font-size:12px;color:#918378}
+.error-details strong{color:var(--brown);margin-right:8px}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:27px}
+button,a.button{border:0;border-radius:8px;padding:13px 19px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
+.primary{background:var(--brown);color:white}
+.primary:hover{background:#60391f}
+.secondary{background:white;color:var(--ink);border:1px solid var(--line)!important}
+.illustration{background:#f1e7dc;border:1px solid #e5d7c8;border-radius:24px;min-height:310px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;position:relative;overflow:hidden}
+.illustration:before,.illustration:after{content:"";position:absolute;border:1px solid #dfcdbb;border-radius:50%;width:260px;height:260px}
+.illustration:after{width:205px;height:205px}
+.paper{z-index:1;background:#fffdf9;border:1px solid #e3d6c9;border-radius:13px;width:180px;padding:20px 15px;text-align:center;box-shadow:0 12px 30px #49321d12;transform:rotate(-3deg)}
+.paper-icon{width:56px;height:56px;border-radius:50%;background:#f2e5d8;margin:0 auto 13px;display:grid;place-items:center;color:var(--brown);font-size:27px;font-weight:600}
+.paper strong{font-family:Georgia,serif;font-size:20px;font-weight:500}
+.paper p{font-size:11px;color:var(--muted);line-height:1.5;margin:7px 0 0}
+.dots{z-index:1;display:flex;gap:7px;margin-top:20px}
+.dots i{width:6px;height:6px;background:#c8993e;border-radius:50%}
+.game{grid-column:1/-1;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;display:grid;grid-template-columns:.8fr 1.2fr;gap:24px;align-items:center}
+.game-tag{font-size:10px;letter-spacing:1.5px;color:var(--brown);font-weight:800;margin-bottom:8px}
+.game h2{font-family:Georgia,serif;font-weight:500;font-size:25px;margin:0 0 7px}
+.game p{font-size:12px;line-height:1.6;color:var(--muted);margin:0;max-width:300px}
+.game-stats{display:flex;gap:18px;margin-top:17px;font-size:11px;color:var(--muted)}
+.game-stats strong{color:var(--brown);margin-left:4px}
+.memory-area{min-width:0}
+.memory-grid{display:grid;grid-template-columns:repeat(4,minmax(48px,1fr));gap:8px;max-width:420px;margin-left:auto}
+.memory-card{border:0;padding:0;background:transparent;aspect-ratio:1.18;perspective:650px;cursor:pointer}
+.card-inner{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .35s}
+.memory-card.flipped .card-inner,.memory-card.matched .card-inner{transform:rotateY(180deg)}
+.card-back,.card-front{position:absolute;inset:0;border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden}
+.card-back{background:#f2e8de;border:1px solid #e5d7c8;color:var(--brown);font-family:Georgia,serif;font-size:23px;font-style:italic}
+.card-front{transform:rotateY(180deg);background:#fffaf4;border:1px solid #d8c2ac;color:var(--brown)}
+.card-front b{font-size:27px;font-weight:500;line-height:1.2}
+.card-front small{font-size:7px;letter-spacing:1px;font-weight:800;margin-top:4px}
+.memory-card.matched .card-front{background:#edf3eb;border-color:#c9ddce;color:var(--green)}
+.memory-card:disabled{cursor:default}
+.memory-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:420px;margin:12px 0 0 auto}
+#memoryStatus{font-size:10px;color:var(--muted);line-height:1.4}
+#restartMemory{padding:8px 12px;font-size:10px;white-space:nowrap}
+footer{width:min(100% - 40px,1120px);margin:0 auto;padding:18px 0 23px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:#95877b;font-size:11px}
+footer a{color:var(--brown);text-decoration:none}
+@media(max-width:720px){header{height:66px;padding:0 20px}main{grid-template-columns:1fr;gap:25px;padding:42px 0}.illustration{min-height:245px}.game{grid-template-columns:1fr;gap:18px}.memory-grid{margin:0;max-width:none}.memory-footer{margin-left:0}.game p{max-width:unset}footer{gap:12px;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="/">snepr<span>.</span></a>
+  <div class="header-label">Something went wrong</div>
+</header>
+
+<main>
+  <section class="copy">
+    <div class="small-label">We couldn't load this page</div>
+    <h1>Oops! This page<br><span>isn't working.</span></h1>
+    <p class="description">Something went wrong while opening this page. Please try again. If it still doesn't work, go back to Snepr and continue browsing.</p>
+    <div class="error-details"><strong id="errorCode">Error 500</strong><span id="errorMessage">Something went wrong on our side.</span></div>
+    <div class="buttons">
+      <button class="primary" onclick="location.reload()">Try again</button>
+      <a class="button secondary" href="/">Go to Snepr home</a>
+    </div>
+  </section>
+
+  <aside class="illustration" aria-label="Page error illustration">
+    <div class="paper">
+      <div class="paper-icon">!</div>
+      <strong>Page not found</strong>
+      <p>Don't worry. You can return to Snepr and try another page.</p>
+    </div>
+    <div class="dots"><i></i><i></i><i></i></div>
+  </aside>
+
+  <section class="game" aria-label="Salon memory match game">
+    <div class="game-intro">
+      <div class="game-tag">SNEPR MINI GAME</div>
+      <h2>Match the salon tools</h2>
+      <p>Flip two cards at a time and find all four matching pairs. How quickly can you do it?</p>
+      <div class="game-stats">
+        <span>Pairs <strong id="pairCount">0 / 4</strong></span>
+        <span>Moves <strong id="moveCount">0</strong></span>
+      </div>
+    </div>
+    <div class="memory-area">
+      <div class="memory-grid" id="memoryGame">
+        <button class="memory-card" data-pair="scissors" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>✂</b><small>SCISSORS</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="comb" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>≋</b><small>COMB</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="razor" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>▱</b><small>RAZOR</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="dryer" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>◉</b><small>DRYER</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="comb" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>≋</b><small>COMB</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="dryer" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>◉</b><small>DRYER</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="scissors" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>✂</b><small>SCISSORS</small></span></span>
+        </button>
+        <button class="memory-card" data-pair="razor" aria-label="Flip card">
+          <span class="card-inner"><span class="card-back">S</span><span class="card-front"><b>▱</b><small>RAZOR</small></span></span>
+        </button>
+      </div>
+      <div class="memory-footer">
+        <span id="memoryStatus" aria-live="polite">Find the matching pairs to win.</span>
+        <button class="secondary" id="restartMemory">Restart game</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>© <span id="year"></span> Snepr</span>
+  <a href="mailto:support@snepr.in">Need help? Contact support</a>
+</footer>
+<script>
+(function(){
+ const params=new URLSearchParams(location.search);
+ const code=params.get('code');
+ const message=params.get('message');
+ if(code && /^[A-Za-z0-9_-]{2,20}$/.test(code)) document.getElementById('errorCode').textContent='Error '+code;
+ if(message) document.getElementById('errorMessage').textContent=message.slice(0,100);
+ document.getElementById('year').textContent=new Date().getFullYear();
+
+ const grid=document.getElementById('memoryGame');
+ const status=document.getElementById('memoryStatus');
+ const pairCount=document.getElementById('pairCount');
+ const moveCount=document.getElementById('moveCount');
+ const restart=document.getElementById('restartMemory');
+ const symbols={
+   scissors:['✂','SCISSORS'],comb:['≋','COMB'],razor:['▱','RAZOR'],dryer:['◉','DRYER']
+ };
+ let first=null,second=null,locked=false,moves=0,pairs=0,turn=0;
+ function shuffleCards(){
+   const cards=[...grid.querySelectorAll('.memory-card')];
+   const values=cards.map(card=>card.dataset.pair);
+   for(let i=values.length-1;i>0;i--){
+     const j=Math.floor(Math.random()*(i+1));
+     [values[i],values[j]]=[values[j],values[i]];
+   }
+   cards.forEach((card,i)=>{
+     const key=values[i],[symbol,label]=symbols[key];
+     card.dataset.pair=key;
+     card.querySelector('.card-front b').textContent=symbol;
+     card.querySelector('.card-front small').textContent=label;
+     card.classList.remove('flipped','matched');
+     card.disabled=false;
+   });
+ }
+ function resetGame(){
+   first=null;second=null;locked=false;moves=0;pairs=0;turn++;
+   pairCount.textContent='0 / 4';moveCount.textContent='0';
+   status.textContent='Find the matching pairs to win.';
+   shuffleCards();
+ }
+ grid.addEventListener('click',event=>{
+   const card=event.target.closest('.memory-card');
+   if(!card||locked||card.disabled||card.classList.contains('flipped'))return;
+   card.classList.add('flipped');
+   if(!first){first=card;return;}
+   second=card;moves++;moveCount.textContent=String(moves);
+   if(first.dataset.pair===second.dataset.pair){
+     first.classList.add('matched');second.classList.add('matched');
+     first.disabled=true;second.disabled=true;
+     pairs++;pairCount.textContent=pairs+' / 4';
+     first=null;second=null;
+     if(pairs===4)status.textContent='You did it! All four pairs found in '+moves+' moves.';
+     else status.textContent='Nice match! Find the next pair.';
+   }else{
+     locked=true;status.textContent='Not a match. Try another pair.';
+     const a=first,b=second;
+     window.setTimeout(()=>{
+       a.classList.remove('flipped');b.classList.remove('flipped');
+       first=null;second=null;locked=false;
+     },750);
+   }
+ });
+ restart.addEventListener('click',resetGame);
+ resetGame();
+ })();
+</script>
+</body>
+</html>

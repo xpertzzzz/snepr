@@ -1,0 +1,23 @@
+{
+  "name": "@snepr/worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Snepr BullMQ worker processing asynchronous notifications, email dispatch, and queue analytics",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@snepr/shared-types": "workspace:*",
+    "bullmq": "^5.41.6",
+    "dotenv": "^17.4.2",
+    "ioredis": "^5.5.0",
+    "nodemailer": "^6.10.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

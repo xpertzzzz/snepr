@@ -1,0 +1,303 @@
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+enum GlobalRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum MembershipRole {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum MembershipStatus {
+  ACTIVE
+  PENDING_INVITE
+  REVOKED
+}
+
+enum ChairStatus {
+  AVAILABLE
+  OCCUPIED
+  FINISHING
+  BREAK
+  OFFLINE
+}
+
+enum QueueStatus {
+  JOINED
+  WAITING
+  CALLED
+  IN_SERVICE
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PlanTier {
+  BASE_199
+  INTERMEDIATE_400
+  PRO_449
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model User {
+  id            String      @id @default(uuid())
+  email         String      @unique
+  phone         String?
+  name          String?
+  avatarUrl     String?
+  globalRole    GlobalRole  @default(CUSTOMER)
+  pointsBalance Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  memberships       SalonMember[]
+  queueTokens       QueueToken[]
+  reviews           Review[]
+  pointTransactions PointTransaction[]
+
+  @@map("users")
+}
+
+model Salon {
+  id                 String   @id @default(uuid())
+  name               String
+  slug               String   @unique
+  category           String   @default("unisex")
+  description        String?
+  logoUrl            String?
+  coverUrl           String?
+  address            String
+  locality           String
+  city               String   @default("Bhubaneswar")
+  state              String   @default("Odisha")
+  pincode            String   @default("751024")
+  latitude           Float
+  longitude          Float
+  contactPhone       String
+  contactEmail       String?
+  website            String?
+  isVerified         Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  rating             Float    @default(4.8)
+  reviewCount        Int      @default(0)
+  openTime           String   @default("09:00")
+  closeTime          String   @default("21:00")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  members       SalonMember[]
+  chairs        Chair[]
+  services      Service[]
+  queueTokens   QueueToken[]
+  claims        SalonClaim[]
+  invites       StaffInvite[]
+  subscriptions Subscription[]
+  reviews       Review[]
+
+  @@index([locality])
+  @@index([city])
+  @@map("salons")
+}
+
+model SalonMember {
+  id              String           @id @default(uuid())
+  userId          String
+  salonId         String
+  role            MembershipRole   @default(STAFF)
+  status          MembershipStatus @default(ACTIVE)
+  assignedChairId String?
+  invitedBy       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, salonId])
+  @@map("salon_members")
+}
+
+model Chair {
+  id                              String      @id @default(uuid())
+  salonId                         String
+  chairNumber                     Int
+  name                            String
+  status                          ChairStatus @default(AVAILABLE)
+  assignedStaffId                 String?
+  currentEstimatedDurationMinutes Int?
+  currentServiceStartedAt         DateTime?
+  updatedAt                       DateTime    @updatedAt
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@unique([salonId, chairNumber])
+  @@map("chairs")
+}
+
+model Service {
+  id              String   @id @default(uuid())
+  salonId         String
+  name            String
+  category        String   @default("Hair")
+  price           Int // In paise (e.g. 20000 = Rs. 200)
+  durationMinutes Int      @default(30)
+  description     String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@map("services")
+}
+
+model QueueToken {
+  id                   String      @id @default(uuid())
+  tokenNumber          Int
+  tokenDisplay         String
+  salonId              String
+  customerId           String?
+  customerName         String
+  customerPhone        String
+  status               QueueStatus @default(WAITING)
+  isWalkIn             Boolean     @default(false)
+  serviceIds           String[]
+  totalPrice           Int         @default(0)
+  estimatedWaitMinutes Int         @default(0)
+  assignedChairId      String?
+  joinedAt             DateTime    @default(now())
+  calledAt             DateTime?
+  serviceStartedAt     DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  cancelReason         String?
+
+  salon    Salon        @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customer User?        @relation(fields: [customerId], references: [id])
+  events   QueueEvent[]
+
+  @@index([salonId, status])
+  @@map("queue_tokens")
+}
+
+model QueueEvent {
+  id             String       @id @default(uuid())
+  tokenId        String
+  salonId        String
+  actorUserId    String?
+  eventType      String
+  previousStatus QueueStatus?
+  newStatus      QueueStatus?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+
+  token QueueToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@map("queue_events")
+}
+
+model SalonClaim {
+  id               String      @id @default(uuid())
+  salonId          String
+  ownerName        String
+  ownerEmail       String
+  ownerPhone       String
+  businessProofUrl String?
+  gstin            String?
+  status           ClaimStatus @default(PENDING)
+  adminNotes       String?
+  reviewedBy       String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@map("salon_claims")
+}
+
+model StaffInvite {
+  id        String           @id @default(uuid())
+  salonId   String
+  email     String
+  phone     String?
+  name      String
+  role      MembershipRole   @default(STAFF)
+  token     String           @unique
+  status    MembershipStatus @default(PENDING_INVITE)
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@map("staff_invites")
+}
+
+model Subscription {
+  id                     String        @id @default(uuid())
+  salonId                String
+  tier                   PlanTier
+  amount                 Int // In rupees (199, 400, 449)
+  status                 PaymentStatus @default(PENDING)
+  razorpaySubscriptionId String?
+  currentPeriodStart     DateTime      @default(now())
+  currentPeriodEnd       DateTime
+  cancelAtPeriodEnd      Boolean       @default(false)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Review {
+  id             String   @id @default(uuid())
+  salonId        String
+  userId         String
+  tokenNumber    Int?
+  rating         Int // 1 to 5
+  comment        String?
+  pointsAwarded  Int      @default(10)
+  createdAt      DateTime @default(now())
+
+  salon Salon @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model PointTransaction {
+  id          String   @id @default(uuid())
+  userId      String
+  salonId     String?
+  amount      Int // Positive for earned, negative for redeemed
+  type        String // "REVIEW_REWARD", "REDEMPTION", "PROMO"
+  description String
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("point_transactions")
+}

@@ -49,6 +49,61 @@ export function LoginPageSplit() {
     return () => clearInterval(timer);
   }, [cooldown]);
 
+  const handleDemoLogin = (role: "customer" | "owner" | "staff" | "admin") => {
+    let sessionData: any = null;
+    let target = "/live";
+
+    if (role === "customer") {
+      sessionData = {
+        id: 9001,
+        name: "Priya Mohapatra",
+        email: "customer@snepr.demo",
+        phone: "+91 94370 12345",
+        role: "customer",
+        isAdmin: false,
+      };
+      target = "/live";
+    } else if (role === "owner") {
+      sessionData = {
+        id: 9002,
+        name: "Arjun Sharma",
+        email: "owner@snepr.demo",
+        phone: "+91 92373 62221",
+        role: "salon_owner",
+        approvalStatus: "approved",
+        salonName: "Lakmé Salon — KIIT Road",
+        isAdmin: false,
+      };
+      target = "/salon-os";
+    } else if (role === "staff") {
+      sessionData = {
+        id: 9003,
+        name: "Rahul Kumar",
+        email: "staff@snepr.demo",
+        phone: "+91 98765 43210",
+        role: "staff",
+        chairAssigned: 2,
+        salonName: "Lakmé Salon — KIIT Road",
+        isAdmin: false,
+      };
+      target = "/staff";
+    } else if (role === "admin") {
+      sessionData = {
+        id: 9004,
+        name: "Snepr Admin",
+        email: "admin@snepr.demo",
+        role: "super_admin",
+        isAdmin: true,
+      };
+      target = "/admin";
+    }
+
+    localStorage.setItem("snepr_session", JSON.stringify(sessionData));
+    window.dispatchEvent(new Event("storage"));
+    toast.success(`Signed in as ${sessionData.name}!`);
+    navigate({ to: target });
+  };
+
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorMsg("");
@@ -115,13 +170,19 @@ export function LoginPageSplit() {
       } catch (err: any) {
         console.warn("DB verification fallback:", err);
         const isAdmin = cleanEmail.includes("admin") || cleanEmail === "xpertenzo.in@gmail.com";
+        const isOwner = cleanEmail.includes("owner");
+        const isStaff = cleanEmail.includes("staff");
+
         userSession = {
           id: Math.floor(1000 + Math.random() * 9000),
           username: cleanEmail.split("@")[0],
-          name: name.trim() || cleanEmail.split("@")[0],
+          name: name.trim() || (isOwner ? "Arjun Sharma" : isStaff ? "Rahul Kumar" : cleanEmail.split("@")[0]),
           email: cleanEmail,
-          phone: phone.trim() || null,
-          role: isAdmin ? "super_admin" : "customer",
+          phone: phone.trim() || "+91 92373 62221",
+          role: isAdmin ? "super_admin" : isOwner ? "salon_owner" : isStaff ? "staff" : "customer",
+          approvalStatus: isOwner ? "approved" : undefined,
+          chairAssigned: isStaff ? 2 : undefined,
+          salonName: (isOwner || isStaff) ? "Lakmé Salon — KIIT Road" : undefined,
           isAdmin,
         };
       }
@@ -139,8 +200,10 @@ export function LoginPageSplit() {
         navigate({ to: redirectTarget });
       } else if (userSession.role === "super_admin") {
         navigate({ to: "/admin" });
-      } else if (userSession.role === "salon_owner" && userSession.approvalStatus === "approved") {
+      } else if (userSession.role === "salon_owner" && (userSession.approvalStatus === "approved" || !userSession.approvalStatus)) {
         navigate({ to: "/salon-os" });
+      } else if (userSession.role === "staff" || userSession.role === "salon_staff") {
+        navigate({ to: "/staff" });
       } else {
         navigate({ to: "/live" });
       }
@@ -299,6 +362,48 @@ export function LoginPageSplit() {
               <span>{successMsg}</span>
             </div>
           )}
+
+          {/* 1-Click Demo Accounts Bar */}
+          <div className="mb-6 p-4 rounded-2xl bg-[#F0E8DE]/80 border border-[#E8DDD0] shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-[#70472F]">
+              <span>1-Click Demo Credentials</span>
+              <span className="text-[10px] text-[#8C8074] font-mono">SneprDemo@2026</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("customer")}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#211912] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
+              >
+                <span className="block text-[10px] text-[#8C8074] uppercase">Customer</span>
+                <span className="truncate block font-mono text-[11px]">customer@snepr.demo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("owner")}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#70472F] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
+              >
+                <span className="block text-[10px] text-[#8C8074] uppercase">Salon Owner</span>
+                <span className="truncate block font-mono text-[11px]">owner@snepr.demo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("staff")}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#A17B50] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
+              >
+                <span className="block text-[10px] text-[#8C8074] uppercase">Barber Staff</span>
+                <span className="truncate block font-mono text-[11px]">staff@snepr.demo</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoLogin("admin")}
+                className="p-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DDD0] font-bold text-[#267447] text-left transition-all hover:scale-[1.01] cursor-pointer shadow-2xs"
+              >
+                <span className="block text-[10px] text-[#8C8074] uppercase">Admin Superuser</span>
+                <span className="truncate block font-mono text-[11px]">admin@snepr.demo</span>
+              </button>
+            </div>
+          </div>
 
           {/* 1. Google OAuth Button */}
           <button

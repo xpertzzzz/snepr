@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { REAL_SALONS_DATA } from "@/lib/real-salons";
+import { LiquidBottomNav } from "@/components/navigation/LiquidBottomNav";
 import "@/styles/live-page.css";
 
 export const Route = createFileRoute("/live/")({
@@ -249,24 +250,22 @@ export function LivePageStrict() {
         </div>
       </footer>
 
-      {/* ─── BOTTOM NAVIGATION ─── */}
-      <nav className="bottom">
-        <Link to="/">
-          <i>⌂</i>Home
-        </Link>
-        <Link to="/live" className="active">
-          <i>◷</i>Live
-        </Link>
-        <Link to="/live/studio">
-          <i>✧</i>AI Studio
-        </Link>
-        <Link to="/live/queue">
-          <i>▱</i>My token
-        </Link>
-        <Link to="/profile">
-          <i>♙</i>Profile
-        </Link>
-      </nav>
+      {/* ─── LIQUID BOTTOM NAVIGATION ─── */}
+      <LiquidBottomNav
+        tabs={[
+          { id: "explore", label: "Live Queues", icon: "◷" },
+          { id: "queue", label: "My Queue", icon: "▱" },
+          { id: "studio", label: "AI Studio", icon: "✧" },
+          { id: "profile", label: "Profile", icon: "♙" },
+        ]}
+        activeTab="explore"
+        onTabChange={(tabId) => {
+          if (tabId === "explore") navigate({ to: "/live" });
+          if (tabId === "queue") navigate({ to: "/live/queue" });
+          if (tabId === "studio") navigate({ to: "/live/studio" });
+          if (tabId === "profile") navigate({ to: "/profile" });
+        }}
+      />
 
       {/* ─── MODAL ─── */}
       <div

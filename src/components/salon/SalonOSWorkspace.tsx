@@ -2,13 +2,35 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { SneprWordmark } from "@/components/SneprWordmark";
 import {
-  Users, Armchair, Scissors, Clock, Store, Settings,
-  Plus, Check, X, Phone, AlertCircle, Play, CheckCircle2,
-  ChevronRight, ArrowLeft, LogOut, RefreshCw, Sparkles, UserPlus
+  Users,
+  Armchair,
+  Scissors,
+  Clock,
+  Store,
+  Settings,
+  Plus,
+  Check,
+  X,
+  Phone,
+  AlertCircle,
+  Play,
+  CheckCircle2,
+  ChevronRight,
+  ArrowLeft,
+  LogOut,
+  RefreshCw,
+  Sparkles,
+  UserPlus,
+  BarChart3,
+  HelpCircle,
+  Send,
+  Shield,
+  Layers,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 
-export type SalonOSTab = "overview" | "queue" | "chairs" | "services" | "profile" | "settings";
+export type SalonOSTab = "overview" | "staff" | "analytics" | "profile";
 
 export interface QueueItem {
   id: number;
@@ -27,32 +49,102 @@ export interface ChairItem {
   id: number;
   number: number;
   name: string;
-  status: "AVAILABLE" | "OCCUPIED" | "UNAVAILABLE";
+  barberName: string;
+  status: "AVAILABLE" | "OCCUPIED" | "OFFLINE";
   currentCustomer?: string;
   currentService?: string;
+  elapsedMins?: number;
 }
 
-export interface ServiceItem {
+export interface StaffItem {
   id: number;
   name: string;
-  price: number;
-  duration: number;
-  isActive: boolean;
+  role: string;
+  phone: string;
+  email: string;
+  chairAssigned: string;
+  servedToday: number;
+  status: "ON_DUTY" | "OFF_DUTY";
 }
 
-const INITIAL_SERVICES: ServiceItem[] = [
-  { id: 1, name: "Haircut", price: 150, duration: 25, isActive: true },
-  { id: 2, name: "Beard Grooming", price: 80, duration: 15, isActive: true },
-  { id: 3, name: "Haircut + Beard Trim", price: 200, duration: 40, isActive: true },
-  { id: 4, name: "Hair Styling", price: 120, duration: 20, isActive: true },
-  { id: 5, name: "Hair Colour", price: 450, duration: 50, isActive: true },
-  { id: 6, name: "Kids Haircut", price: 100, duration: 20, isActive: true },
+const INITIAL_STAFF: StaffItem[] = [
+  {
+    id: 1,
+    name: "Rahul Kumar",
+    role: "Senior Barber",
+    phone: "+91 98765 43210",
+    email: "rahul@example.com",
+    chairAssigned: "Station 1",
+    servedToday: 12,
+    status: "ON_DUTY",
+  },
+  {
+    id: 2,
+    name: "Amit Dash",
+    role: "Master Stylist",
+    phone: "+91 94370 22334",
+    email: "amit@example.com",
+    chairAssigned: "Station 2",
+    servedToday: 9,
+    status: "ON_DUTY",
+  },
+  {
+    id: 3,
+    name: "Pooja Sen",
+    role: "Grooming Specialist",
+    phone: "+91 99371 88990",
+    email: "pooja@example.com",
+    chairAssigned: "Station 3",
+    servedToday: 7,
+    status: "ON_DUTY",
+  },
+  {
+    id: 4,
+    name: "Bikash Raut",
+    role: "Junior Stylist",
+    phone: "+91 91240 55667",
+    email: "bikash@example.com",
+    chairAssigned: "Station 4",
+    servedToday: 0,
+    status: "OFF_DUTY",
+  },
 ];
 
 const INITIAL_CHAIRS: ChairItem[] = [
-  { id: 1, number: 1, name: "Station 1", status: "OCCUPIED", currentCustomer: "Rohan Patel", currentService: "Haircut" },
-  { id: 2, number: 2, name: "Station 2", status: "AVAILABLE" },
-  { id: 3, number: 3, name: "Station 3", status: "AVAILABLE" },
+  {
+    id: 1,
+    number: 1,
+    name: "Station 1",
+    barberName: "Rahul Kumar",
+    status: "OCCUPIED",
+    currentCustomer: "Rohan Patel",
+    currentService: "Haircut",
+    elapsedMins: 14,
+  },
+  {
+    id: 2,
+    number: 2,
+    name: "Station 2",
+    barberName: "Amit Dash",
+    status: "AVAILABLE",
+  },
+  {
+    id: 3,
+    number: 3,
+    name: "Station 3",
+    barberName: "Pooja Sen",
+    status: "OCCUPIED",
+    currentCustomer: "Aman Sharma",
+    currentService: "Beard trim",
+    elapsedMins: 8,
+  },
+  {
+    id: 4,
+    number: 4,
+    name: "Station 4",
+    barberName: "Bikash Raut",
+    status: "OFFLINE",
+  },
 ];
 
 const INITIAL_QUEUES: QueueItem[] = [
@@ -66,17 +158,18 @@ const INITIAL_QUEUES: QueueItem[] = [
     waitTime: 0,
     status: "SERVING",
     chairAssigned: 1,
-    createdAt: new Date(Date.now() - 15 * 60000).toISOString(),
+    createdAt: new Date(Date.now() - 14 * 60000).toISOString(),
   },
   {
     id: 102,
     tokenNumber: 102,
     customerName: "Aman Sharma",
     phone: "+91 98610 22334",
-    serviceName: "Haircut + Beard Trim",
-    position: 1,
-    waitTime: 8,
-    status: "WAITING",
+    serviceName: "Beard trim",
+    position: 0,
+    waitTime: 0,
+    status: "SERVING",
+    chairAssigned: 3,
     createdAt: new Date(Date.now() - 8 * 60000).toISOString(),
   },
   {
@@ -85,25 +178,47 @@ const INITIAL_QUEUES: QueueItem[] = [
     customerName: "Priya Das",
     phone: "+91 99370 33445",
     serviceName: "Hair Styling",
-    position: 2,
-    waitTime: 20,
+    position: 1,
+    waitTime: 10,
     status: "WAITING",
-    createdAt: new Date(Date.now() - 3 * 60000).toISOString(),
+    createdAt: new Date(Date.now() - 4 * 60000).toISOString(),
+  },
+  {
+    id: 104,
+    tokenNumber: 104,
+    customerName: "Subhashree Ray",
+    phone: "+91 98532 99881",
+    serviceName: "Haircut + Facial",
+    position: 2,
+    waitTime: 22,
+    status: "WAITING",
+    createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
   },
 ];
 
 export function SalonOSWorkspace({ session }: { session: any }) {
   const navigate = useNavigate();
+
+  // Exactly 4 tabs: overview, staff, analytics, profile
   const [activeTab, setActiveTab] = useState<SalonOSTab>("overview");
 
-  // Live salon data states
-  const [salonName, setSalonName] = useState(session?.salonName || "Lakmé Salon — KIIT Road");
-  const [description, setDescription] = useState("Premium grooming and hair styling in Patia, Bhubaneswar.");
-  const [phone, setPhone] = useState("+91 92373 62221");
-  const [address, setAddress] = useState("1st Floor, KIIT Road, opposite Manyavar, Patia, Bhubaneswar – 751024");
-  const [locality, setLocality] = useState("Patia");
-  const [openingHours, setOpeningHours] = useState("10:00 AM – 09:00 PM");
+  // Salon info
+  const [salonName, setSalonName] = useState(
+    session?.salonName || "Lakmé Salon — KIIT Road"
+  );
+  const [locality, setLocality] = useState("Patia, Bhubaneswar");
+  const [ownerName, setOwnerName] = useState(session?.name || "Arjun Sharma");
+  const [ownerEmail, setOwnerEmail] = useState(
+    session?.email || "arjun@example.com"
+  );
+  const [ownerPhone, setOwnerPhone] = useState("+91 92373 62221");
 
+  // Subscriptions state
+  const [currentPlan, setCurrentPlan] = useState<"base" | "intermediate" | "pro">(
+    "intermediate"
+  );
+
+  // Queues & Chairs state
   const [queues, setQueues] = useState<QueueItem[]>(() => {
     try {
       const stored = localStorage.getItem("snepr_active_queues");
@@ -113,56 +228,114 @@ export function SalonOSWorkspace({ session }: { session: any }) {
     }
   });
 
-  const [chairs, setChairs] = useState<ChairItem[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_salon_chairs");
-      return stored ? JSON.parse(stored) : INITIAL_CHAIRS;
-    } catch {
-      return INITIAL_CHAIRS;
-    }
-  });
+  const [chairs, setChairs] = useState<ChairItem[]>(INITIAL_CHAIRS);
+  const [staffList, setStaffList] = useState<StaffItem[]>(INITIAL_STAFF);
 
-  const [services, setServices] = useState<ServiceItem[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_salon_services");
-      return stored ? JSON.parse(stored) : INITIAL_SERVICES;
-    } catch {
-      return INITIAL_SERVICES;
-    }
-  });
-
-  // Walk-in modal state
+  // Modals state
   const [showWalkInModal, setShowWalkInModal] = useState(false);
   const [walkInName, setWalkInName] = useState("");
   const [walkInPhone, setWalkInPhone] = useState("");
-  const [walkInServiceId, setWalkInServiceId] = useState<number>(1);
+  const [walkInService, setWalkInService] = useState("Haircut");
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteContact, setInviteContact] = useState("");
+  const [inviteRole, setInviteRole] = useState("Barber");
+  const [inviteChair, setInviteChair] = useState("Station 4");
+
+  // Support ticket form state
+  const [supportCategory, setSupportCategory] = useState("Technical Support");
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
 
   // Sync queues to localStorage
   useEffect(() => {
     try {
       localStorage.setItem("snepr_active_queues", JSON.stringify(queues));
-      localStorage.setItem("snepr_salon_chairs", JSON.stringify(chairs));
-      localStorage.setItem("snepr_salon_services", JSON.stringify(services));
     } catch {}
-  }, [queues, chairs, services]);
+  }, [queues]);
 
-  // Derived metrics
+  // Derived counts
   const waitingCustomers = queues.filter((q) => q.status === "WAITING");
   const servingCustomers = queues.filter((q) => q.status === "SERVING");
-  const completedToday = queues.filter((q) => q.status === "COMPLETED");
-  const availableChairsCount = chairs.filter((c) => c.status === "AVAILABLE").length;
-  const avgWaitTime = waitingCustomers.length > 0 ? waitingCustomers.length * 10 : 0;
 
   // Queue Operations
-  const handleAddWalkIn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!walkInName.trim()) {
-      toast.error("Please enter customer name.");
+  const handleCallNext = () => {
+    const nextWaiting = queues.find((q) => q.status === "WAITING");
+    if (!nextWaiting) {
+      toast.info("No customers currently waiting in queue.");
       return;
     }
 
-    const selectedService = services.find((s) => s.id === walkInServiceId) || services[0];
-    const maxToken = queues.reduce((max, q) => Math.max(max, q.tokenNumber), 100);
+    const freeChair = chairs.find((c) => c.status === "AVAILABLE");
+    const chairNum = freeChair?.number || 2;
+
+    setQueues((prev) =>
+      prev.map((q) =>
+        q.id === nextWaiting.id
+          ? { ...q, status: "SERVING", chairAssigned: chairNum }
+          : q
+      )
+    );
+
+    setChairs((prev) =>
+      prev.map((c) =>
+        c.number === chairNum
+          ? {
+              ...c,
+              status: "OCCUPIED",
+              currentCustomer: nextWaiting.customerName,
+              currentService: nextWaiting.serviceName,
+              elapsedMins: 0,
+            }
+          : c
+      )
+    );
+
+    toast.success(
+      `Token #${nextWaiting.tokenNumber} (${nextWaiting.customerName}) called to Station ${chairNum}!`
+    );
+  };
+
+  const handleCompleteService = (queueId: number) => {
+    const item = queues.find((q) => q.id === queueId);
+    setQueues((prev) =>
+      prev.map((q) => (q.id === queueId ? { ...q, status: "COMPLETED" } : q))
+    );
+
+    if (item?.chairAssigned) {
+      setChairs((prev) =>
+        prev.map((c) =>
+          c.number === item.chairAssigned
+            ? {
+                ...c,
+                status: "AVAILABLE",
+                currentCustomer: undefined,
+                currentService: undefined,
+                elapsedMins: undefined,
+              }
+            : c
+        )
+      );
+    }
+
+    toast.success(
+      `Service completed for Token #${item?.tokenNumber || queueId}! (+10 Loyalty Points awarded)`
+    );
+  };
+
+  const handleAddWalkIn = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!walkInName.trim()) {
+      toast.error("Please enter the customer name.");
+      return;
+    }
+
+    const maxToken = queues.reduce(
+      (max, q) => Math.max(max, q.tokenNumber),
+      100
+    );
     const nextToken = maxToken + 1;
     const position = waitingCustomers.length + 1;
     const waitTime = position * 12;
@@ -172,7 +345,7 @@ export function SalonOSWorkspace({ session }: { session: any }) {
       tokenNumber: nextToken,
       customerName: walkInName.trim(),
       phone: walkInPhone.trim() || undefined,
-      serviceName: selectedService.name,
+      serviceName: walkInService,
       position,
       waitTime,
       status: "WAITING",
@@ -183,968 +356,1121 @@ export function SalonOSWorkspace({ session }: { session: any }) {
     setWalkInName("");
     setWalkInPhone("");
     setShowWalkInModal(false);
-    toast.success(`Token #${nextToken} issued for ${newQueueItem.customerName}!`);
+    toast.success(`Walk-in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
   };
 
-  const handleCallNext = () => {
-    const nextWaiting = queues.find((q) => q.status === "WAITING");
-    if (!nextWaiting) {
-      toast.info("No customers currently waiting in queue.");
+  const handleInviteStaff = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteName.trim() || !inviteContact.trim()) {
+      toast.error("Please fill in staff name and contact.");
       return;
     }
 
-    // Find first available chair
-    const availableChair = chairs.find((c) => c.status === "AVAILABLE");
-
-    setQueues((prev) =>
-      prev.map((q) =>
-        q.id === nextWaiting.id
-          ? { ...q, status: "SERVING", chairAssigned: availableChair?.number || 1 }
-          : q
-      )
-    );
-
-    if (availableChair) {
-      setChairs((prev) =>
-        prev.map((c) =>
-          c.id === availableChair.id
-            ? {
-                ...c,
-                status: "OCCUPIED",
-                currentCustomer: nextWaiting.customerName,
-                currentService: nextWaiting.serviceName,
-              }
-            : c
-        )
-      );
-    }
-
-    toast.success(`Calling Token #${nextWaiting.tokenNumber} (${nextWaiting.customerName})!`);
-  };
-
-  const handleMarkCompleted = (queueId: number) => {
-    const item = queues.find((q) => q.id === queueId);
-    setQueues((prev) =>
-      prev.map((q) => (q.id === queueId ? { ...q, status: "COMPLETED" } : q))
-    );
-
-    if (item?.chairAssigned) {
-      setChairs((prev) =>
-        prev.map((c) =>
-          c.number === item.chairAssigned
-            ? { ...c, status: "AVAILABLE", currentCustomer: undefined, currentService: undefined }
-            : c
-        )
-      );
-    }
-
-    toast.success(`Service completed for #${item?.tokenNumber || queueId}!`);
-  };
-
-  const handleCancelQueue = (queueId: number, status: "CANCELLED" | "NO_SHOW") => {
-    setQueues((prev) =>
-      prev.map((q) => (q.id === queueId ? { ...q, status } : q))
-    );
-    toast.info(`Token marked as ${status}.`);
-  };
-
-  // Chair Operations
-  const handleToggleChairStatus = (chairId: number, newStatus: "AVAILABLE" | "OCCUPIED" | "UNAVAILABLE") => {
-    setChairs((prev) =>
-      prev.map((c) => (c.id === chairId ? { ...c, status: newStatus } : c))
-    );
-    toast.success("Chair status updated!");
-  };
-
-  const handleAddChair = () => {
-    // Respect subscription limit (e.g. Intermediate allows up to 3)
-    if (chairs.length >= 6) {
-      toast.error("Chair limit reached for your salon plan.");
-      return;
-    }
-    const nextNum = chairs.length + 1;
-    const newChair: ChairItem = {
+    const newStaff: StaffItem = {
       id: Date.now(),
-      number: nextNum,
-      name: `Station ${nextNum}`,
-      status: "AVAILABLE",
+      name: inviteName.trim(),
+      role: inviteRole,
+      phone: inviteContact.trim(),
+      email: `${inviteName.toLowerCase().replace(/\s+/g, ".")}@example.com`,
+      chairAssigned: inviteChair,
+      servedToday: 0,
+      status: "ON_DUTY",
     };
-    setChairs([...chairs, newChair]);
-    toast.success(`Added ${newChair.name}!`);
+
+    setStaffList([...staffList, newStaff]);
+    setShowInviteModal(false);
+    setInviteName("");
+    setInviteContact("");
+    toast.success(`Staff invite sent to ${newStaff.name}! Added to ${newStaff.chairAssigned}.`);
   };
 
-  const handleRemoveChair = (chairId: number) => {
-    if (chairs.length <= 1) {
-      toast.error("Salons must have at least 1 active chair.");
+  const handleSubmitTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supportSubject.trim() || !supportMessage.trim()) {
+      toast.error("Please fill in subject and description.");
       return;
     }
-    setChairs(chairs.filter((c) => c.id !== chairId));
-    toast.info("Chair removed.");
-  };
 
-  // Service Operations
-  const handleToggleService = (serviceId: number) => {
-    setServices((prev) =>
-      prev.map((s) => (s.id === serviceId ? { ...s, isActive: !s.isActive } : s))
-    );
-    toast.success("Service status updated!");
+    setIsSubmittingTicket(true);
+    setTimeout(() => {
+      setIsSubmittingTicket(false);
+      setSupportSubject("");
+      setSupportMessage("");
+      toast.success("Support ticket #SN-8921 opened! Snepr team will respond via email within 2 hours.");
+    }, 600);
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col md:flex-row">
-      {/* ─── SIDEBAR NAVIGATION (Light Warm Theme) ─── */}
-      <aside className="w-full md:w-64 bg-[#FFFDFA] border-r border-[#E9E1D7] flex flex-col justify-between shrink-0">
-        <div>
-          {/* Logo & Salon Badge */}
-          <div className="p-6 border-b border-[#E9E1D7]">
+    <div className="min-h-screen bg-[#F7F3ED] text-[#211912] font-sans flex flex-col selection:bg-[#EAD8BD]">
+      {/* ─── TOP BAR ─── */}
+      <header className="sticky top-0 z-30 bg-[#F7F3ED]/90 backdrop-blur-md border-b border-[#EEE5DA] px-4 py-3 sm:px-8">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
             <Link to="/" className="inline-block" aria-label="Snepr home">
-              <SneprWordmark height={32} color="#1B1410" />
+              <SneprWordmark height={30} color="#211912" />
             </Link>
-            <div className="mt-3">
-              <div className="text-[10px] uppercase font-bold tracking-widest text-[#7A4B29]">
-                SalonOS Desk
+            <div className="hidden sm:block text-[11px] text-[#8C8074] pl-3 border-l border-[#EEE5DA]">
+              <span className="font-bold text-[#211912]">SalonOS</span> · {salonName} ({locality})
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <div className="text-xs font-bold text-[#211912]">{ownerName}</div>
+              <div className="text-[10px] text-[#8C8074] uppercase tracking-wider font-semibold">
+                Salon Owner · {currentPlan.toUpperCase()} TIER
               </div>
-              <h2 className="text-sm font-bold text-[#1B1410] truncate mt-0.5">
+            </div>
+
+            <div className="w-9 h-9 rounded-full bg-[#E7D6C3] text-[#70472F] font-bold text-xs flex items-center justify-center border border-[#EEE5DA]">
+              {ownerName.split(" ").map((n) => n[0]).join("")}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* ─── WORKSPACE LAYOUT (SIDEBAR ON DESKTOP, MAIN AREA) ─── */}
+      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row">
+        {/* DESKTOP SIDEBAR (EXACTLY 4 TABS: OVERVIEW, STAFF, ANALYTICS, PROFILE) */}
+        <aside className="hidden md:flex w-56 flex-col justify-between border-r border-[#EEE5DA] p-5 bg-[#F0E8DE]/60">
+          <div className="space-y-6">
+            <div className="px-2">
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                SALON WORKSPACE
+              </div>
+              <div className="text-sm font-serif font-bold text-[#70472F] mt-0.5 truncate">
                 {salonName}
-              </h2>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#267447] bg-[#EAF3EC] px-2 py-0.5 rounded-full mt-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#267447]" />
-                Live Desk Active
-              </span>
-            </div>
-          </div>
-
-          {/* Navigation Links - 6 Core Items */}
-          <nav className="p-3 space-y-1">
-            <button
-              onClick={() => setActiveTab("overview")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "overview"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <Store className="w-4 h-4" />
-              <span>1. Overview</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("queue")}
-              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "queue"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Clock className="w-4 h-4" />
-                <span>2. Live Queue</span>
-              </div>
-              {waitingCustomers.length > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                    activeTab === "queue" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-900"
-                  }`}
-                >
-                  {waitingCustomers.length}
-                </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab("chairs")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "chairs"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <Armchair className="w-4 h-4" />
-              <span>3. Chairs ({chairs.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("services")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "services"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <Scissors className="w-4 h-4" />
-              <span>4. Services ({services.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("profile")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "profile"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <Store className="w-4 h-4" />
-              <span>5. Salon Profile</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-                activeTab === "settings"
-                  ? "bg-[#7A4B29] text-white shadow-sm"
-                  : "text-[#786B60] hover:bg-[#FAF7F2] hover:text-[#1B1410]"
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span>6. Settings</span>
-            </button>
-          </nav>
-        </div>
-
-        {/* Bottom Switcher: Return to Customer View */}
-        <div className="p-4 border-t border-[#E9E1D7] space-y-2">
-          <Link
-            to="/live"
-            className="w-full py-2.5 px-3 rounded-xl border border-[#E9E1D7] bg-[#FAF7F2] hover:bg-white text-xs font-bold text-[#1B1410] flex items-center justify-center gap-2 transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#7A4B29]" />
-            <span>Return to Customer View</span>
-          </Link>
-
-          <button
-            onClick={() => {
-              try {
-                localStorage.removeItem("snepr_session");
-              } catch {}
-              navigate({ to: "/login" });
-            }}
-            className="w-full py-2 px-3 text-[11px] font-semibold text-[#786B60] hover:text-red-600 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <LogOut className="w-3 h-3" />
-            <span>Sign out of SalonOS</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ─── MAIN DASHBOARD CONTENT AREA ─── */}
-      <main className="flex-1 p-6 md:p-8 lg:p-10 max-w-6xl overflow-y-auto">
-        {/* Top Header Row with Quick Action */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 mb-6 border-b border-[#E9E1D7]">
-          <div>
-            <h1 className="text-2xl font-bold font-serif text-[#1B1410]">
-              {activeTab === "overview" && "Dashboard Overview"}
-              {activeTab === "queue" && "Live Queue Operations"}
-              {activeTab === "chairs" && "Chairs & Stations"}
-              {activeTab === "services" && "Services & Menu"}
-              {activeTab === "profile" && "Salon Business Profile"}
-              {activeTab === "settings" && "SalonOS Settings"}
-            </h1>
-            <p className="text-xs text-[#786B60] mt-0.5">
-              Live operational desk for <strong>{salonName}</strong> in {locality}, Bhubaneswar.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={handleCallNext}
-              className="px-4 py-2.5 rounded-xl bg-[#267447] hover:bg-[#1E5D38] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <Play className="w-3.5 h-3.5 fill-current" />
-              <span>Call Next</span>
-            </button>
-
-            <button
-              onClick={() => setShowWalkInModal(true)}
-              className="px-4 py-2.5 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Add Walk-in</span>
-            </button>
-          </div>
-        </div>
-
-        {/* ─── TAB A: OVERVIEW ─── */}
-        {activeTab === "overview" && (
-          <div className="space-y-6">
-            {/* Real Database Metrics Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
-              <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-2xl p-4 shadow-sm">
-                <span className="text-[11px] font-semibold text-[#786B60]">Waiting</span>
-                <div className="text-2xl font-bold font-serif text-[#1B1410] mt-1">
-                  {waitingCustomers.length}
-                </div>
-                <span className="text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded">
-                  In queue
-                </span>
-              </div>
-
-              <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-2xl p-4 shadow-sm">
-                <span className="text-[11px] font-semibold text-[#786B60]">Now Serving</span>
-                <div className="text-2xl font-bold font-serif text-[#267447] mt-1">
-                  {servingCustomers.length}
-                </div>
-                <span className="text-[10px] text-green-700 bg-green-50 px-1.5 py-0.5 rounded">
-                  In chair
-                </span>
-              </div>
-
-              <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-2xl p-4 shadow-sm">
-                <span className="text-[11px] font-semibold text-[#786B60]">Completed Today</span>
-                <div className="text-2xl font-bold font-serif text-[#1B1410] mt-1">
-                  {completedToday.length}
-                </div>
-                <span className="text-[10px] text-[#786B60]">Haircuts done</span>
-              </div>
-
-              <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-2xl p-4 shadow-sm">
-                <span className="text-[11px] font-semibold text-[#786B60]">Available Chairs</span>
-                <div className="text-2xl font-bold font-serif text-[#1B1410] mt-1">
-                  {availableChairsCount} / {chairs.length}
-                </div>
-                <span className="text-[10px] text-[#786B60]">Stations open</span>
-              </div>
-
-              <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-2xl p-4 shadow-sm col-span-2 lg:col-span-1">
-                <span className="text-[11px] font-semibold text-[#786B60]">Avg. Wait Time</span>
-                <div className="text-2xl font-bold font-serif text-[#7A4B29] mt-1">
-                  {avgWaitTime} min
-                </div>
-                <span className="text-[10px] text-[#786B60]">Predicted queue</span>
               </div>
             </div>
 
-            {/* Compact Live Queue Preview */}
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div className="flex items-center justify-between">
+            <nav className="space-y-1.5">
+              <button
+                onClick={() => setActiveTab("overview")}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "overview"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <Armchair className="w-4 h-4 text-[#70472F]" />
+                <span>Overview</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("staff")}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "staff"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <Users className="w-4 h-4 text-[#70472F]" />
+                <span>Staff</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("analytics")}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "analytics"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <BarChart3 className="w-4 h-4 text-[#70472F]" />
+                <span>Analytics</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("profile")}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "profile"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <Store className="w-4 h-4 text-[#70472F]" />
+                <span>Profile & Plans</span>
+              </button>
+            </nav>
+          </div>
+
+          <div className="pt-4 border-t border-[#EEE5DA] space-y-2">
+            <Link
+              to="/staff"
+              className="w-full py-2 px-3 rounded-xl bg-white/60 hover:bg-white text-[11px] font-bold text-[#70472F] flex items-center justify-center gap-1.5 transition-colors border border-[#EEE5DA]"
+            >
+              <Scissors className="w-3.5 h-3.5" />
+              <span>Switch to Staff Desk</span>
+            </Link>
+
+            <button
+              onClick={() => {
+                try {
+                  localStorage.removeItem("snepr_session");
+                } catch {}
+                toast.info("Signed out of SalonOS.");
+                navigate({ to: "/login" });
+              }}
+              className="w-full py-2 px-3 text-[11px] font-semibold text-[#8C8074] hover:text-red-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* ─── MAIN CONTENT AREA ─── */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Header with Call Next & Add Walk-in */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
                 <div>
-                  <h3 className="text-base font-bold font-serif text-[#1B1410]">Live Queue Preview</h3>
-                  <p className="text-xs text-[#786B60]">Customers currently queued for your stylist chairs.</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab("queue")}
-                  className="text-xs font-bold text-[#7A4B29] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  Manage Live Queue <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {queues.filter((q) => q.status === "WAITING" || q.status === "SERVING").length === 0 ? (
-                <div className="p-8 text-center text-xs text-[#786B60] border border-dashed border-[#E9E1D7] rounded-2xl">
-                  No active tokens right now. Use <strong>"Add Walk-in"</strong> to queue walk-in customers.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#E9E1D7] text-[#786B60] uppercase text-[10px] tracking-wider">
-                        <th className="py-2.5">Token</th>
-                        <th className="py-2.5">Customer</th>
-                        <th className="py-2.5">Service</th>
-                        <th className="py-2.5">Est. Wait</th>
-                        <th className="py-2.5">Status</th>
-                        <th className="py-2.5 text-right">Quick Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#E9E1D7]">
-                      {queues
-                        .filter((q) => q.status === "WAITING" || q.status === "SERVING")
-                        .map((q) => (
-                          <tr key={q.id} className="hover:bg-[#FAF7F2]/50">
-                            <td className="py-3 font-mono font-bold text-sm text-[#7A4B29]">
-                              #{q.tokenNumber}
-                            </td>
-                            <td className="py-3 font-semibold text-[#1B1410]">
-                              {q.customerName}
-                            </td>
-                            <td className="py-3 text-[#786B60]">{q.serviceName}</td>
-                            <td className="py-3 font-medium">
-                              {q.status === "SERVING" ? (
-                                <span className="text-[#267447] font-bold">Serving now</span>
-                              ) : (
-                                `${q.waitTime} mins`
-                              )}
-                            </td>
-                            <td className="py-3">
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                  q.status === "SERVING"
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-amber-100 text-amber-800"
-                                }`}
-                              >
-                                {q.status}
-                              </span>
-                            </td>
-                            <td className="py-3 text-right">
-                              {q.status === "SERVING" ? (
-                                <button
-                                  onClick={() => handleMarkCompleted(q.id)}
-                                  className="px-3 py-1 rounded-lg bg-[#7A4B29] text-white text-[11px] font-bold hover:bg-[#60391F] cursor-pointer"
-                                >
-                                  Mark Completed
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => {
-                                    setQueues((prev) =>
-                                      prev.map((item) =>
-                                        item.id === q.id ? { ...item, status: "SERVING" } : item
-                                      )
-                                    );
-                                    toast.success(`Serving Token #${q.tokenNumber}!`);
-                                  }}
-                                  className="px-3 py-1 rounded-lg border border-[#7A4B29] text-[#7A4B29] text-[11px] font-bold hover:bg-[#7A4B29] hover:text-white cursor-pointer"
-                                >
-                                  Call Next
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB B: LIVE QUEUE (Primary Feature) ─── */}
-        {activeTab === "queue" && (
-          <div className="space-y-6">
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <h3 className="text-base font-bold font-serif text-[#1B1410]">Active Live Queue</h3>
-                  <p className="text-xs text-[#786B60]">
-                    Manage walk-ins and digital token entries. Statuses automatically sync with customer screens.
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    TODAY'S OPERATIONS
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Salon Overview</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Live chairs, telemetry, and customer queue for {salonName}.
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex items-center gap-2.5">
                   <button
                     onClick={handleCallNext}
-                    className="px-4 py-2 rounded-xl bg-[#267447] hover:bg-[#1E5D38] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-[#477B5D] hover:bg-[#38624A] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
-                    Call Next Customer
+                    <span>Call Next</span>
                   </button>
+
                   <button
                     onClick={() => setShowWalkInModal(true)}
-                    className="px-4 py-2 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                    className="px-4 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    Issue Walk-in
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Add Walk-in</span>
                   </button>
                 </div>
               </div>
 
-              {/* Queue table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-[#E9E1D7] text-[#786B60] uppercase text-[10px] tracking-wider">
-                      <th className="py-2.5">Token</th>
-                      <th className="py-2.5">Customer Name</th>
-                      <th className="py-2.5">Requested Service</th>
-                      <th className="py-2.5">Queue Position</th>
-                      <th className="py-2.5">Wait Time</th>
-                      <th className="py-2.5">Status</th>
-                      <th className="py-2.5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E9E1D7]">
-                    {queues.map((q) => (
-                      <tr key={q.id} className="hover:bg-[#FAF7F2]/50">
-                        <td className="py-3 font-mono font-bold text-sm text-[#7A4B29]">
-                          #{q.tokenNumber}
-                        </td>
-                        <td className="py-3">
-                          <strong className="block text-[#1B1410]">{q.customerName}</strong>
-                          {q.phone && <small className="text-[#786B60]">{q.phone}</small>}
-                        </td>
-                        <td className="py-3 text-[#786B60]">{q.serviceName}</td>
-                        <td className="py-3">
-                          {q.status === "SERVING" ? "In chair" : `#${q.position}`}
-                        </td>
-                        <td className="py-3 font-medium">
-                          {q.status === "SERVING" ? (
-                            <span className="text-[#267447] font-bold">Serving now</span>
-                          ) : (
-                            `${q.waitTime} mins`
-                          )}
-                        </td>
-                        <td className="py-3">
+              {/* 4 Stat Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-2xl p-4 shadow-sm">
+                  <div className="text-xs font-semibold text-[#8C8074]">Customers today</div>
+                  <div className="text-3xl font-bold font-serif text-[#211912] mt-1">28</div>
+                  <div className="text-[11px] text-[#477B5D] font-bold mt-1">↑ 14% vs yesterday</div>
+                </div>
+
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-2xl p-4 shadow-sm">
+                  <div className="text-xs font-semibold text-[#8C8074]">Avg. service time</div>
+                  <div className="text-3xl font-bold font-serif text-[#211912] mt-1">
+                    26 <span className="text-xs font-sans font-normal text-[#8C8074]">min</span>
+                  </div>
+                  <div className="text-[11px] text-[#8C8074] mt-1">Across completed services</div>
+                </div>
+
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-2xl p-4 shadow-sm">
+                  <div className="text-xs font-semibold text-[#8C8074]">Queue completion</div>
+                  <div className="text-3xl font-bold font-serif text-[#211912] mt-1">91%</div>
+                  <div className="text-[11px] text-[#477B5D] font-bold mt-1">↑ 3.2% this week</div>
+                </div>
+
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-2xl p-4 shadow-sm">
+                  <div className="text-xs font-semibold text-[#8C8074]">Repeat customers</div>
+                  <div className="text-3xl font-bold font-serif text-[#211912] mt-1">34%</div>
+                  <div className="text-[11px] text-[#8C8074] mt-1">Snepr loyalty members</div>
+                </div>
+              </div>
+
+              {/* Live Chair Grid & Live Queue Split */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                {/* Left: Chairs Status Grid */}
+                <div className="lg:col-span-6 bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
+                    <div>
+                      <h2 className="text-base font-bold font-serif text-[#211912]">Live Chairs</h2>
+                      <p className="text-[11px] text-[#8C8074]">Active station telemetry</p>
+                    </div>
+                    <span className="text-xs font-bold text-[#70472F] bg-[#F1E8DC] px-2.5 py-1 rounded-full">
+                      {chairs.filter((c) => c.status === "OCCUPIED").length} Busy ·{" "}
+                      {chairs.filter((c) => c.status === "AVAILABLE").length} Free
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {chairs.map((chair) => (
+                      <div
+                        key={chair.id}
+                        className="p-3.5 rounded-2xl border border-[#EEE5DA] bg-[#FFFDF9] space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#211912]">{chair.name}</span>
+                          <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                chair.status === "AVAILABLE"
+                                  ? "bg-[#5D9871]"
+                                  : chair.status === "OCCUPIED"
+                                  ? "bg-[#D49A4D]"
+                                  : "bg-[#B8AAA0]"
+                              }`}
+                            />
+                            <span
+                              className={
+                                chair.status === "AVAILABLE"
+                                  ? "text-[#5D9871]"
+                                  : chair.status === "OCCUPIED"
+                                  ? "text-[#D49A4D]"
+                                  : "text-[#B8AAA0]"
+                              }
+                            >
+                              {chair.status === "AVAILABLE" ? "Free" : chair.status === "OCCUPIED" ? "Busy" : "Off"}
+                            </span>
+                          </span>
+                        </div>
+
+                        <div className="text-xs text-[#8C8074]">
+                          Barber: <strong>{chair.barberName}</strong>
+                        </div>
+
+                        {chair.status === "OCCUPIED" ? (
+                          <div className="pt-1.5 border-t border-[#EEE5DA] text-[11px] text-[#70472F] font-medium flex items-center justify-between">
+                            <span>{chair.currentCustomer} ({chair.currentService})</span>
+                            <span className="text-[10px] text-[#8C8074]">{chair.elapsedMins}m in chair</span>
+                          </div>
+                        ) : (
+                          <div className="pt-1.5 border-t border-[#EEE5DA] text-[11px] text-[#5D9871] font-medium">
+                            Ready for next customer
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Live Queue Operations Table */}
+                <div className="lg:col-span-6 bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-5 shadow-sm space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
+                    <div>
+                      <h2 className="text-base font-bold font-serif text-[#211912]">Live Queue</h2>
+                      <p className="text-[11px] text-[#8C8074]">
+                        {waitingCustomers.length} waiting · {servingCustomers.length} serving
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="divide-y divide-[#EEE5DA]">
+                    {queues.map((item) => (
+                      <div key={item.id} className="py-3 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-[#F2E8DC] text-[#70472F] font-bold font-mono text-xs flex items-center justify-center shrink-0">
+                            #{item.tokenNumber}
+                          </div>
+                          <div>
+                            <div className="text-xs font-bold text-[#211912]">{item.customerName}</div>
+                            <div className="text-[11px] text-[#8C8074]">
+                              {item.serviceName} ·{" "}
+                              {item.status === "SERVING" ? (
+                                <span className="text-[#477B5D] font-bold">In Station {item.chairAssigned}</span>
+                              ) : (
+                                <span>~{item.waitTime}m wait</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
                           <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              q.status === "SERVING"
-                                ? "bg-green-100 text-green-800"
-                                : q.status === "WAITING"
-                                ? "bg-amber-100 text-amber-800"
-                                : q.status === "COMPLETED"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-700"
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                              item.status === "SERVING"
+                                ? "bg-[#E5F0E7] text-[#477B5D]"
+                                : item.status === "WAITING"
+                                ? "bg-[#F1E8DF] text-[#8A6B50]"
+                                : "bg-gray-100 text-gray-600"
                             }`}
                           >
-                            {q.status}
+                            {item.status}
                           </span>
-                        </td>
-                        <td className="py-3 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {q.status === "WAITING" && (
-                              <button
-                                onClick={() => {
-                                  setQueues((prev) =>
-                                    prev.map((item) =>
-                                      item.id === q.id ? { ...item, status: "SERVING" } : item
-                                    )
-                                  );
-                                  toast.success(`Serving #${q.tokenNumber}!`);
-                                }}
-                                className="px-2.5 py-1 rounded bg-[#267447] text-white text-[10px] font-bold hover:bg-[#1E5D38] cursor-pointer"
-                              >
-                                Call Next
-                              </button>
-                            )}
-                            {q.status === "SERVING" && (
-                              <button
-                                onClick={() => handleMarkCompleted(q.id)}
-                                className="px-2.5 py-1 rounded bg-[#7A4B29] text-white text-[10px] font-bold hover:bg-[#60391F] cursor-pointer"
-                              >
-                                Done
-                              </button>
-                            )}
-                            {(q.status === "WAITING" || q.status === "SERVING") && (
-                              <>
-                                <button
-                                  onClick={() => handleCancelQueue(q.id, "NO_SHOW")}
-                                  className="px-2 py-1 rounded border border-[#E9E1D7] text-[#786B60] hover:text-amber-700 text-[10px] cursor-pointer"
-                                  title="Mark No-Show"
-                                >
-                                  No Show
-                                </button>
-                                <button
-                                  onClick={() => handleCancelQueue(q.id, "CANCELLED")}
-                                  className="px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 text-[10px] cursor-pointer"
-                                  title="Cancel token"
-                                >
-                                  Cancel
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
+
+                          {item.status === "SERVING" && (
+                            <button
+                              onClick={() => handleCompleteService(item.id)}
+                              className="px-2.5 py-1 rounded-lg bg-[#477B5D] text-white text-[11px] font-bold hover:bg-[#38624A] cursor-pointer"
+                            >
+                              Complete
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ─── TAB C: CHAIRS ─── */}
-        {activeTab === "chairs" && (
-          <div className="space-y-6">
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
+          {/* TAB 2: STAFF */}
+          {activeTab === "staff" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
                 <div>
-                  <h3 className="text-base font-bold font-serif text-[#1B1410]">Chairs & Stations</h3>
-                  <p className="text-xs text-[#786B60]">
-                    Manage active chairs in your salon. Respects your subscription plan limits.
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    TEAM & BARBERS
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Staff Management</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Assign barbers to stations, track individual customer counts, and invite staff.
                   </p>
                 </div>
+
                 <button
-                  onClick={handleAddChair}
-                  className="px-4 py-2 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => setShowInviteModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5" />
-                  Add Chair
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Invite Staff Member</span>
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                {chairs.map((chair) => (
+              {/* Staff Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {staffList.map((staff) => (
                   <div
-                    key={chair.id}
-                    className={`p-4 rounded-2xl border transition-colors flex flex-col justify-between ${
-                      chair.status === "OCCUPIED"
-                        ? "border-[#C8993E] bg-[#FAF7F2]"
-                        : chair.status === "AVAILABLE"
-                        ? "border-[#267447]/30 bg-green-50/30"
-                        : "border-[#E9E1D7] bg-gray-50 opacity-60"
+                    key={staff.id}
+                    className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-5 shadow-sm space-y-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-2xl bg-[#EADBCA] text-[#70472F] font-bold text-sm flex items-center justify-center">
+                          {staff.name.split(" ").map((n) => n[0]).join("")}
+                        </div>
+                        <div>
+                          <div className="text-sm font-bold text-[#211912]">{staff.name}</div>
+                          <div className="text-xs text-[#8C8074]">{staff.role}</div>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${
+                          staff.status === "ON_DUTY"
+                            ? "bg-[#E8F3EB] text-[#28734F]"
+                            : "bg-[#F2EEE7] text-[#8C8074]"
+                        }`}
+                      >
+                        {staff.status === "ON_DUTY" ? "On duty" : "Off duty"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-[#8C8074] pt-2 border-t border-[#EEE5DA]">
+                      <div className="flex justify-between">
+                        <span>Assigned Station:</span>
+                        <strong className="text-[#70472F]">{staff.chairAssigned}</strong>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Contact:</span>
+                        <span>{staff.phone}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Served Today:</span>
+                        <strong className="text-[#211912]">{staff.servedToday} customers</strong>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: ANALYTICS */}
+          {activeTab === "analytics" && (
+            <div className="space-y-6">
+              <div className="pb-4 border-b border-[#EEE5DA]">
+                <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                  PERFORMANCE & METRICS
+                </div>
+                <h1 className="text-2xl font-bold font-serif text-[#211912]">Salon Analytics</h1>
+                <p className="text-xs text-[#8C8074] mt-0.5">
+                  Understand chair utilization, peak queue hours, and client retention.
+                </p>
+              </div>
+
+              {/* Analytics Charts Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Chart 1: Customers Served */}
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#211912]">Customers Served</h3>
+                    <p className="text-xs text-[#8C8074]">Daily completed services this week</p>
+                  </div>
+
+                  <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2">
+                    {[
+                      { day: "Mon", val: 55 },
+                      { day: "Tue", val: 68 },
+                      { day: "Wed", val: 48 },
+                      { day: "Thu", val: 82 },
+                      { day: "Fri", val: 72 },
+                      { day: "Sat", val: 96, active: true },
+                      { day: "Sun", val: 62 },
+                    ].map((item) => (
+                      <div key={item.day} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full flex justify-center">
+                          <div
+                            style={{ height: `${item.val}%` }}
+                            className={`w-7 rounded-t-lg transition-all ${
+                              item.active ? "bg-[#70472F]" : "bg-[#D4C3B3] hover:bg-[#BCA998]"
+                            }`}
+                          />
+                        </div>
+                        <span className="text-[11px] font-bold text-[#8C8074]">{item.day}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Chart 2: Queue Activity Peak Hours */}
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#211912]">Queue Activity</h3>
+                    <p className="text-xs text-[#8C8074]">Queue entries by time of day</p>
+                  </div>
+
+                  <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2">
+                    {[
+                      { time: "9 AM", val: 25 },
+                      { time: "11 AM", val: 48 },
+                      { time: "1 PM", val: 70 },
+                      { time: "3 PM", val: 92, active: true },
+                      { time: "5 PM", val: 75 },
+                      { time: "7 PM", val: 45 },
+                    ].map((item) => (
+                      <div key={item.time} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full flex justify-center">
+                          <div
+                            style={{ height: `${item.val}%` }}
+                            className={`w-7 rounded-t-lg transition-all ${
+                              item.active ? "bg-[#70472F]" : "bg-[#D4C3B3] hover:bg-[#BCA998]"
+                            }`}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold text-[#8C8074] whitespace-nowrap">
+                          {item.time}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Top Services Breakdown */}
+                <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#211912]">Top Services</h3>
+                    <p className="text-xs text-[#8C8074]">By completed services this week</p>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <div>
+                      <div className="flex justify-between text-xs font-bold text-[#211912]">
+                        <span>Haircut</span>
+                        <span>118</span>
+                      </div>
+                      <div className="h-2 w-full bg-[#F0E8DF] rounded-full mt-1.5 overflow-hidden">
+                        <div className="h-full bg-[#70472F] rounded-full w-[86%]" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs font-bold text-[#211912]">
+                        <span>Haircut + Beard</span>
+                        <span>76</span>
+                      </div>
+                      <div className="h-2 w-full bg-[#F0E8DF] rounded-full mt-1.5 overflow-hidden">
+                        <div className="h-full bg-[#956746] rounded-full w-[62%]" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs font-bold text-[#211912]">
+                        <span>Beard trim</span>
+                        <span>52</span>
+                      </div>
+                      <div className="h-2 w-full bg-[#F0E8DF] rounded-full mt-1.5 overflow-hidden">
+                        <div className="h-full bg-[#C8AD91] rounded-full w-[42%]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Revenue Trends (Pro Teaser) */}
+                <div className="relative overflow-hidden bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-[#211912]">Revenue & P&L Trends</h3>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#C69A5C]/20 text-[#70472F]">
+                        Pro Plan Feature
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#8C8074] mt-1">
+                      Direct gross billing, stylist commissions, and zero marketplace clawbacks.
+                    </p>
+                  </div>
+
+                  <div className="my-6 p-4 rounded-2xl bg-[#F7F3ED] border border-[#EEE5DA] text-center space-y-2">
+                    <Crown className="w-8 h-8 text-[#C69A5C] mx-auto" />
+                    <div className="text-xs font-bold text-[#211912]">
+                      Unlock Advanced Financial Analytics
+                    </div>
+                    <p className="text-[11px] text-[#8C8074] max-w-xs mx-auto">
+                      Upgrade to the Pro Plan (₹449/mo) to track real-time revenue and chair monetization.
+                    </p>
+                    <button
+                      onClick={() => setActiveTab("profile")}
+                      className="px-4 py-2 rounded-xl bg-[#70472F] text-white text-xs font-bold hover:bg-[#583724] transition-colors cursor-pointer mt-1"
+                    >
+                      View Subscription Plans
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: PROFILE & SUPPORT */}
+          {activeTab === "profile" && (
+            <div className="space-y-8">
+              <div className="pb-4 border-b border-[#EEE5DA]">
+                <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                  OWNER & SALON SETTINGS
+                </div>
+                <h1 className="text-2xl font-bold font-serif text-[#211912]">Profile & Subscriptions</h1>
+                <p className="text-xs text-[#8C8074] mt-0.5">
+                  Manage your verified salon credentials, flat SaaS subscription, and reach support.
+                </p>
+              </div>
+
+              {/* Owner Profile Card */}
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
+                  <div>
+                    <h2 className="text-base font-bold font-serif text-[#211912]">Owner Profile</h2>
+                    <p className="text-xs text-[#8C8074]">Your account and salon details</p>
+                  </div>
+                  <div className="w-12 h-12 rounded-2xl bg-[#E7D6C3] text-[#70472F] font-bold text-base flex items-center justify-center">
+                    {ownerName.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-xl bg-[#F7F3ED] border border-[#EEE5DA]">
+                    <span className="text-[10px] font-bold text-[#8C8074] uppercase block mb-0.5">Full Name</span>
+                    <strong className="text-[#211912]">{ownerName}</strong>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#F7F3ED] border border-[#EEE5DA]">
+                    <span className="text-[10px] font-bold text-[#8C8074] uppercase block mb-0.5">Email Address</span>
+                    <strong className="text-[#211912]">{ownerEmail}</strong>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#F7F3ED] border border-[#EEE5DA]">
+                    <span className="text-[10px] font-bold text-[#8C8074] uppercase block mb-0.5">Phone Number</span>
+                    <strong className="text-[#211912]">{ownerPhone}</strong>
+                  </div>
+                  <div className="p-3 rounded-xl bg-[#F7F3ED] border border-[#EEE5DA]">
+                    <span className="text-[10px] font-bold text-[#8C8074] uppercase block mb-0.5">Salon Name</span>
+                    <strong className="text-[#70472F]">{salonName}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3 Flat SaaS Subscription Plans */}
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-lg font-bold font-serif text-[#211912]">Flat SaaS Plans (0% Commission)</h2>
+                  <p className="text-xs text-[#8C8074]">
+                    No haircut cut. Keep 100% of your earnings with predictable monthly pricing.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* BASE PLAN */}
+                  <div
+                    className={`rounded-3xl p-6 border transition-all flex flex-col justify-between ${
+                      currentPlan === "base"
+                        ? "bg-white border-[#70472F] shadow-md ring-2 ring-[#70472F]/20"
+                        : "bg-[#FFFDF9] border-[#EEE5DA]"
                     }`}
                   >
                     <div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-[#786B60] uppercase">
-                          CHAIR {chair.number}
-                        </span>
-                        <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                            chair.status === "AVAILABLE"
-                              ? "bg-green-100 text-green-800"
-                              : chair.status === "OCCUPIED"
-                              ? "bg-amber-100 text-amber-800"
-                              : "bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          {chair.status}
-                        </span>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C8074]">
+                        BASE PLAN · SINGLE BARBER
                       </div>
-                      <h4 className="text-base font-bold font-serif text-[#1B1410] mt-1">
-                        {chair.name}
-                      </h4>
-                      {chair.currentCustomer ? (
-                        <p className="text-xs text-[#7A4B29] font-medium mt-1">
-                          Serving: {chair.currentCustomer} ({chair.currentService})
-                        </p>
-                      ) : (
-                        <p className="text-xs text-[#786B60] mt-1">Ready for next customer</p>
-                      )}
+                      <h3 className="text-xl font-bold font-serif text-[#211912] mt-1">Barbershop Starter</h3>
+                      <div className="mt-4 flex items-baseline gap-1">
+                        <span className="text-3xl font-extrabold font-serif text-[#211912]">₹199</span>
+                        <span className="text-xs text-[#8C8074]">/month</span>
+                      </div>
+
+                      <div className="my-4 h-px bg-[#EEE5DA]" />
+
+                      <ul className="space-y-2 text-xs text-[#8C8074]">
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>1 Active Stylist Chair</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Real-time chair countdown queue</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Printable counter QR standee</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>100% Free for your customers</span>
+                        </li>
+                      </ul>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-[#E9E1D7]/60 flex items-center justify-between text-xs">
-                      <div className="flex gap-1.5">
-                        <button
-                          onClick={() =>
-                            handleToggleChairStatus(
-                              chair.id,
-                              chair.status === "AVAILABLE" ? "OCCUPIED" : "AVAILABLE"
-                            )
-                          }
-                          className="px-2 py-1 rounded border border-[#E9E1D7] hover:bg-white text-[10px] font-semibold cursor-pointer"
-                        >
-                          Toggle State
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => handleRemoveChair(chair.id)}
-                        className="text-red-500 hover:text-red-700 text-[10px] font-semibold cursor-pointer"
-                      >
-                        Remove
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setCurrentPlan("base");
+                        toast.success("Switched to Base Plan (₹199/mo)!");
+                      }}
+                      className={`mt-6 w-full py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                        currentPlan === "base"
+                          ? "bg-[#F1E8DC] text-[#70472F]"
+                          : "border border-[#EEE5DA] text-[#211912] hover:bg-black/5"
+                      }`}
+                    >
+                      {currentPlan === "base" ? "Current Active Plan" : "Select Base Plan"}
+                    </button>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* ─── TAB D: SERVICES ─── */}
-        {activeTab === "services" && (
-          <div className="space-y-6">
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div>
-                <h3 className="text-base font-bold font-serif text-[#1B1410]">Service Menu & Pricing</h3>
-                <p className="text-xs text-[#786B60]">
-                  Changes published here immediately update your public salon page for Bhubaneswar customers.
-                </p>
-              </div>
-
-              <div className="divide-y divide-[#E9E1D7]">
-                {services.map((svc) => (
+                  {/* INTERMEDIATE PLAN (MOST POPULAR) */}
                   <div
-                    key={svc.id}
-                    className="py-3 flex items-center justify-between gap-4 text-xs"
+                    className={`rounded-3xl p-6 border transition-all flex flex-col justify-between relative ${
+                      currentPlan === "intermediate"
+                        ? "bg-white border-[#70472F] shadow-lg ring-2 ring-[#70472F]"
+                        : "bg-[#FFFDF9] border-[#EEE5DA]"
+                    }`}
                   >
-                    <div className="min-w-0 flex-1">
-                      <strong className="block text-sm text-[#1B1410]">{svc.name}</strong>
-                      <span className="text-[#786B60]">{svc.duration} mins</span>
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-[#70472F] text-white text-[10px] font-bold uppercase tracking-wider">
+                      Most Popular
                     </div>
 
-                    <div className="text-right">
-                      <div className="font-bold text-sm text-[#7A4B29]">₹{svc.price}</div>
-                      <span className="text-[10px] text-[#786B60]">0% commission</span>
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#70472F]">
+                        INTERMEDIATE · UP TO 3 CHAIRS
+                      </div>
+                      <h3 className="text-xl font-bold font-serif text-[#211912] mt-1">High-Traffic Salon</h3>
+                      <div className="mt-4 flex items-baseline gap-1">
+                        <span className="text-3xl font-extrabold font-serif text-[#70472F]">₹400</span>
+                        <span className="text-xs text-[#8C8074]">/month</span>
+                      </div>
+
+                      <div className="my-4 h-px bg-[#EEE5DA]" />
+
+                      <ul className="space-y-2 text-xs text-[#8C8074]">
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span><b>Up to 3 Chairs & Staff Logins</b></span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Multi-barber queue routing</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Automated WhatsApp delay alerts</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Snepr Points Loyalty Network</span>
+                        </li>
+                      </ul>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleToggleService(svc.id)}
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold cursor-pointer transition-colors ${
-                          svc.isActive
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-500"
-                        }`}
+                    <button
+                      onClick={() => {
+                        setCurrentPlan("intermediate");
+                        toast.success("Switched to Intermediate Plan (₹400/mo)!");
+                      }}
+                      className={`mt-6 w-full py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                        currentPlan === "intermediate"
+                          ? "bg-[#70472F] text-white"
+                          : "border border-[#EEE5DA] text-[#211912] hover:bg-black/5"
+                      }`}
+                    >
+                      {currentPlan === "intermediate" ? "Current Active Plan" : "Choose Intermediate"}
+                    </button>
+                  </div>
+
+                  {/* PRO PLAN */}
+                  <div
+                    className={`rounded-3xl p-6 border transition-all flex flex-col justify-between ${
+                      currentPlan === "pro"
+                        ? "bg-white border-[#70472F] shadow-md ring-2 ring-[#70472F]/20"
+                        : "bg-[#FFFDF9] border-[#EEE5DA]"
+                    }`}
+                  >
+                    <div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-[#8C8074]">
+                        PRO PLAN · UNLIMITED
+                      </div>
+                      <h3 className="text-xl font-bold font-serif text-[#211912] mt-1">Luxury Lounge</h3>
+                      <div className="mt-4 flex items-baseline gap-1">
+                        <span className="text-3xl font-extrabold font-serif text-[#211912]">₹449</span>
+                        <span className="text-xs text-[#8C8074]">/month</span>
+                      </div>
+
+                      <div className="my-4 h-px bg-[#EEE5DA]" />
+
+                      <ul className="space-y-2 text-xs text-[#8C8074]">
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span><b>Unlimited Chairs & Barbers</b></span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Full AI Snepr Studio previews</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Advanced revenue & turnover metrics</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Check className="w-3.5 h-3.5 text-[#477B5D]" />
+                          <span>Priority 24/7 dedicated support</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setCurrentPlan("pro");
+                        toast.success("Upgraded to Pro Plan (₹449/mo)!");
+                      }}
+                      className={`mt-6 w-full py-2.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+                        currentPlan === "pro"
+                          ? "bg-[#70472F] text-white"
+                          : "border border-[#EEE5DA] text-[#211912] hover:bg-black/5"
+                      }`}
+                    >
+                      {currentPlan === "pro" ? "Current Active Plan" : "Upgrade to Pro"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* INTEGRATED HELP CENTRE SUPPORT TICKET FORM (NO FLOATING BUBBLE) */}
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 pb-3 border-b border-[#EEE5DA]">
+                  <div className="w-10 h-10 rounded-2xl bg-[#EADBCA] text-[#70472F] flex items-center justify-center">
+                    <HelpCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold font-serif text-[#211912]">
+                      Integrated Partner Support Desk
+                    </h2>
+                    <p className="text-xs text-[#8C8074]">
+                      Submit a direct support ticket to the Snepr engineering & operations team.
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmitTicket} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                        ISSUE CATEGORY
+                      </label>
+                      <select
+                        value={supportCategory}
+                        onChange={(e) => setSupportCategory(e.target.value)}
+                        className="w-full h-11 px-3 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-bold text-[#211912] focus:outline-none focus:border-[#70472F]"
                       >
-                        {svc.isActive ? "Active" : "Inactive"}
-                      </button>
+                        <option value="Technical Support">Technical & Telemetry Support</option>
+                        <option value="Billing & Subscription">Billing & Plan Inquiry</option>
+                        <option value="Staff & Chair Setup">Staff & Chair Configuration</option>
+                        <option value="Feature Request">New Feature Request</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                        SUBJECT
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Question regarding SMS customer notifications"
+                        value={supportSubject}
+                        onChange={(e) => setSupportSubject(e.target.value)}
+                        className="w-full h-11 px-3.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                      />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* ─── TAB E: SALON PROFILE ─── */}
-        {activeTab === "profile" && (
-          <div className="space-y-6">
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div>
-                <h3 className="text-base font-bold font-serif text-[#1B1410]">Salon Details</h3>
-                <p className="text-xs text-[#786B60]">
-                  Keep your public listing accurate for Bhubaneswar customers.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                    Salon Name
-                  </label>
-                  <input
-                    type="text"
-                    value={salonName}
-                    onChange={(e) => setSalonName(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    className="w-full p-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                      Direct Phone
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                      MESSAGE / DESCRIPTION
                     </label>
-                    <input
-                      type="text"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
+                    <textarea
+                      required
+                      rows={4}
+                      placeholder="Please describe what you need assistance with..."
+                      value={supportMessage}
+                      onChange={(e) => setSupportMessage(e.target.value)}
+                      className="w-full p-3 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs text-[#211912] focus:outline-none focus:border-[#70472F]"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                      Locality (Bhubaneswar)
-                    </label>
-                    <input
-                      type="text"
-                      value={locality}
-                      onChange={(e) => setLocality(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
-                    />
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSubmittingTicket}
+                      className="px-6 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer shadow-sm disabled:opacity-50"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      <span>{isSubmittingTicket ? "Sending Ticket..." : "Submit Support Ticket"}</span>
+                    </button>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                    Full Street Address
-                  </label>
-                  <input
-                    type="text"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-[#1B1410] uppercase mb-1">
-                    Working Hours
-                  </label>
-                  <input
-                    type="text"
-                    value={openingHours}
-                    onChange={(e) => setOpeningHours(e.target.value)}
-                    className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    onClick={() => toast.success("Salon profile saved!")}
-                    className="px-6 py-2.5 rounded-xl bg-[#7A4B29] text-white text-xs font-bold hover:bg-[#60391F] transition-colors cursor-pointer"
-                  >
-                    Save Changes
-                  </button>
-                </div>
+                </form>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </main>
+      </div>
 
-        {/* ─── TAB F: SETTINGS & SUBSCRIPTIONS ─── */}
-        {activeTab === "settings" && (
-          <div className="space-y-6">
-            {/* Subscription Card */}
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-[#7A4B29]">
-                    Authoritative Pricing
-                  </span>
-                  <h3 className="text-base font-bold font-serif text-[#1B1410] mt-0.5">
-                    SalonOS Subscription Plans
-                  </h3>
-                  <p className="text-xs text-[#786B60]">
-                    0% Haircut Commission Guarantee. Monthly flat software fee only.
-                  </p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-bold">
-                  Active: Intermediate
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                <div className="p-4 rounded-xl border border-[#E9E1D7] bg-[#FAF7F2]/40 space-y-1.5">
-                  <span className="text-[10px] font-bold text-[#786B60] uppercase">BASE PLAN</span>
-                  <div className="text-xl font-bold font-serif text-[#1B1410]">₹199<small className="text-xs font-normal"> /mo</small></div>
-                  <ul className="text-[11px] text-[#786B60] space-y-1 pt-1">
-                    <li>✓ 1 Active Stylist Chair</li>
-                    <li>✓ Digital Live Queue</li>
-                    <li>✓ 0% Haircut Commission</li>
-                  </ul>
-                </div>
-
-                <div className="p-4 rounded-xl border-2 border-[#7A4B29] bg-[#FFFDFA] space-y-1.5 relative shadow-sm">
-                  <span className="text-[9px] font-extrabold uppercase tracking-wider text-white bg-[#7A4B29] px-2 py-0.5 rounded-full absolute -top-2.5 right-3">
-                    MOST POPULAR
-                  </span>
-                  <span className="text-[10px] font-bold text-[#7A4B29] uppercase">INTERMEDIATE</span>
-                  <div className="text-xl font-bold font-serif text-[#1B1410]">₹400<small className="text-xs font-normal"> /mo</small></div>
-                  <ul className="text-[11px] text-[#786B60] space-y-1 pt-1">
-                    <li>✓ Up to 3 Stylist Chairs</li>
-                    <li>✓ Real-time Queue Updates</li>
-                    <li>✓ Walk-in & Digital Tokens</li>
-                    <li>✓ 0% Haircut Commission</li>
-                  </ul>
-                </div>
-
-                <div className="p-4 rounded-xl border border-[#E9E1D7] bg-[#FAF7F2]/40 space-y-1.5">
-                  <span className="text-[10px] font-bold text-[#786B60] uppercase">PRO PLAN</span>
-                  <div className="text-xl font-bold font-serif text-[#1B1410]">₹449<small className="text-xs font-normal"> /mo</small></div>
-                  <ul className="text-[11px] text-[#786B60] space-y-1 pt-1">
-                    <li>✓ Unlimited Stylist Chairs</li>
-                    <li>✓ Priority Salon Listing</li>
-                    <li>✓ Full SalonOS Suite</li>
-                    <li>✓ 0% Haircut Commission</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Account Info */}
-            <div className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 shadow-sm space-y-3 text-xs">
-              <h3 className="font-bold text-sm text-[#1B1410] uppercase tracking-wide">
-                Account Credentials
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#786B60]">
-                <div>
-                  <span>Owner Account:</span> <strong className="text-[#1B1410]">{session?.name || "Salon Owner"}</strong>
-                </div>
-                <div>
-                  <span>Email:</span> <strong className="text-[#1B1410]">{session?.email || "owner@salon.com"}</strong>
-                </div>
-                <div>
-                  <span>Role:</span> <strong className="text-[#7A4B29]">Authorized Salon Partner</strong>
-                </div>
-                <div>
-                  <span>City Launch:</span> <strong className="text-[#1B1410]">Bhubaneswar, Odisha</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* ─── ADD WALK-IN MODAL ─── */}
-      {showWalkInModal && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs z-50 flex items-center justify-center p-4"
-          onClick={() => setShowWalkInModal(false)}
-        >
-          <div
-            className="bg-[#FFFDFA] border border-[#E9E1D7] rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl space-y-5"
-            onClick={(e) => e.stopPropagation()}
+      {/* ─── MOBILE BOTTOM NAVIGATION (4 TABS: OVERVIEW, STAFF, ANALYTICS, PROFILE) ─── */}
+      <div className="md:hidden fixed bottom-3 inset-x-3 max-w-md mx-auto z-40">
+        <nav className="bg-white/90 backdrop-blur-xl border border-[#EEE5DA] rounded-2xl p-1.5 shadow-lg flex items-center justify-around">
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === "overview"
+                ? "bg-[#F1E8DC] text-[#70472F]"
+                : "text-[#8C8074] hover:text-[#211912]"
+            }`}
           >
-            <div className="flex justify-between items-center">
+            <Armchair className="w-4 h-4" />
+            <span className="text-[10px]">Overview</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("staff")}
+            className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === "staff"
+                ? "bg-[#F1E8DC] text-[#70472F]"
+                : "text-[#8C8074] hover:text-[#211912]"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            <span className="text-[10px]">Staff</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === "analytics"
+                ? "bg-[#F1E8DC] text-[#70472F]"
+                : "text-[#8C8074] hover:text-[#211912]"
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-[10px]">Analytics</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`flex-1 py-2 px-1 rounded-xl text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer ${
+              activeTab === "profile"
+                ? "bg-[#F1E8DC] text-[#70472F]"
+                : "text-[#8C8074] hover:text-[#211912]"
+            }`}
+          >
+            <Store className="w-4 h-4" />
+            <span className="text-[10px]">Profile</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* ─── MODAL 1: ADD WALK-IN CUSTOMER ─── */}
+      {showWalkInModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
               <div>
-                <span className="text-[10px] font-bold tracking-widest uppercase text-[#7A4B29]">
-                  Desk Action
-                </span>
-                <h3 className="text-lg font-bold font-serif text-[#1B1410]">Issue Walk-in Token</h3>
+                <h3 className="text-base font-bold font-serif text-[#211912]">Add Walk-in Customer</h3>
+                <p className="text-xs text-[#8C8074]">Manual entry at salon counter</p>
               </div>
               <button
                 onClick={() => setShowWalkInModal(false)}
-                className="text-gray-400 hover:text-black text-xl cursor-pointer"
+                className="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center text-[#8C8074] cursor-pointer"
               >
-                ×
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleAddWalkIn} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase text-[#1B1410] mb-1">
-                  Customer Name *
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                  CUSTOMER NAME *
                 </label>
                 <input
                   type="text"
                   required
-                  autoFocus
-                  placeholder="e.g. Suman Tripathy"
+                  placeholder="e.g. Alok Das"
                   value={walkInName}
                   onChange={(e) => setWalkInName(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none focus:border-[#7A4B29]"
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-[#1B1410] mb-1">
-                  Phone (Optional for SMS/Call)
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                  PHONE NUMBER (FOR SMS NOTIFICATION)
                 </label>
                 <input
                   type="tel"
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 94370 00000"
                   value={walkInPhone}
                   onChange={(e) => setWalkInPhone(e.target.value)}
-                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm focus:outline-none focus:border-[#7A4B29]"
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase text-[#1B1410] mb-1">
-                  Select Service
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                  SERVICE
                 </label>
                 <select
-                  value={walkInServiceId}
-                  onChange={(e) => setWalkInServiceId(Number(e.target.value))}
-                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] text-sm bg-white focus:outline-none cursor-pointer"
+                  value={walkInService}
+                  onChange={(e) => setWalkInService(e.target.value)}
+                  className="w-full h-11 px-3 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-bold text-[#211912] focus:outline-none focus:border-[#70472F]"
                 >
-                  {services
-                    .filter((s) => s.isActive)
-                    .map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} — ₹{s.price} ({s.duration} mins)
-                      </option>
-                    ))}
+                  <option value="Haircut">Haircut (₹150)</option>
+                  <option value="Beard trim">Beard trim (₹80)</option>
+                  <option value="Haircut + Beard">Haircut + Beard (₹200)</option>
+                  <option value="Hair Styling">Hair Styling (₹120)</option>
+                  <option value="Hair Colour">Hair Colour (₹450)</option>
                 </select>
               </div>
 
-              <div className="pt-2 flex gap-2">
+              <div className="flex gap-2.5 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowWalkInModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-[#E9E1D7] text-xs font-semibold hover:bg-gray-50"
+                  className="flex-1 py-2.5 rounded-xl border border-[#EEE5DA] text-xs font-bold text-[#8C8074] hover:bg-black/5 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-xs font-bold transition-colors shadow-sm"
+                  className="flex-1 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
                 >
                   Issue Token
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MODAL 2: INVITE STAFF MEMBER ─── */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EEE5DA]">
+              <div>
+                <h3 className="text-base font-bold font-serif text-[#211912]">Invite Staff Member</h3>
+                <p className="text-xs text-[#8C8074]">Onboard barber or stylist to chair</p>
+              </div>
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="w-8 h-8 rounded-full hover:bg-black/5 flex items-center justify-center text-[#8C8074] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleInviteStaff} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                  STAFF FULL NAME *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Subrat Mohanty"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                  PHONE OR EMAIL *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="+91 94370 12345 or subrat@example.com"
+                  value={inviteContact}
+                  onChange={(e) => setInviteContact(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                    ROLE
+                  </label>
+                  <select
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value)}
+                    className="w-full h-11 px-3 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-bold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                  >
+                    <option value="Barber">Barber</option>
+                    <option value="Senior Stylist">Senior Stylist</option>
+                    <option value="Grooming Specialist">Grooming Specialist</option>
+                    <option value="Manager">Manager</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#8C8074] mb-1">
+                    ASSIGN CHAIR
+                  </label>
+                  <select
+                    value={inviteChair}
+                    onChange={(e) => setInviteChair(e.target.value)}
+                    className="w-full h-11 px-3 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-bold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                  >
+                    <option value="Station 1">Station 1</option>
+                    <option value="Station 2">Station 2</option>
+                    <option value="Station 3">Station 3</option>
+                    <option value="Station 4">Station 4</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowInviteModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-[#EEE5DA] text-xs font-bold text-[#8C8074] hover:bg-black/5 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-colors cursor-pointer shadow-sm"
+                >
+                  Send Invite
                 </button>
               </div>
             </form>
@@ -1156,4 +1482,3 @@ export function SalonOSWorkspace({ session }: { session: any }) {
 }
 
 export default SalonOSWorkspace;
-

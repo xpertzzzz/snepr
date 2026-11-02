@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SneprWordmark } from "@/components/SneprWordmark";
+import { LiquidBottomNav } from "@/components/navigation/LiquidBottomNav";
 import {
   User, Store, ShieldCheck, Ticket, Award, Settings,
-  LogOut, ChevronRight, PlusCircle, Building2, Clock, CheckCircle2, AlertCircle
+  LogOut, ChevronRight, PlusCircle, Building2, Clock, CheckCircle2, AlertCircle, Scissors
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -272,6 +273,25 @@ export function ProfilePageUnified() {
           </div>
         </section>
 
+        {/* Staff Desk Quick Access for Staff Members */}
+        {session?.role === "staff" && (
+          <div className="bg-[#FAF7F2] border border-[#7A4B29]/30 rounded-2xl p-5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Scissors className="w-5 h-5 text-[#7A4B29]" />
+              <div>
+                <div className="text-xs font-bold text-[#1B1410]">Staff Operations Desk</div>
+                <div className="text-[11px] text-[#786B60]">Manage Chair 02 queue, call next customer, and scan tickets.</div>
+              </div>
+            </div>
+            <Link
+              to="/staff"
+              className="px-4 py-2 rounded-xl bg-[#7A4B29] text-white text-xs font-bold hover:bg-[#60391F] transition-colors shrink-0"
+            >
+              Open Staff Desk
+            </Link>
+          </div>
+        )}
+
         {/* Administrator Portal Link if Authorized */}
         {(session?.role === "super_admin" || session?.isAdmin) && (
           <div className="bg-[#FAF7F2] border border-[#7A4B29]/30 rounded-2xl p-5 flex items-center justify-between">
@@ -291,6 +311,24 @@ export function ProfilePageUnified() {
           </div>
         )}
       </main>
+
+      {/* ─── LIQUID BOTTOM NAVIGATION ─── */}
+      <div className="h-20" />
+      <LiquidBottomNav
+        tabs={[
+          { id: "explore", label: "Live Queues", icon: "◷" },
+          { id: "queue", label: "My Queue", icon: "▱" },
+          { id: "studio", label: "AI Studio", icon: "✧" },
+          { id: "profile", label: "Profile", icon: "♙" },
+        ]}
+        activeTab="profile"
+        onTabChange={(tabId) => {
+          if (tabId === "explore") navigate({ to: "/live" });
+          if (tabId === "queue") navigate({ to: "/live/queue" });
+          if (tabId === "studio") navigate({ to: "/live/studio" });
+          if (tabId === "profile") navigate({ to: "/profile" });
+        }}
+      />
     </div>
   );
 }

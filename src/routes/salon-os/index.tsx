@@ -24,11 +24,16 @@ export function SalonOSPage() {
     try {
       const stored = localStorage.getItem("snepr_session");
       if (stored) {
-        setSession(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setSession(parsed);
+        if (parsed.role === "staff" || parsed.role === "salon_staff") {
+          navigate({ to: "/staff" });
+          return;
+        }
       }
     } catch {}
     setLoading(false);
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return (
