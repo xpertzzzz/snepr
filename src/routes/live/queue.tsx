@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { getQueueStatus, cancelQueueToken } from "../../backend/functions/queues";
+import { getQueueStatus, cancelQueueToken } from "@/backend/functions/queues";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -13,20 +13,26 @@ import {
   MapPin,
   Navigation,
   Compass,
+  Scissors,
+  Armchair,
+  RefreshCw,
+  Phone,
+  Share2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { LiquidBottomNav } from "@/components/navigation/LiquidBottomNav";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 
 export const Route = createFileRoute("/live/queue")({
   head: () => ({
-    title: "Live Digital Queue Token & GPS Route | Snepr",
+    title: "Digital Queue Pass & Chair Progress | Snepr",
     meta: [
       {
         name: "description",
-        content: "Your real-time digital queue pass with 5-stage countdown and GPS navigation to your salon.",
+        content:
+          "Your live digital queue pass with 5-stage progress countdown and GPS navigation to your salon.",
       },
-      { name: "theme-color", content: "#FAF7F2" },
+      { name: "theme-color", content: "#f5f1e9" },
     ],
   }),
   component: AppQueue,
@@ -35,151 +41,266 @@ export const Route = createFileRoute("/live/queue")({
 export function AppQueue() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const search = Route.useSearch() as { queueId?: number };
-  const queueId = search.queueId;
+  const params = useParams<{ token?: string; id?: string; $token?: string; $id?: string }>();
+  const search = useSearch() as { queueId?: string | number; token?: string };
 
-  // Local fallback queue state if no query parameter
-  const [localToken, setLocalToken] = useState({
-    id: 101,
-    tokenNumber: 24,
-    salonName: "Lakmé Salon — For Him and Her",
-    address: "KIIT Road, opposite Manyavar, Patia, Bhubaneswar",
-    service: "Hair styling & beard sculpt",
-    stage: 2, // 1 to 5
-    position: 2,
-    waitTimeMins: 14,
-    chairAssigned: "Station 1",
+  const rawToken =
+    params.token ||
+    params.$token ||
+    params.id ||
+    params.$id ||
+    search.token ||
+    search.queueId ||
+    "A07";
+
+  const tokenString = String(rawToken).toUpperCase();
+
+  // Local state initialized or hydrated from localStorage
+  const [tokenData, setTokenData] = useState(() => {
+    try {
+      const stored = localStorage.getItem("snepr_active_queue");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.tokenCode === tokenString || String(parsed.tokenNumber) === tokenString) {
+          return parsed;
+        }
+      }
+    } catch {}
+
+    return {
+      tokenCode: tokenString.startsWith("#") ? tokenString : `#${tokenString}`,
+      tokenNumber: parseInt(tokenString.replace(/\D/g, "") || "7", 10),
+      salonName: "The Scissors Edge",
+      address: "Plot 142, Janpath Road, Saheed Nagar, Bhubaneswar",
+      serviceName: "Signature Haircut & Beard Sculpt",
+      barberName: "Sameer Mohanty",
+      chairAssigned: "Chair 02",
+      stage: 2, // 1 to 5
+      position: 2,
+      peopleAhead: 1,
+      waitTimeMins: 12,
+      status: "waiting", // waiting | serving | completed | cancelled
+      createdAt: new Date().toISOString(),
+    };
   });
 
-  const { data: queue, isLoading } = useQuery({
-    queryKey: ["queue", queueId],
-    queryFn: () => getQueueStatus({ data: Number(queueId) }),
-    enabled: !!queueId,
-    refetchInterval: 5000,
+  const [lastSynced, setLastSynced] = useState("Just now");
+
+  // Poll backend and localStorage every 4 seconds for live salon updates
+  const { data: serverStatus, dataUpdatedAt } = useQuery({
+    queryKey: ["queue-status", tokenString],
+    queryFn: async () => {
+      // Check if salon owner in SalonOS updated active queues
+      try {
+        const ownerQueues = localStorage.getItem("snepr_active_queues");
+        if (ownerQueues) {
+          const parsedArr = JSON.parse(ownerQueues);
+          const found = parsedArr.find(
+            (q: any) =>
+              String(q.tokenNumber) === tokenString.replace(/\D/g, "") ||
+              q.tokenCode === tokenString ||
+              `#${q.tokenNumber}` === tokenString
+          );
+          if (found) {
+            return {
+              status: found.status?.toLowerCase(),
+              chairAssigned: found.chairAssigned ? `Station 0${found.chairAssigned}` : "Station 02",
+              barberName: "Master Stylist",
+              position: found.position ?? 0,
+              waitTimeMins: found.waitTime ?? 0,
+            };
+          }
+        }
+      } catch {}
+
+      return await getQueueStatus({ data: tokenString });
+    },
+    refetchInterval: 4000,
   });
+
+  useEffect(() => {
+    const d = new Date();
+    setLastSynced(d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+
+    if (serverStatus) {
+      setTokenData((prev: any) => {
+        const s = serverStatus.status || prev.status;
+        let newStage = prev.stage;
+        if (s === "completed" || s === "COMPLETED") newStage = 5;
+        else if (s === "serving" || s === "SERVING" || s === "in-progress") newStage = 4;
+        else if (serverStatus.position <= 1) newStage = 3;
+        else newStage = 2;
+
+        return {
+          ...prev,
+          status: s,
+          stage: newStage,
+          position: serverStatus.position ?? prev.position,
+          peopleAhead: serverStatus.peopleAhead ?? prev.peopleAhead,
+          waitTimeMins: serverStatus.estimatedWaitMins ?? prev.waitTimeMins,
+          chairAssigned: serverStatus.chairAssigned || prev.chairAssigned,
+          barberName: serverStatus.barberName || prev.barberName,
+        };
+      });
+    }
+  }, [serverStatus, dataUpdatedAt]);
 
   const cancelMutation = useMutation({
-    mutationFn: () => cancelQueueToken({ data: { queueId: Number(queueId) } }),
+    mutationFn: () => cancelQueueToken({ data: { queueId: 101 } }),
     onSuccess: () => {
-      toast.success("Queue token cancelled");
-      queryClient.invalidateQueries({ queryKey: ["queue", queueId] });
+      try {
+        localStorage.removeItem("snepr_active_queue");
+      } catch {}
+      toast.info("You have left the queue.");
       navigate({ to: "/live" });
     },
   });
 
-  const tokenNum = queue?.tokenNumber || localToken.tokenNumber;
-  const status = queue?.status || "WAITING";
-  const isCompleted = status === "completed" || status === "COMPLETED";
-  const isInChair = status === "in-progress" || status === "SERVING";
-  const isCancelled = status === "cancelled" || status === "CANCELLED";
+  const isCompleted = tokenData.stage === 5 || tokenData.status === "completed";
+  const isInChair = tokenData.stage === 4 || tokenData.status === "serving";
+  const isApproaching = tokenData.stage === 3;
 
-  // Compute 5-stage progress:
-  // 1: Ticket Confirmed, 2: In Queue, 3: Head to Salon, 4: In Chair, 5: Completed
-  const currentStage = isCompleted ? 5 : isInChair ? 4 : localToken.position <= 1 ? 3 : 2;
+  const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(
+    tokenData.salonName + " " + tokenData.address
+  )}`;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#FAF7F2] text-[#211912] font-sans pb-28 selection:bg-[#EAD8BD]">
-      {/* ─── HEADER ─── */}
-      <header className="sticky top-0 z-30 bg-[#FAF7F2]/90 backdrop-blur-md border-b border-[#EEE5DA] px-4 py-3 sm:px-8">
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/live"
-              className="w-9 h-9 rounded-full bg-white border border-[#EEE5DA] flex items-center justify-center text-[#211912] hover:bg-[#F5EEE7] transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#70472F]">
-                LIVE TICKET
-              </div>
-              <h1 className="font-bold text-sm text-[#211912]">My Digital Queue Pass</h1>
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#f7f3ed] text-[#211914] flex flex-col justify-between">
+      <Navbar />
 
-          <span
-            className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-              isCompleted
-                ? "bg-[#EAF3EC] text-[#267447] border-[#267447]/20"
-                : isInChair
-                ? "bg-[#F1E8DF] text-[#70472F] border-[#70472F]/20"
-                : "bg-amber-50 text-amber-700 border-amber-200"
-            }`}
+      <main className="flex-1 pt-28 sm:pt-32 pb-24 max-w-[780px] mx-auto px-4 sm:px-6 w-full space-y-6">
+        {/* ─── TOP STATUS PILL & BACK ─── */}
+        <div className="flex items-center justify-between">
+          <Link
+            to="/live"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6b5e52] hover:text-[#1d1b17] transition-colors"
           >
-            {isCompleted ? "Completed" : isInChair ? "In Chair" : `In Queue (#${localToken.position})`}
-          </span>
+            <ChevronLeft className="w-4 h-4" />
+            <span>Live Queues</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold text-[#8c8074]">
+              Synced {lastSynced}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${
+                isCompleted
+                  ? "bg-[#267447]/10 text-[#267447]"
+                  : isInChair
+                  ? "bg-[#80543a]/15 text-[#80543a]"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {isCompleted
+                ? "● COMPLETED"
+                : isInChair
+                ? "● IN BARBER CHAIR"
+                : isApproaching
+                ? "● YOUR TURN SOON"
+                : `● IN QUEUE (#${tokenData.position} IN LINE)`}
+            </span>
+          </div>
         </div>
-      </header>
 
-      {/* ─── MAIN CONTENT ─── */}
-      <main className="flex-1 max-w-md mx-auto w-full p-4 space-y-5">
-        {/* PASS CARD */}
-        <div className="w-full bg-[#FFFDF9] rounded-3xl shadow-sm border border-[#EEE5DA] relative overflow-hidden text-center p-6 sm:p-7">
-          <div className="text-[11px] font-bold uppercase tracking-widest text-[#8C8074]">
-            {localToken.salonName}
+        {/* ─── TOKEN PASS HERO CARD ─── */}
+        <div className="bg-white border border-[#eee4d8] rounded-3xl p-6 sm:p-10 shadow-sm text-center relative overflow-hidden">
+          <div className="text-[11px] font-extrabold uppercase tracking-widest text-[#80543a] mb-1">
+            {tokenData.salonName}
           </div>
-          <div className="text-xs text-[#8C8074] mt-0.5">{localToken.address}</div>
+          <div className="text-xs text-[#6b5e52] mb-6 flex items-center justify-center gap-1">
+            <MapPin className="w-3.5 h-3.5 text-[#80543a]" />
+            <span>{tokenData.address}</span>
+          </div>
 
-          <div className="my-5">
-            <span className="text-xs font-semibold text-[#8C8074] block">YOUR TOKEN NUMBER</span>
-            <div className="text-6xl font-black font-serif tracking-tight text-[#211912] leading-none my-1">
-              #{tokenNum < 100 ? `0${tokenNum}` : tokenNum}
+          {/* TOKEN HERO BADGE */}
+          <div className="inline-block bg-[#f7f3ed] border border-[#eee4d8] rounded-3xl p-6 sm:p-8 min-w-[240px] my-2 shadow-inner">
+            <div className="text-[11px] font-extrabold uppercase tracking-widest text-[#8c8074]">
+              YOUR DIGITAL PASS
             </div>
-            <div className="text-xs font-medium text-[#70472F]">
-              {isInChair
-                ? "Stylist is currently cutting your hair!"
-                : isCompleted
-                ? "Your visit is complete"
-                : `~${localToken.waitTimeMins} minutes estimated wait (${localToken.position} customer${
-                    localToken.position === 1 ? "" : "s"
-                  } ahead)`}
+            <div className="text-5xl sm:text-6xl font-black font-serif tracking-tight text-[#1d1b17] my-1">
+              {tokenData.tokenCode}
+            </div>
+            <div className="text-xs font-bold text-[#80543a] mt-1">
+              {tokenData.serviceName}
             </div>
           </div>
 
-          {/* 5-STAGE PROGRESS INDICATOR */}
-          <div className="pt-4 pb-2 border-t border-[#EEE5DA] text-left">
-            <div className="text-[10px] font-extrabold uppercase tracking-wider text-[#8C8074] mb-3 text-center">
-              5-STAGE VISIT STATUS
+          {/* TELEMETRY METRICS */}
+          <div className="grid grid-cols-3 gap-3 my-6 max-w-lg mx-auto">
+            <div className="p-3 bg-[#f7f3ed] rounded-2xl border border-[#eee4d8]">
+              <div className="text-[10px] font-bold text-[#8c8074] uppercase">Position</div>
+              <div className="text-lg font-serif font-bold text-[#1d1b17] mt-0.5">
+                {isCompleted ? "Done" : isInChair ? "In Chair" : `#${tokenData.position}`}
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#f7f3ed] rounded-2xl border border-[#eee4d8]">
+              <div className="text-[10px] font-bold text-[#8c8074] uppercase">Est. Wait</div>
+              <div className="text-lg font-serif font-bold text-[#80543a] mt-0.5">
+                {isCompleted || isInChair ? "0m" : `~${tokenData.waitTimeMins}m`}
+              </div>
+            </div>
+
+            <div className="p-3 bg-[#f7f3ed] rounded-2xl border border-[#eee4d8]">
+              <div className="text-[10px] font-bold text-[#8c8074] uppercase">Chair &amp; Barber</div>
+              <div className="text-xs font-bold text-[#1d1b17] mt-1 truncate">
+                {tokenData.chairAssigned}
+              </div>
+            </div>
+          </div>
+
+          {/* ─── 5-STAGE PROGRESS JOURNEY ─── */}
+          <div className="pt-6 border-t border-[#eee4d8] text-left max-w-lg mx-auto">
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#8c8074] text-center mb-4">
+              5-STAGE LIVE VISIT PROGRESS
             </div>
 
             <div className="space-y-3">
               {[
-                { stage: 1, label: "Ticket Confirmed", desc: "Pass generated and verified" },
-                { stage: 2, label: `In Queue (#${localToken.position} in line)`, desc: "Position locked in live chair telemetry" },
-                { stage: 3, label: "Head to Salon", desc: "Depart now to reach before your turn" },
-                { stage: 4, label: "In Chair", desc: "Stylist has called your token" },
-                { stage: 5, label: "Completed (+10 Points)", desc: "Service done & loyalty rewards credited" },
+                { stage: 1, title: "Pass Generated", desc: "Token confirmed on digital board" },
+                { stage: 2, title: `In Queue (#${tokenData.position} in line)`, desc: `${tokenData.peopleAhead} customer ahead · Relax at home or nearby` },
+                { stage: 3, title: "Your Turn Approaching", desc: "Depart for salon now · Assigned chair is preparing" },
+                { stage: 4, title: "In Barber Chair", desc: `${tokenData.barberName} is serving your haircut & styling` },
+                { stage: 5, title: "Service Completed", desc: "Loyalty rewards unlocked · Verified review (+10 Points)" },
               ].map((step) => {
-                const isDone = currentStage > step.stage;
-                const isCurrent = currentStage === step.stage;
+                const isPassed = tokenData.stage > step.stage;
+                const isCurrent = tokenData.stage === step.stage;
 
                 return (
-                  <div key={step.stage} className="flex items-start gap-3 text-xs">
+                  <div
+                    key={step.stage}
+                    className={`flex items-start gap-3.5 p-3 rounded-2xl transition-all ${
+                      isCurrent
+                        ? "bg-[#f7f3ed] border border-[#80543a]/40 shadow-xs"
+                        : "opacity-80"
+                    }`}
+                  >
                     <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 ${
-                        isDone
-                          ? "bg-[#477B5D] text-white"
+                      className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                        isPassed
+                          ? "bg-[#267447] text-white"
                           : isCurrent
-                          ? "bg-[#70472F] text-white ring-4 ring-[#70472F]/15"
-                          : "bg-[#EEE5DA] text-[#8C8074]"
+                          ? "bg-[#80543a] text-white ring-4 ring-[#80543a]/20"
+                          : "bg-[#eee4d8] text-[#8c8074]"
                       }`}
                     >
-                      {isDone ? "✓" : step.stage}
+                      {isPassed ? "✓" : step.stage}
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div
-                        className={`font-bold ${
+                        className={`text-xs font-bold ${
                           isCurrent
-                            ? "text-[#70472F]"
-                            : isDone
-                            ? "text-[#211912]"
-                            : "text-[#8C8074]"
+                            ? "text-[#80543a]"
+                            : isPassed
+                            ? "text-[#1d1b17]"
+                            : "text-[#8c8074]"
                         }`}
                       >
-                        {step.label}
+                        {step.title}
                       </div>
-                      <div className="text-[11px] text-[#8C8074]">{step.desc}</div>
+                      <div className="text-[11px] text-[#6b5e52] mt-0.5">{step.desc}</div>
                     </div>
                   </div>
                 );
@@ -187,23 +308,21 @@ export function AppQueue() {
             </div>
           </div>
 
-          {/* Cancellation or Review action */}
-          <div className="mt-5 pt-4 border-t border-[#EEE5DA]">
+          {/* ─── ACTION FOOTER ─── */}
+          <div className="pt-6 mt-6 border-t border-[#eee4d8] flex items-center justify-center gap-4">
             {isCompleted ? (
               <Link
-                to="/live/activity"
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#477B5D] text-white font-bold text-xs shadow-sm hover:bg-[#38624A]"
+                to="/dashboard"
+                className="px-6 py-3 rounded-full bg-[#267447] text-white text-xs font-bold hover:bg-[#1f5c38] transition-all shadow-md flex items-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Write Review &amp; Claim +10 Points</span>
+                <span>Claim +10 Points &amp; Write Review</span>
               </Link>
             ) : (
               <button
-                onClick={() => {
-                  toast.info("Queue token cancelled.");
-                  navigate({ to: "/live" });
-                }}
-                className="text-xs font-semibold text-[#8C8074] hover:text-red-700 transition-colors cursor-pointer"
+                onClick={() => cancelMutation.mutate()}
+                disabled={cancelMutation.isPending}
+                className="text-xs font-bold text-[#8c8074] hover:text-red-700 transition-colors cursor-pointer"
               >
                 Cannot make it? Leave Queue
               </button>
@@ -211,65 +330,39 @@ export function AppQueue() {
           </div>
         </div>
 
-        {/* GPS ROUTE & DIRECTIONS MAP CARD */}
-        <div className="bg-[#FFFDF9] rounded-3xl border border-[#EEE5DA] p-5 shadow-sm space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#EEE5DA]">
+        {/* ─── GPS ROUTE & SALON NAVIGATION CARD ─── */}
+        <div className="bg-white border border-[#eee4d8] rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#eee4d8]">
             <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#70472F]">
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#80543a]">
                 GPS NAVIGATION
               </div>
-              <h2 className="text-sm font-bold text-[#211912]">Route to Salon</h2>
+              <h3 className="text-sm font-bold text-[#1d1b17]">Route to {tokenData.salonName}</h3>
             </div>
-            <span className="text-[11px] font-bold text-[#477B5D] bg-[#E8F3EB] px-2.5 py-1 rounded-full">
-              1.2 km · ~6 mins
+            <span className="text-xs font-bold text-[#267447] bg-[#eaf3ec] px-3 py-1 rounded-full">
+              ~6 mins travel time
             </span>
           </div>
 
-          {/* Simulated Map View */}
-          <div className="h-44 rounded-2xl bg-[#EEE7DD] border border-[#EEE5DA] relative overflow-hidden flex flex-col items-center justify-center p-4 text-center">
-            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#70472F_1px,transparent_1px)] [background-size:16px_16px]" />
-
-            <div className="relative z-10 space-y-2">
-              <div className="w-10 h-10 rounded-full bg-[#70472F] text-white flex items-center justify-center mx-auto shadow-md">
-                <Navigation className="w-5 h-5" />
-              </div>
-              <div className="text-xs font-bold text-[#211912]">
-                Patia Square → KIIT Road (Opp. Manyavar)
-              </div>
-              <div className="text-[11px] text-[#8C8074]">
-                Turn right at Union Bank junction. 400m straight.
-              </div>
+          <div className="p-4 rounded-2xl bg-[#f7f3ed] border border-[#eee4d8] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2.5">
+              <Navigation className="w-4 h-4 text-[#80543a]" />
+              <span className="font-semibold text-[#1d1b17]">{tokenData.address}</span>
             </div>
+            <a
+              href={mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-xl bg-[#1d1b17] text-[#f5f1e9] font-bold text-xs hover:bg-[#3d322a] transition-all flex items-center gap-1.5"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Open in Google Maps ↗</span>
+            </a>
           </div>
-
-          <a
-            href="https://maps.google.com/?q=Lakme+Salon+Patia+Bhubaneswar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-2.5 rounded-xl bg-[#FAF7F2] hover:bg-[#F0E8DE] border border-[#EEE5DA] text-xs font-bold text-[#70472F] flex items-center justify-center gap-1.5 transition-colors"
-          >
-            <Compass className="w-4 h-4" />
-            <span>Open GPS Directions in Google Maps</span>
-          </a>
         </div>
       </main>
 
-      {/* ─── LIQUID BOTTOM NAVIGATION ─── */}
-      <LiquidBottomNav
-        tabs={[
-          { id: "explore", label: "Live Queues", icon: "◷" },
-          { id: "queue", label: "My Queue", icon: "▱" },
-          { id: "studio", label: "AI Studio", icon: "✧" },
-          { id: "profile", label: "Profile", icon: "♙" },
-        ]}
-        activeTab="queue"
-        onTabChange={(tabId) => {
-          if (tabId === "explore") navigate({ to: "/live" });
-          if (tabId === "queue") navigate({ to: "/live/queue" });
-          if (tabId === "studio") navigate({ to: "/live/studio" });
-          if (tabId === "profile") navigate({ to: "/profile" });
-        }}
-      />
+      <Footer />
     </div>
   );
 }

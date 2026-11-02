@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { db } from "../db";
 import { salons, bookings, queues, users, services, staff, reviews } from "../db/schema";
 import { eq, and, count, sql, desc } from "drizzle-orm";
-import { REAL_SALONS_DATA, DEFAULT_SERVICES, DEFAULT_BARBERS } from "@/lib/real-salons";
+import { REAL_SALONS_DATA, DEFAULT_SERVICES, DEFAULT_BARBERS, getSalonBySlug } from "@/lib/real-salons";
 
 // ─── Salon CRUD ───────────────────────────────────────────────────────────────
 
@@ -130,23 +130,36 @@ export const getSalonById = createServerFn({ method: "GET" })
 
 // getSalonDetails — enriched view for the salon detail page according to Strategy Report
 export const getSalonDetails = createServerFn({ method: "GET" })
-  .validator((d: number) => d)
-  .handler(async ({ data: id }) => {
+  .validator((d: string | number) => d)
+  .handler(async ({ data: idOrSlug }) => {
+    const raw = String(idOrSlug || "").trim();
+    const num = Number(raw);
+    const isNum = !isNaN(num) && num > 0;
+    
     let salon = null;
-    try {
-      const res = await db.select().from(salons).where(eq(salons.id, id));
-      if (res && res[0]) salon = res[0];
-    } catch {}
+    if (isNum) {
+      try {
+        const res = await db.select().from(salons).where(eq(salons.id, num));
+        if (res && res[0]) salon = res[0];
+      } catch {}
+    } else if (raw) {
+      try {
+        const res = await db.select().from(salons).where(eq(salons.slug, raw));
+        if (res && res[0]) salon = res[0];
+      } catch {}
+    }
 
     if (!salon) {
-      const fallback = REAL_SALONS_DATA.find(s => s.id === Number(id)) || REAL_SALONS_DATA[0];
+      const fallback = (raw ? getSalonBySlug(raw) : null) || (isNum ? REAL_SALONS_DATA.find(s => s.id === num) : null) || REAL_SALONS_DATA[0];
       return {
         ...fallback,
-        services: DEFAULT_SERVICES,
-        barbers: DEFAULT_BARBERS,
+        services: fallback.services && fallback.services.length > 0 ? fallback.services : DEFAULT_SERVICES,
+        barbers: fallback.barbers && fallback.barbers.length > 0 ? fallback.barbers : DEFAULT_BARBERS,
+        chairs: fallback.chairs || [],
         reviews: [
           { id: 1, author: "Debabrata Dash", rating: 5, date: "Yesterday", comment: "Zero wait time! Token called right when I stepped in. Highly recommended." },
-          { id: 2, author: "Sneha Priyadarshini", rating: 5, date: "2 days ago", comment: "Best hair styling experience in Patia. Clean, punctual, and professional." },
+          { id: 2, author: "Sneha Priyadarshini", rating: 5, date: "2 days ago", comment: "Best hair styling experience in Bhubaneswar. Clean, punctual, and professional." },
+          { id: 3, author: "Ankit Mohapatra", rating: 5, date: "3 days ago", comment: "Joined queue from phone, stepped straight into the barber chair!" },
         ],
         waitingCount: fallback.waitingCount,
         inProgressCount: 2,

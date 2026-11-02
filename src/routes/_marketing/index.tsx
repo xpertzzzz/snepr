@@ -454,19 +454,19 @@ export function SneprLandingPage() {
             <img src="/snepr-logo-transparent.png" alt="Snepr" />
           </a>
           <nav className={`hero-nav ${navOpen ? "open" : ""}`} id="navlinks">
-            <a href="#discover" onClick={() => setNavOpen(false)}>
+            <a href="/explore" onClick={() => setNavOpen(false)}>
               Explore
             </a>
-            <a href="#discover" onClick={() => setNavOpen(false)}>
+            <a href="/live" onClick={() => setNavOpen(false)}>
               Live Queues
             </a>
-            <a href="#how" onClick={() => setNavOpen(false)}>
+            <a href="/how-it-works" onClick={() => setNavOpen(false)}>
               How it works
             </a>
-            <a href="#ai" onClick={() => setNavOpen(false)}>
+            <a href="/ai-studio" onClick={() => setNavOpen(false)}>
               AI Studio
             </a>
-            <a href="#salons" onClick={() => setNavOpen(false)}>
+            <a href="/salonos" onClick={() => setNavOpen(false)}>
               For Salons
             </a>
             <a href="/pricing" onClick={() => setNavOpen(false)}>
@@ -477,7 +477,7 @@ export function SneprLandingPage() {
             <a className="btn" href="/login">
               Sign in
             </a>
-            <a className="btn fill" href="#discover">
+            <a className="btn fill" href="/explore">
               Find a Salon ↗
             </a>
             <button
@@ -505,14 +505,14 @@ export function SneprLandingPage() {
               Discover salons across Bhubaneswar, check live chair availability and estimated waiting times, and join the queue before you arrive. Know before you go.
             </p>
             <div className="hero-ctas">
-              <a className="btn fill" href="#discover">
+              <a className="btn fill" href="/explore">
                 Find a salon near you
               </a>
-              <a className="btn" href="#discover">
+              <a className="btn" href="/live">
                 Explore live queues
               </a>
             </div>
-            <a className="owner-link" href="#salons" style={{ marginTop: "18px" }}>
+            <a className="owner-link" href="/salonos" style={{ marginTop: "18px" }}>
               For salon owners | SalonOS ↗
             </a>
           </div>
@@ -705,7 +705,7 @@ export function SneprLandingPage() {
                       </div>
                       <span className="open" style={{ fontWeight: 700 }}>● Open</span>
                     </div>
-                    <h3>{s.name}</h3>
+                    <h3><a href={`/salon/${s.id}`} style={{ color: "inherit", textDecoration: "none" }}>{s.name}</a></h3>
                     <div className="salon-meta">
                       {s.area} · {s.type} · ★ {s.rating.toFixed(1)} ({s.reviewCount})
                     </div>

@@ -15,3 +15,4 @@ m_p = re.search(r'<footer id="footer".*?</footer>', text_pricing, re.DOTALL)
 if m_p:
     print('\n--- Footer in pricing.tsx ---')
     print(m_p.group(0))
+

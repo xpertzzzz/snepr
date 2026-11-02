@@ -5,3 +5,4 @@ import re
 m = re.search(r'id="cutCopy".*?</div>', text, re.DOTALL)
 if m:
     print(m.group(0))
+

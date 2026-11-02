@@ -1548,3 +1548,4 @@ with open('src/routes/_marketing/index.tsx', 'w', encoding='utf-8') as f:
     f.write(code)
 
 print("Generated clean, conversion-focused homepage in src/routes/_marketing/index.tsx! Length:", len(code))
+

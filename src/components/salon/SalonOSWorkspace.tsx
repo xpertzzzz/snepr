@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-export type SalonOSTab = "overview" | "staff" | "analytics" | "profile";
+export type SalonOSTab = "overview" | "queue" | "chairs" | "staff" | "services" | "customers" | "analytics" | "profile" | "settings";
 
 export interface QueueItem {
   id: number;
@@ -196,11 +196,23 @@ const INITIAL_QUEUES: QueueItem[] = [
   },
 ];
 
-export function SalonOSWorkspace({ session }: { session: any }) {
+export function SalonOSWorkspace({
+  session,
+  initialTab = "overview",
+}: {
+  session: any;
+  initialTab?: SalonOSTab;
+}) {
   const navigate = useNavigate();
 
   // Exactly 4 tabs: overview, staff, analytics, profile
-  const [activeTab, setActiveTab] = useState<SalonOSTab>("overview");
+  const [activeTab, setActiveTab] = useState<SalonOSTab>(initialTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   // Salon info
   const [salonName, setSalonName] = useState(
@@ -238,6 +250,30 @@ export function SalonOSWorkspace({ session }: { session: any }) {
   const [walkInService, setWalkInService] = useState("Haircut");
 
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
+
+  // Services State
+  const [servicesList, setServicesList] = useState([
+    { id: 1, name: "Signature Haircut & Styling", price: 280, durationMins: 30, category: "Hair", isActive: true },
+    { id: 2, name: "Beard Sculpt & Razor Finish", price: 150, durationMins: 15, category: "Beard", isActive: true },
+    { id: 3, name: "Deep Nourishing Hair Spa", price: 650, durationMins: 45, category: "Spa", isActive: true },
+    { id: 4, name: "Charcoal Face Clean-up", price: 400, durationMins: 30, category: "Skin", isActive: true },
+    { id: 5, name: "Hot Towel Shave & Oil Massage", price: 200, durationMins: 20, category: "Grooming", isActive: true },
+  ]);
+  const [newServiceName, setNewServiceName] = useState("");
+  const [newServicePrice, setNewServicePrice] = useState("");
+  const [newServiceDuration, setNewServiceDuration] = useState("30");
+  const [newServiceCategory, setNewServiceCategory] = useState("Hair");
+
+  // Customers State
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [customersList, setCustomersList] = useState([
+    { id: 1, name: "Rohan Patel", phone: "+91 94370 11223", totalVisits: 5, lastVisit: "Today", loyaltyPoints: 50, favoriteService: "Haircut" },
+    { id: 2, name: "Aman Sharma", phone: "+91 98610 22334", totalVisits: 8, lastVisit: "Today", loyaltyPoints: 80, favoriteService: "Beard trim" },
+    { id: 3, name: "Priya Das", phone: "+91 99370 33445", totalVisits: 3, lastVisit: "Today", loyaltyPoints: 30, favoriteService: "Hair Styling" },
+    { id: 4, name: "Subhashree Ray", phone: "+91 98532 99881", totalVisits: 6, lastVisit: "2 days ago", loyaltyPoints: 60, favoriteService: "Haircut + Facial" },
+    { id: 5, name: "Debabrata Dash", phone: "+91 94380 55432", totalVisits: 11, lastVisit: "Yesterday", loyaltyPoints: 110, favoriteService: "Signature Haircut" },
+  ]);
   const [inviteName, setInviteName] = useState("");
   const [inviteContact, setInviteContact] = useState("");
   const [inviteRole, setInviteRole] = useState("Barber");
@@ -359,6 +395,26 @@ export function SalonOSWorkspace({ session }: { session: any }) {
     toast.success(`Walk-in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
   };
 
+  const handleAddService = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newServiceName.trim() || !newServicePrice) {
+      toast.error("Please enter service name and price.");
+      return;
+    }
+    const newSvc = {
+      id: Date.now(),
+      name: newServiceName.trim(),
+      price: parseInt(newServicePrice, 10) || 200,
+      durationMins: parseInt(newServiceDuration, 10) || 30,
+      category: newServiceCategory,
+      isActive: true,
+    };
+    setServicesList([...servicesList, newSvc]);
+    setNewServiceName("");
+    setNewServicePrice("");
+    toast.success(`Service "${newSvc.name}" added to menu!`);
+  };
+
   const handleInviteStaff = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteName.trim() || !inviteContact.trim()) {
@@ -443,34 +499,70 @@ export function SalonOSWorkspace({ session }: { session: any }) {
               </div>
             </div>
 
-            <nav className="space-y-1.5">
+            <nav className="space-y-1">
               <button
-                onClick={() => setActiveTab("overview")}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                onClick={() => { setActiveTab("overview"); navigate({ to: "/salonos/dashboard" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "overview"
                     ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
                     : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
                 }`}
               >
                 <Armchair className="w-4 h-4 text-[#70472F]" />
-                <span>Overview</span>
+                <span>Dashboard</span>
               </button>
 
               <button
-                onClick={() => setActiveTab("staff")}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "staff"
+                onClick={() => { setActiveTab("queue"); navigate({ to: "/salonos/queue" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "queue"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <Clock className="w-4 h-4 text-[#70472F]" />
+                <span>Live Queue</span>
+              </button>
+
+              <button
+                onClick={() => { setActiveTab("chairs"); navigate({ to: "/salonos/chairs" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "chairs" || activeTab === "staff"
                     ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
                     : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
                 }`}
               >
                 <Users className="w-4 h-4 text-[#70472F]" />
-                <span>Staff</span>
+                <span>Chairs & Staff</span>
               </button>
 
               <button
-                onClick={() => setActiveTab("analytics")}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                onClick={() => { setActiveTab("services"); navigate({ to: "/salonos/services" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "services"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <Scissors className="w-4 h-4 text-[#70472F]" />
+                <span>Services</span>
+              </button>
+
+              <button
+                onClick={() => { setActiveTab("customers"); navigate({ to: "/salonos/customers" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "customers"
+                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
+                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
+                }`}
+              >
+                <UserPlus className="w-4 h-4 text-[#70472F]" />
+                <span>Customers</span>
+              </button>
+
+              <button
+                onClick={() => { setActiveTab("analytics"); navigate({ to: "/salonos/analytics" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activeTab === "analytics"
                     ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
                     : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
@@ -481,15 +573,15 @@ export function SalonOSWorkspace({ session }: { session: any }) {
               </button>
 
               <button
-                onClick={() => setActiveTab("profile")}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "profile"
+                onClick={() => { setActiveTab("settings"); navigate({ to: "/salonos/settings" }); }}
+                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activeTab === "settings" || activeTab === "profile"
                     ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
                     : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
                 }`}
               >
-                <Store className="w-4 h-4 text-[#70472F]" />
-                <span>Profile & Plans</span>
+                <Settings className="w-4 h-4 text-[#70472F]" />
+                <span>Settings & Plans</span>
               </button>
             </nav>
           </div>
@@ -712,7 +804,7 @@ export function SalonOSWorkspace({ session }: { session: any }) {
           )}
 
           {/* TAB 2: STAFF */}
-          {activeTab === "staff" && (
+          {(activeTab === "staff" || activeTab === "chairs") && (
             <div className="space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
                 <div>
@@ -938,7 +1030,7 @@ export function SalonOSWorkspace({ session }: { session: any }) {
           )}
 
           {/* TAB 4: PROFILE & SUPPORT */}
-          {activeTab === "profile" && (
+          {(activeTab === "profile" || activeTab === "settings") && (
             <div className="space-y-8">
               <div className="pb-4 border-b border-[#EEE5DA]">
                 <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
@@ -1240,7 +1332,320 @@ export function SalonOSWorkspace({ session }: { session: any }) {
               </div>
             </div>
           )}
-        </main>
+                  {/* TAB: DEDICATED LIVE QUEUE MANAGEMENT */}
+          {activeTab === "queue" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    CHAIR TELEMETRY & LIVE CALLING
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Live Queue Management</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Advance tokens, call walk-ins to available chairs, and view queue progress for {salonName}.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    onClick={handleCallNext}
+                    className="px-4 py-2.5 rounded-xl bg-[#477B5D] hover:bg-[#38624A] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Call Next in Line</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowWalkInModal(true)}
+                    className="px-4 py-2.5 rounded-xl bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Add Walk-in</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowQrModal(true)}
+                    className="px-4 py-2.5 rounded-xl border border-[#70472F] text-[#70472F] hover:bg-[#70472F] hover:text-white text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Reception QR Standee</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Queue Table */}
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold text-base text-[#211912]">Active Queue Pass List ({queues.length})</h3>
+                  <span className="text-xs font-semibold text-[#477B5D] bg-[#EAF3EC] px-3 py-1 rounded-full">
+                    ● Telemetry Sync Active
+                  </span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#EEE5DA] text-[#8C8074] font-bold text-[11px] uppercase tracking-wider">
+                        <th className="pb-3 pl-2">Token</th>
+                        <th className="pb-3">Customer</th>
+                        <th className="pb-3">Phone</th>
+                        <th className="pb-3">Service</th>
+                        <th className="pb-3">Wait</th>
+                        <th className="pb-3">Chair</th>
+                        <th className="pb-3">Status</th>
+                        <th className="pb-3 text-right pr-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#EEE5DA]/60">
+                      {queues.map((item) => {
+                        const isServing = item.status === "SERVING";
+                        const isWaiting = item.status === "WAITING";
+                        return (
+                          <tr key={item.id} className="hover:bg-[#F7F3ED]/40 transition-colors">
+                            <td className="py-3.5 pl-2 font-serif font-black text-sm text-[#70472F]">
+                              #{item.tokenNumber}
+                            </td>
+                            <td className="py-3.5 font-bold text-[#211912]">{item.customerName}</td>
+                            <td className="py-3.5 text-[#8C8074]">{item.phone || "+91 94370 xxxxx"}</td>
+                            <td className="py-3.5 font-medium text-[#211912]">{item.serviceName}</td>
+                            <td className="py-3.5 text-[#8C8074]">
+                              {isServing ? "Serving" : `~${item.waitTime}m`}
+                            </td>
+                            <td className="py-3.5 font-semibold text-[#70472F]">
+                              {item.chairAssigned ? `Station ${item.chairAssigned}` : "Queue"}
+                            </td>
+                            <td className="py-3.5">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase ${
+                                  isServing
+                                    ? "bg-[#70472F] text-white"
+                                    : isWaiting
+                                    ? "bg-amber-100 text-amber-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="py-3.5 text-right pr-2">
+                              {isWaiting && (
+                                <button
+                                  onClick={() => handleAdvanceQueue(item.id)}
+                                  className="px-3 py-1.5 rounded-lg bg-[#477B5D] text-white text-[11px] font-bold hover:bg-[#38624A] mr-2"
+                                >
+                                  Call
+                                </button>
+                              )}
+                              {isServing && (
+                                <button
+                                  onClick={() => handleCompleteQueue(item.id)}
+                                  className="px-3 py-1.5 rounded-lg bg-[#70472F] text-white text-[11px] font-bold hover:bg-[#583724] mr-2"
+                                >
+                                  Complete (+10 pts)
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleCancelQueue(item.id)}
+                                className="px-2.5 py-1.5 rounded-lg border border-red-200 text-red-700 text-[11px] font-semibold hover:bg-red-50"
+                              >
+                                Cancel
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: DEDICATED SERVICES MANAGEMENT */}
+          {activeTab === "services" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    MENU & PRICING
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Service Management</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Configure services, durations, and pricing displayed to customers on Snepr.
+                  </p>
+                </div>
+              </div>
+
+              {/* Add Service Form */}
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm">
+                <h3 className="font-bold text-sm text-[#211912] mb-4">Add New Salon Service</h3>
+                <form onSubmit={handleAddService} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <div className="sm:col-span-2">
+                    <input
+                      type="text"
+                      placeholder="Service name (e.g. Charcoal Detox Facial)"
+                      value={newServiceName}
+                      onChange={(e) => setNewServiceName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      placeholder="Price in ₹ (e.g. 350)"
+                      value={newServicePrice}
+                      onChange={(e) => setNewServicePrice(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      className="w-full py-2.5 rounded-xl bg-[#70472F] text-white text-xs font-bold hover:bg-[#583724] transition-all cursor-pointer"
+                    >
+                      + Add to Menu
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Services List */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {servicesList.map((svc) => (
+                  <div
+                    key={svc.id}
+                    className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-2xl p-5 shadow-sm flex items-center justify-between"
+                  >
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#9A8069]">
+                        {svc.category}
+                      </span>
+                      <h4 className="font-bold text-sm text-[#211912] mt-0.5">{svc.name}</h4>
+                      <div className="flex items-center gap-2 text-xs text-[#8C8074] mt-1">
+                        <span>{svc.durationMins} mins duration</span>
+                        <span>·</span>
+                        <span className="font-bold text-[#70472F] text-sm">₹{svc.price}</span>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-full bg-green-100 text-green-800 text-[10px] font-bold">
+                      ACTIVE
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: DEDICATED CUSTOMERS MANAGEMENT */}
+          {activeTab === "customers" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    CLIENT DIRECTORY & REPUTATION
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Customer Management</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    View repeat clients, visit history, and loyalty points across {salonName}.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm">
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    placeholder="Search client by name or phone number..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
+                  />
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-[#EEE5DA] text-[#8C8074] font-bold text-[11px] uppercase tracking-wider">
+                        <th className="pb-3 pl-2">Customer</th>
+                        <th className="pb-3">Phone</th>
+                        <th className="pb-3">Total Visits</th>
+                        <th className="pb-3">Last Visit</th>
+                        <th className="pb-3">Snepr Points</th>
+                        <th className="pb-3">Preferred Service</th>
+                        <th className="pb-3 text-right pr-2">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#EEE5DA]/60">
+                      {customersList
+                        .filter(
+                          (c) =>
+                            c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+                            c.phone.includes(customerSearch)
+                        )
+                        .map((c) => (
+                          <tr key={c.id} className="hover:bg-[#F7F3ED]/40 transition-colors">
+                            <td className="py-3 pl-2 font-bold text-[#211912]">{c.name}</td>
+                            <td className="py-3 text-[#8C8074]">{c.phone}</td>
+                            <td className="py-3 font-semibold text-[#70472F]">{c.totalVisits} visits</td>
+                            <td className="py-3 text-[#8C8074]">{c.lastVisit}</td>
+                            <td className="py-3 font-bold text-amber-700">+{c.loyaltyPoints} pts</td>
+                            <td className="py-3 text-[#211912]">{c.favoriteService}</td>
+                            <td className="py-3 text-right pr-2">
+                              <button
+                                onClick={() => {
+                                  toast.success(`Priority token issued for ${c.name}!`);
+                                }}
+                                className="px-3 py-1 rounded-lg bg-[#70472F] text-white text-[11px] font-bold hover:bg-[#583724]"
+                              >
+                                Issue Token
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TABLETOP RECEPTION QR MODAL */}
+          {showQrModal && (
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-8 max-w-sm w-full text-center space-y-4 shadow-2xl">
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowQrModal(false)}
+                    className="p-1 rounded-full text-[#8C8074] hover:text-[#211912]"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="inline-block px-3 py-1 rounded-full bg-[#70472F]/10 text-[#70472F] text-[10px] font-extrabold uppercase tracking-wider">
+                  OFFICIAL RECEPTION STANDEE
+                </div>
+                <h3 className="text-xl font-bold font-serif text-[#211912]">{salonName}</h3>
+                <p className="text-xs text-[#8C8074]">
+                  Place this standee at your reception counter. Walk-ins scan to join the live queue without downloading an app.
+                </p>
+                <div className="w-48 h-48 mx-auto bg-white border-2 border-[#70472F] rounded-2xl p-4 flex flex-col items-center justify-center shadow-inner">
+                  <div className="text-6xl mb-2">📱</div>
+                  <div className="text-[11px] font-bold text-[#70472F]">SCAN TO JOIN QUEUE</div>
+                  <div className="text-[9px] text-[#8C8074] mt-1">snepr.com/salon/{locality.split(",")[0].toLowerCase()}</div>
+                </div>
+                <button
+                  onClick={() => {
+                    toast.success("Reception standee PDF prepared for printing!");
+                    setShowQrModal(false);
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-[#70472F] text-white text-xs font-bold hover:bg-[#583724]"
+                >
+                  Print QR Standee PDF
+                </button>
+              </div>
+            </div>
+          )}
+
+</main>
       </div>
 
       {/* ─── MOBILE BOTTOM NAVIGATION (4 TABS: OVERVIEW, STAFF, ANALYTICS, PROFILE) ─── */}

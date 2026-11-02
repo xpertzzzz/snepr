@@ -30,3 +30,4 @@ for path in ['/', '/pricing', '/snepr-logo-transparent.png']:
         assert resp.status == 200, f"{url} returned status {resp.status}"
 
 print("✓ All Footer, Logo, Instagram, and Copyright Assertions PASSED!")
+

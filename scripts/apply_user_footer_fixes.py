@@ -54,3 +54,4 @@ for path in ['src/routes/_marketing/index.tsx', 'src/routes/_marketing/pricing.t
         f.write(content)
 
     print(f"Updated {path}!")
+
