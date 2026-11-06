@@ -4,9 +4,16 @@ import { SneprWordmark } from "@/components/SneprWordmark";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase";
 import { sendAuthEmailOtp, verifyAuthOtpAndLogin, googleAuthLogin } from "../backend/functions/otp";
-import { authenticateUser, requestPasswordReset, verifyAndResetPassword } from "@/lib/supabase";
+import {
+  authenticateUser,
+  registerUser,
+  verifyEmailOwnership,
+  requestPasswordReset,
+  verifyAndResetPassword,
+  queryTable
+} from "@/lib/supabase";
 import { toast } from "sonner";
-import { ArrowRight, ShieldCheck, CheckCircle2, Lock, Mail, KeyRound } from "lucide-react";
+import { ArrowRight, ShieldCheck, CheckCircle2, Lock, Mail, KeyRound, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -66,6 +73,18 @@ export function LoginPageSplit() {
     return () => clearInterval(timer);
   }, [cooldown]);
 
+  // CAPTCHA State & Challenge Generator (Fallback on Brute-force Detection)
+  const [captchaRequired, setCaptchaRequired] = useState(false);
+  const [captchaSolution, setCaptchaSolution] = useState("");
+  const [captchaQuestion, setCaptchaQuestion] = useState({ text: "7 + 5", answer: "12" });
+
+  const generateCaptcha = () => {
+    const a = Math.floor(Math.random() * 9) + 2;
+    const b = Math.floor(Math.random() * 9) + 2;
+    setCaptchaQuestion({ text: `${a} + ${b}`, answer: String(a + b) });
+    setCaptchaSolution("");
+  };
+
   const redirectByRole = (userSession: any) => {
     if (redirectTarget && redirectTarget !== "/login" && redirectTarget !== "/") {
       navigate({ to: redirectTarget });
@@ -84,24 +103,53 @@ export function LoginPageSplit() {
     }
   };
 
-  // Password Login Handler
+  // Password Login Handler (Rate-Limited, CAPTCHA Fallback, Anti-Enumeration, Lockout)
   const handlePasswordLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorMsg("");
     setSuccessMsg("");
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) {
+      setErrorMsg("Please enter your email or username.");
+      return;
+    }
+    if (!password) {
+      setErrorMsg("Please enter your password.");
+      return;
+    }
+
+    // Enforce CAPTCHA if challenge was triggered by failed attempts
+    if (captchaRequired) {
+      if (captchaSolution.trim() !== captchaQuestion.answer) {
+        setErrorMsg("Incorrect security challenge answer. Please try again.");
+        generateCaptcha();
+        return;
+      }
+    }
+
     setIsVerifying(true);
-
     try {
-      const cleanEmail = email.trim().toLowerCase();
-      if (!cleanEmail) {
-        throw new Error("Please enter your email or username.");
-      }
-      if (!password) {
-        throw new Error("Please enter your password.");
+      const captchaToken = captchaRequired ? `solved_${captchaSolution.trim()}` : undefined;
+      const res = await authenticateUser(cleanEmail, password, captchaToken);
+
+      // Check for security triggers
+      if (res && res.captcha_required) {
+        setCaptchaRequired(true);
+        generateCaptcha();
+        throw new Error(res.message || "Security verification required. Please solve the CAPTCHA challenge.");
       }
 
-      // Enterprise Database Authenticate (Bcrypt, Rate Limiting, Lockout, Anti-enumeration)
-      const res = await authenticateUser(cleanEmail, password);
+      if (res && res.locked) {
+        throw new Error(res.message || "Account is temporarily locked. Please try again in 15 minutes.");
+      }
+
+      if (res && res.unverified) {
+        setMode("signup");
+        setOtpSent(true);
+        throw new Error(res.message || "Please verify your email address before signing in.");
+      }
+
       if (!res || !res.success || !res.user) {
         throw new Error(res?.message || "Invalid email or password.");
       }
@@ -126,6 +174,47 @@ export function LoginPageSplit() {
       toast.error(err.message || "Sign in failed");
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  // Unified Signup Handler (Anti-enumeration, Slow Bcrypt KDF, Verified Ownership Requirement)
+  const handleSignup = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+    if (!name.trim()) {
+      setErrorMsg("Please enter your full name.");
+      return;
+    }
+    if (!password || password.length < 8) {
+      setErrorMsg("Password must be at least 8 characters long.");
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      const res = await registerUser(cleanEmail, password, name.trim(), phone.trim() || undefined);
+
+      // Anti-enumeration guarantee: identical message whether account exists or not
+      const msg = res?.message || "If this email is eligible, a verification code has been dispatched. Please verify ownership to activate your account.";
+      setSuccessMsg(msg);
+      toast.success("Verification code dispatched.");
+      setOtpSent(true);
+      setCooldown(60);
+    } catch {
+      // Uniform fail-safe for anti-enumeration
+      const msg = "If this email is eligible, a verification code has been dispatched. Please verify ownership to activate your account.";
+      setSuccessMsg(msg);
+      setOtpSent(true);
+      setCooldown(60);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -206,7 +295,7 @@ export function LoginPageSplit() {
     }
   };
 
-  // OTP Request Handler
+  // OTP Request Handler for Passwordless Email Sign-In
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorMsg("");
@@ -218,17 +307,12 @@ export function LoginPageSplit() {
       return;
     }
 
-    if (mode === "signup" && !name.trim()) {
-      setErrorMsg("Please enter your full name.");
-      return;
-    }
-
     setIsSending(true);
     try {
       try {
         await sendAuthEmailOtp({ data: { email: cleanEmail } });
       } catch (err: any) {
-        console.warn("ServerFn sendAuthEmailOtp fallback:", err);
+        console.warn("ServerFn sendAuthEmailOtp:", err);
       }
 
       setOtpSent(true);
@@ -243,7 +327,7 @@ export function LoginPageSplit() {
     }
   };
 
-  // OTP Verification Handler
+  // Verify Email Ownership and Activate Account (Zero Client Role Forgery)
   const handleVerifyOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setErrorMsg("");
@@ -256,48 +340,54 @@ export function LoginPageSplit() {
     setIsVerifying(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
+
+      // 1. Verify email ownership in database
+      const verifRes = await verifyEmailOwnership(cleanEmail, otpCode.trim());
+      if (!verifRes || !verifRes.success) {
+        throw new Error(verifRes?.message || "Invalid or expired verification code.");
+      }
+
+      toast.success("Email verified successfully! Signing in...");
+
+      // 2. Authenticate if password was supplied during signup
       let userSession: any = null;
-
-      try {
-        const res = await verifyAuthOtpAndLogin({
-          data: {
-            email: cleanEmail,
-            code: otpCode.trim(),
-            name: name.trim() || undefined,
-            phone: phone.trim() || undefined,
-          },
-        });
-        if (res && res.user) {
-          userSession = res.user;
+      if (password) {
+        const authRes = await authenticateUser(cleanEmail, password);
+        if (authRes && authRes.success && authRes.user) {
+          userSession = authRes.user;
         }
-      } catch (err: any) {
-        console.warn("DB verification fallback:", err);
-        const isAdmin = cleanEmail.includes("admin") || cleanEmail === "xpertenzo.in@gmail.com";
-        const isOwner = cleanEmail.includes("owner");
-        const isStaff = cleanEmail.includes("staff");
+      }
 
-        userSession = {
-          id: Math.floor(1000 + Math.random() * 9000),
-          username: cleanEmail.split("@")[0],
-          name: name.trim() || (isOwner ? "Arjun Sharma" : isStaff ? "Rahul Kumar" : cleanEmail.split("@")[0]),
-          email: cleanEmail,
-          phone: phone.trim() || "+91 92373 62221",
-          role: isAdmin ? "super_admin" : isOwner ? "salon_owner" : isStaff ? "staff" : "customer",
-          approvalStatus: isOwner ? "approved" : undefined,
-          chairAssigned: isStaff ? 2 : undefined,
-          salonName: (isOwner || isStaff) ? "Lakmé Salon | KIIT Road" : undefined,
-          isAdmin,
-        };
+      // 3. Fallback: fetch verified user record from database
+      if (!userSession) {
+        const users = await queryTable<any[]>(`users?email=eq.${encodeURIComponent(cleanEmail)}&limit=1`);
+        if (users && users.length > 0) {
+          const u = users[0];
+          userSession = {
+            id: u.id,
+            username: u.username,
+            name: u.name || cleanEmail.split("@")[0],
+            email: u.email,
+            phone: u.phone,
+            role: u.role,
+            salonId: u.salon_id,
+            isAdmin: (u.role === "super_admin" || u.role === "admin"),
+          };
+        }
       }
 
       if (!userSession) {
-        throw new Error("Invalid or expired verification code.");
+        setSuccessMsg("Email verified successfully! You may now sign in with your credentials.");
+        setMode("signin");
+        setAuthMethod("password");
+        setOtpSent(false);
+        return;
       }
 
       localStorage.setItem("snepr_session", JSON.stringify(userSession));
       window.dispatchEvent(new Event("storage"));
 
-      toast.success(`Welcome to Snepr, ${userSession.name || "Customer"}!`);
+      toast.success(`Welcome to Snepr, ${userSession.name}!`);
       redirectByRole(userSession);
     } catch (err: any) {
       setErrorMsg(err.message || "Invalid verification code.");
@@ -307,7 +397,7 @@ export function LoginPageSplit() {
     }
   };
 
-  // Google OAuth Login
+  // Google OAuth Login (Server Authoritative - No Client Fallback Forging)
   const handleGoogleLogin = async () => {
     setErrorMsg("");
     setIsGoogleLoading(true);
@@ -320,32 +410,20 @@ export function LoginPageSplit() {
         throw new Error("Could not retrieve email from Google.");
       }
 
-      let userSession: any = null;
-      try {
-        const res = await googleAuthLogin({
-          data: {
-            email: gUser.email,
-            name: gUser.displayName || gUser.email.split("@")[0],
-            phone: gUser.phoneNumber || undefined,
-            photoUrl: gUser.photoURL || undefined,
-          },
-        });
-        if (res && res.user) {
-          userSession = res.user;
-        }
-      } catch (err: any) {
-        const isAdmin = gUser.email.includes("admin") || gUser.email === "xpertenzo.in@gmail.com";
-        userSession = {
-          id: Math.floor(1000 + Math.random() * 9000),
-          username: gUser.email.split("@")[0],
+      const res = await googleAuthLogin({
+        data: {
+          email: gUser.email.toLowerCase(),
           name: gUser.displayName || gUser.email.split("@")[0],
-          email: gUser.email,
-          phone: gUser.phoneNumber || null,
-          role: isAdmin ? "super_admin" : "customer",
-          isAdmin,
-        };
+          phone: gUser.phoneNumber || undefined,
+          photoUrl: gUser.photoURL || undefined,
+        },
+      });
+
+      if (!res || !res.user) {
+        throw new Error("Google authentication failed on server. Please sign in with email and password.");
       }
 
+      const userSession = res.user;
       localStorage.setItem("snepr_session", JSON.stringify(userSession));
       window.dispatchEvent(new Event("storage"));
 
@@ -573,6 +651,36 @@ export function LoginPageSplit() {
                 />
               </div>
 
+              {/* Fallback CAPTCHA Challenge if brute-force attempts detected */}
+              {captchaRequired && (
+                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-2">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold">
+                    <ShieldAlert className="w-4 h-4 text-amber-600" />
+                    <span>Security Challenge Required</span>
+                  </div>
+                  <p className="text-[#786B60]">
+                    Multiple attempts detected. Please solve: <strong>{captchaQuestion.text} = ?</strong>
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Answer"
+                      value={captchaSolution}
+                      onChange={(e) => setCaptchaSolution(e.target.value)}
+                      className="w-28 h-9 px-3 rounded-lg border border-amber-300 bg-white text-sm font-bold text-[#1B1410] focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={generateCaptcha}
+                      className="px-2.5 py-1 text-[11px] text-[#7A4B29] font-semibold hover:underline cursor-pointer"
+                    >
+                      New question
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={isVerifying}
@@ -699,11 +807,11 @@ export function LoginPageSplit() {
             </form>
           )}
 
-          {/* 2B. Email OTP Form */}
+          {/* 2B. Email OTP / Signup Form */}
           {(mode === "signup" || (mode === "signin" && authMethod === "otp")) && (
             <>
               {!otpSent ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
+                <form onSubmit={mode === "signup" ? handleSignup : handleSendOtp} className="space-y-4">
                   {mode === "signup" && (
                     <>
                       <div>
@@ -716,6 +824,21 @@ export function LoginPageSplit() {
                           placeholder="e.g. Priya Sharma"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
+                          className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-[#1B1410] mb-1.5 uppercase tracking-wide">
+                          Create Password
+                        </label>
+                        <input
+                          type="password"
+                          required
+                          autoComplete="new-password"
+                          placeholder="Minimum 8 characters"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
                           className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
                         />
                       </div>
@@ -758,7 +881,11 @@ export function LoginPageSplit() {
                     disabled={isSending}
                     className="w-full h-12 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer disabled:opacity-50 mt-2"
                   >
-                    <span>{isSending ? "Sending code..." : "Continue with email"}</span>
+                    <span>
+                      {isSending
+                        ? (mode === "signup" ? "Creating account..." : "Sending code...")
+                        : (mode === "signup" ? "Create Account & Verify" : "Continue with email")}
+                    </span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </form>

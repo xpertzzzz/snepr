@@ -125,13 +125,37 @@ export async function submitVerifiedReviewDirect(params: {
 }
 
 /**
- * Enterprise Secure Authentication
- * Checks bcrypt hash, rate limits, lockouts, and verified email status.
+ * Enterprise Secure Registration (Anti-Enumeration, Slow Bcrypt KDF, Unverified State)
+ * Returns uniform response whether email exists or not.
  */
-export async function authenticateUser(identifier: string, password: string) {
+export async function registerUser(email: string, password: string, name: string, phone?: string) {
+  return await callRpc("register_user", {
+    p_email: email,
+    p_password: password,
+    p_name: name,
+    p_phone: phone || null,
+  });
+}
+
+/**
+ * Verify Email Ownership before account goes active
+ */
+export async function verifyEmailOwnership(email: string, code: string) {
+  return await callRpc("verify_email_ownership", {
+    p_email: email,
+    p_code: code,
+  });
+}
+
+/**
+ * Enterprise Secure Authentication
+ * Checks bcrypt hash, rate limits, lockouts, CAPTCHA requirement, and verified email status.
+ */
+export async function authenticateUser(identifier: string, password: string, captchaToken?: string) {
   return await callRpc("authenticate_user", {
     p_identifier: identifier,
     p_password: password,
+    p_captcha_token: captchaToken || null,
   });
 }
 
