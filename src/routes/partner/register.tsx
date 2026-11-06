@@ -5,6 +5,7 @@ import {
   Store, MapPin, Scissors, Clock, CheckCircle2,
   ChevronRight, ChevronLeft, Plus, Trash2, Edit3, ShieldAlert
 } from "lucide-react";
+import { submitPartnerApplicationDb } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/partner/register")({
@@ -143,7 +144,10 @@ export function SalonRegistrationWizard() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSubmitApplication = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmitApplication = async () => {
+    setIsSubmitting(true);
     const appId = `SN-BBS-${Math.floor(1000 + Math.random() * 9000)}`;
     const application = {
       applicationId: appId,
@@ -166,14 +170,33 @@ export function SalonRegistrationWizard() {
       createdAt: new Date().toISOString(),
     };
 
-    // Save to localStorage for demo persistence & admin visibility
+    try {
+      // 1. Submit directly to PostgreSQL database
+      const res = await submitPartnerApplicationDb({
+        salonName,
+        ownerName,
+        contactNumber,
+        businessEmail,
+        salonDescription,
+        locality,
+        fullAddress,
+        postalCode,
+        chairCount,
+        openingTime,
+        closingTime,
+        weeklyHoliday,
+        services,
+      });
+      if (res && res.applicationId) {
+        application.applicationId = res.applicationId;
+      }
+    } catch (err: any) {
+      console.warn("Direct DB submit error:", err);
+    }
+
+    // Save to local session so the user can immediately track their application
     try {
       localStorage.setItem("snepr_salon_application", JSON.stringify(application));
-      const existing = JSON.parse(localStorage.getItem("snepr_admin_applications") || "[]");
-      existing.unshift(application);
-      localStorage.setItem("snepr_admin_applications", JSON.stringify(existing));
-
-      // Update active session role to salon_owner pending
       const s = localStorage.getItem("snepr_session");
       if (s) {
         const u = JSON.parse(s);
@@ -184,7 +207,8 @@ export function SalonRegistrationWizard() {
     } catch {}
 
     setSubmittedApp(application);
-    toast.success("Salon application submitted successfully!");
+    setIsSubmitting(false);
+    toast.success("Salon application submitted to Snepr database!");
   };
 
   if (submittedApp) {

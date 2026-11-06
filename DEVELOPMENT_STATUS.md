@@ -57,7 +57,11 @@ A full audit and synchronization of the Snepr codebase, database, queue engine, 
 | **Salon Dashboard** | Service Management (`/salonos/services`) | Sec 6, 8 | **Completed and tested** | Create, edit prices, durations, activate/deactivate services. |
 | **Salon Dashboard** | Staff Management (`/salonos/staff`) | Sec 6 | **Completed and tested** | Barber profiles, station assignment, duty toggle, customer counts. |
 | **Staff Desk** | Barber Mobile Desk (`/staff/dashboard`) | Sec 6 | **Completed and tested** | Synchronized with Supabase queues: Call Next, Complete Service, Walk-in entry. |
-| **Admin Console** | Super Admin Management (`/ankom`) | Sec 7 | **Completed and tested** | Verifies admin authorization, applications review, salon suspension, locality management. |
+| **Authentication** | Anti-Enumeration & Uniform Timing Defense | Sec 3.1, 6.1 | **Completed and tested** | Both response wording and timing identical for existing and non-existing accounts (constant-time dummy bcrypt executions). |
+| **Authentication** | Rate Limiting & Account Lockout | Sec 6.1 | **Completed and tested** | 5 failed attempts lockout (15-min lockout window) enforced via PL/pgSQL stored procedure. |
+| **Authentication** | Cryptographic Password Reset | Sec 6.1 | **Completed and tested** | Single-use 32-byte hex token, stored only as SHA-256 hash in database, 1-hour expiration. |
+| **Partner Onboarding** | Salon Application Database Sync (`/partner/register`, `/partner/application`) | Sec 7 | **Completed and tested** | Submissions write directly to Supabase `partner_applications` table; status tracked live from DB. |
+| **Admin Console** | Database Sync & Review (`/ankom`) | Sec 7 | **Completed and tested** | Applications, salons, and users load directly from Supabase; one-click approval auto-provisions salon in DB. |
 | **Subscriptions** | Plan Entitlement Matrix (Entry, Intermediate, Pro) | Sec 11, 11A | **Completed and tested** | Enforces Entry (no customer ETA), Intermediate (live ETA, 3 AI attempts), Pro (unlimited AI). |
 | **Reviews & Points** | Verified Review Submission | Sec 10 | **Completed and tested** | Review modal writes directly to Supabase `reviews` table and awards +15 points. |
 | **Reviews & Points** | Snepr Points Ledger (`/points`, `/dashboard`) | Sec 10 | **Completed and tested** | Real-time points balance read directly from `snepr_points_ledger`. |

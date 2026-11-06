@@ -4,9 +4,9 @@ import { SneprWordmark } from "@/components/SneprWordmark";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../config/firebase";
 import { sendAuthEmailOtp, verifyAuthOtpAndLogin, googleAuthLogin } from "../backend/functions/otp";
-import { login } from "../backend/functions/auth";
+import { authenticateUser, requestPasswordReset, verifyAndResetPassword } from "@/lib/supabase";
 import { toast } from "sonner";
-import { ArrowRight, ShieldCheck, CheckCircle2, Lock, Mail } from "lucide-react";
+import { ArrowRight, ShieldCheck, CheckCircle2, Lock, Mail, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -27,11 +27,25 @@ export function LoginPageSplit() {
   const redirectTarget = search?.redirect || "";
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [authMethod, setAuthMethod] = useState<"password" | "otp">("password");
+  const [authMethod, setAuthMethod] = useState<"password" | "otp" | "forgot" | "reset">("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+
+  // Cryptographic Password Reset State
+  const [resetToken, setResetToken] = useState(search?.token || "");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isResetting, setIsResetting] = useState(false);
+
+  // If token is in URL query parameters, automatically switch to reset mode
+  useEffect(() => {
+    if (search?.token) {
+      setResetToken(search.token);
+      setAuthMethod("reset");
+    }
+  }, [search?.token]);
 
   // OTP State
   const [otpSent, setOtpSent] = useState(false);
@@ -86,91 +100,13 @@ export function LoginPageSplit() {
         throw new Error("Please enter your password.");
       }
 
-      let userSession: any = null;
-
-      // 1. Direct Supabase RPC Authentication
-      try {
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://becpnekqqkgjopjzemtt.supabase.co";
-        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_WRx6dkibRMeRPZGOPcJoHQ_RaNMJb1g";
-
-        const res = await fetch(`${supabaseUrl}/rest/v1/rpc/authenticate_user`, {
-          method: "POST",
-          headers: {
-            "apikey": supabaseAnonKey,
-            "Authorization": `Bearer ${supabaseAnonKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            p_identifier: cleanEmail,
-            p_password: password,
-          }),
-        });
-
-        if (res.ok) {
-          const result = await res.json();
-          if (result && result.success && result.user) {
-            userSession = result.user;
-          } else if (result && result.message) {
-            throw new Error(result.message);
-          }
-        }
-      } catch (rpcErr: any) {
-        if (rpcErr.message && (rpcErr.message.toLowerCase().includes("invalid") || rpcErr.message.toLowerCase().includes("password"))) {
-          throw rpcErr;
-        }
-        console.warn("Direct RPC fetch fallback:", rpcErr);
+      // Enterprise Database Authenticate (Bcrypt, Rate Limiting, Lockout, Anti-enumeration)
+      const res = await authenticateUser(cleanEmail, password);
+      if (!res || !res.success || !res.user) {
+        throw new Error(res?.message || "Invalid email or password.");
       }
 
-      // 2. Client-side fallback if Supabase network is unreachable
-      if (!userSession) {
-        const passValid = password === "Password@123" || password === "admin123";
-        if (passValid) {
-          if (cleanEmail === "admin@snepr.com" || cleanEmail === "admin" || cleanEmail === "xpertenzo.in@gmail.com") {
-            userSession = {
-              id: 1,
-              username: "admin",
-              name: "Snepr Super Admin",
-              email: "admin@snepr.com",
-              role: "super_admin",
-              isAdmin: true,
-            };
-          } else if (cleanEmail === "owner@snepr.com" || cleanEmail === "salon_owner") {
-            userSession = {
-              id: 2,
-              username: "salon_owner",
-              name: "Arjun Sharma (Salon Owner)",
-              email: "owner@snepr.com",
-              role: "salon_owner",
-              salonId: 1,
-              salonName: "Lakmé Salon | For Him and Her",
-              approvalStatus: "approved",
-            };
-          } else if (cleanEmail === "staff@snepr.com" || cleanEmail === "barber_prakash") {
-            userSession = {
-              id: 3,
-              username: "barber_prakash",
-              name: "Prakash Jena (Senior Stylist)",
-              email: "staff@snepr.com",
-              role: "staff",
-              salonId: 1,
-              chairAssigned: 2,
-              salonName: "Lakmé Salon | For Him and Her",
-            };
-          } else if (cleanEmail === "customer@snepr.com" || cleanEmail === "customer_rohan") {
-            userSession = {
-              id: 4,
-              username: "customer_rohan",
-              name: "Rohan Dash",
-              email: "customer@snepr.com",
-              role: "customer",
-            };
-          }
-        }
-      }
-
-      if (!userSession) {
-        throw new Error("Invalid email or password. Please try again.");
-      }
+      const userSession = res.user;
 
       // Standardize session properties
       if (userSession.role === "staff" && !userSession.chairAssigned) {
@@ -186,10 +122,87 @@ export function LoginPageSplit() {
       toast.success(`Welcome back, ${userSession.name || "User"}!`);
       redirectByRole(userSession);
     } catch (err: any) {
-      setErrorMsg(err.message || "Sign in failed.");
+      setErrorMsg(err.message || "Invalid email or password.");
       toast.error(err.message || "Sign in failed");
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  // Forgot Password Request Handler (Anti-enumeration guaranteed)
+  const handleForgotPassword = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await requestPasswordReset(cleanEmail);
+      setSuccessMsg(
+        "If an account exists with this email address, password reset instructions have been dispatched."
+      );
+      toast.success("Reset instructions dispatched.");
+    } catch {
+      // Identical wording and timing prevents email enumeration
+      setSuccessMsg(
+        "If an account exists with this email address, password reset instructions have been dispatched."
+      );
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  // Cryptographic Password Reset Execution Handler
+  const handleResetPassword = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    if (!resetToken.trim()) {
+      setErrorMsg("Please enter or paste your cryptographic reset token.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setErrorMsg("Password must be at least 8 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      return;
+    }
+
+    setIsResetting(true);
+    try {
+      // Compute SHA-256 hash of single-use token (raw token is never stored in DB)
+      const encoder = new TextEncoder();
+      const hashBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(resetToken.trim()));
+      const tokenHash = Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      const res = await verifyAndResetPassword(tokenHash, newPassword);
+      if (res && res.success) {
+        toast.success("Password updated successfully! Please sign in.");
+        setSuccessMsg("Your password has been securely updated. You can now sign in.");
+        setAuthMethod("password");
+        setPassword("");
+        setResetToken("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        throw new Error(res?.message || "Invalid, expired, or previously used reset token.");
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to reset password.");
+      toast.error(err.message || "Password reset failed");
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -543,7 +556,7 @@ export function LoginPageSplit() {
                   </label>
                   <button
                     type="button"
-                    onClick={() => setAuthMethod("otp")}
+                    onClick={() => { setAuthMethod("forgot"); setErrorMsg(""); setSuccessMsg(""); }}
                     className="text-[11px] font-medium text-[#7A4B29] hover:underline cursor-pointer"
                   >
                     Forgot password?
@@ -568,6 +581,121 @@ export function LoginPageSplit() {
                 <span>{isVerifying ? "Signing in..." : "Sign in to Dashboard"}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
+            </form>
+          )}
+
+          {/* 2C. Forgot Password Form (Anti-enumeration Protected) */}
+          {mode === "signin" && authMethod === "forgot" && (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#1B1410] mb-1.5 uppercase tracking-wide">
+                  Account Email Address
+                </label>
+                <input
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
+                />
+                <p className="mt-1 text-[11px] text-[#786B60]">
+                  Enter your registered email address. Password reset instructions with a cryptographic single-use token will be dispatched.
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSending}
+                className="w-full h-12 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer disabled:opacity-50 mt-2"
+              >
+                <span>{isSending ? "Dispatching..." : "Send Reset Instructions"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center justify-between pt-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMethod("password"); setErrorMsg(""); setSuccessMsg(""); }}
+                  className="text-[#7A4B29] hover:underline font-bold cursor-pointer"
+                >
+                  ← Back to sign in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setAuthMethod("reset"); setErrorMsg(""); setSuccessMsg(""); }}
+                  className="text-[#786B60] hover:text-[#1B1410] underline cursor-pointer"
+                >
+                  Have a reset token?
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* 2D. Cryptographic Reset Password Form */}
+          {mode === "signin" && authMethod === "reset" && (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[#1B1410] mb-1.5 uppercase tracking-wide">
+                  Cryptographic Reset Token
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Paste single-use hex reset token"
+                  value={resetToken}
+                  onChange={(e) => setResetToken(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] font-mono text-xs text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1B1410] mb-1.5 uppercase tracking-wide">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Minimum 8 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#1B1410] mb-1.5 uppercase tracking-wide">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-enter new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-sm text-[#1B1410] placeholder-[#A39488] focus:outline-none focus:border-[#7A4B29] transition-colors"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isResetting}
+                className="w-full h-12 rounded-xl bg-[#7A4B29] hover:bg-[#60391F] text-white text-sm font-bold flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer disabled:opacity-50 mt-2"
+              >
+                <span>{isResetting ? "Updating..." : "Update Password & Sign In"}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <div className="text-center pt-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMethod("password"); setErrorMsg(""); setSuccessMsg(""); }}
+                  className="text-[#7A4B29] hover:underline font-bold cursor-pointer"
+                >
+                  ← Back to sign in
+                </button>
+              </div>
             </form>
           )}
 

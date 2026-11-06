@@ -19,6 +19,7 @@ dist-ssr/
 *.local
 .env
 .env.*
+!.env.example
 
 # Binaries & Large Build Artifacts (>25MB)
 *.apk

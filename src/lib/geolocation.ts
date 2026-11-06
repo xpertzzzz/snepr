@@ -86,3 +86,4 @@ export function getDistanceToSalon(
   const distKm = calculateDistance(uLat, uLon, salonLat, salonLon);
   return formatDistance(distKm);
 }
+

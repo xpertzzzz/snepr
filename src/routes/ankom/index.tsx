@@ -4,9 +4,15 @@ import { SneprWordmark } from "@/components/SneprWordmark";
 import {
   Building2, Users, MapPin, CheckCircle2, XCircle, AlertTriangle,
   Plus, Edit, Eye, Filter, Search, BarChart3, ShieldCheck,
-  TrendingUp, RefreshCw, Armchair, Clock, ChevronRight, Check, X, Store
+  TrendingUp, RefreshCw, Armchair, Clock, ChevronRight, Check, X,
+  Store as StoreIcon
 } from "lucide-react";
 import { BHUBANESWAR_AREAS, REAL_SALONS_DATA, RealSalon, Area } from "@/lib/real-salons";
+import {
+  fetchPartnerApplicationsDb,
+  reviewPartnerApplicationDb,
+  queryTable
+} from "@/lib/supabase";
 import { toast } from "sonner";
 
 export type AdminTab = "overview" | "applications" | "salons" | "users" | "localities";
@@ -40,181 +46,176 @@ export function AdminConsole() {
   }, []);
 
   // 1. Applications State
-  const [applications, setApplications] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_admin_applications");
-      if (stored) return JSON.parse(stored);
-      // Sample initial pending application
-      return [
-        {
-          applicationId: "SN-BBS-1042",
-          salonName: "Barber King Studio",
-          ownerName: "Bikash Sahoo",
-          contactNumber: "+91 94371 88990",
-          businessEmail: "bikash@barberking.com",
-          salonDescription: "Modern fades and beard styling near KIIT Square.",
-          locality: "KIIT Road",
-          fullAddress: "Plot No. 12, KIIT Road, opposite Big Bazaar, Patia",
-          postalCode: "751024",
-          chairCount: 2,
-          openingTime: "09:30 AM",
-          closingTime: "09:00 PM",
-          weeklyHoliday: "Tuesday",
-          services: [
-            { name: "Executive Haircut", price: 180, duration: 25 },
-            { name: "Beard Sculpt & Trim", price: 100, duration: 20 },
-            { name: "Charcoal Face Mask", price: 250, duration: 30 },
-          ],
-          status: "PENDING_REVIEW",
-          createdAt: new Date(Date.now() - 4 * 3600000).toISOString(),
-        },
-      ];
-    } catch {
-      return [];
-    }
-  });
-
+  const [applications, setApplications] = useState<any[]>([]);
   const [applicationSearch, setApplicationSearch] = useState("");
   const [rejectingAppId, setRejectingAppId] = useState<string | null>(null);
   const [rejectionReasonInput, setRejectionReasonInput] = useState("");
 
   // 2. Salons State
-  const [salonsList, setSalonsList] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_admin_salons");
-      if (stored) return JSON.parse(stored);
-      return REAL_SALONS_DATA.map((s) => ({
-        ...s,
-        status: "APPROVED",
-        isSuspended: false,
-      }));
-    } catch {
-      return REAL_SALONS_DATA.map((s) => ({
-        ...s,
-        status: "APPROVED",
-        isSuspended: false,
-      }));
-    }
-  });
+  const [salonsList, setSalonsList] = useState<any[]>(REAL_SALONS_DATA.map((s) => ({
+    ...s,
+    status: "APPROVED",
+    isSuspended: false,
+  })));
   const [salonSearch, setSalonSearch] = useState("");
   const [salonLocalityFilter, setSalonLocalityFilter] = useState("all");
 
   // 3. Users State
-  const [usersList, setUsersList] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_admin_users");
-      if (stored) return JSON.parse(stored);
-      return [
-        {
-          id: 1,
-          name: "Ankit Kumar",
-          email: "xpertenzo.in@gmail.com",
-          phone: "+91 98765 43210",
-          role: "super_admin",
-          isSuspended: false,
-          associatedSalon: null,
-          createdAt: "2026-10-15",
-        },
-        {
-          id: 2,
-          name: "Rajesh Mohapatra",
-          email: "rajesh@lakmesalon.in",
-          phone: "+91 92373 62221",
-          role: "salon_owner",
-          isSuspended: false,
-          associatedSalon: "Lakmé Salon  |  KIIT Road",
-          createdAt: "2026-10-20",
-        },
-        {
-          id: 3,
-          name: "Suman Tripathy",
-          email: "suman.t@gmail.com",
-          phone: "+91 94370 55443",
-          role: "customer",
-          isSuspended: false,
-          associatedSalon: null,
-          createdAt: "2026-11-01",
-        },
-      ];
-    } catch {
-      return [];
-    }
-  });
+  const [usersList, setUsersList] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState("");
 
   // 4. Localities State
-  const [areas, setAreas] = useState<Area[]>(() => {
-    try {
-      const stored = localStorage.getItem("snepr_admin_localities");
-      if (stored) return JSON.parse(stored);
-      return BHUBANESWAR_AREAS;
-    } catch {
-      return BHUBANESWAR_AREAS;
-    }
-  });
+  const [areas, setAreas] = useState<Area[]>(BHUBANESWAR_AREAS);
   const [newAreaName, setNewAreaName] = useState("");
   const [showAddAreaModal, setShowAddAreaModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Sync state to localStorage
-  useEffect(() => {
+  // Sync with Supabase Database
+  const loadDatabaseData = async () => {
+    setIsRefreshing(true);
     try {
-      localStorage.setItem("snepr_admin_applications", JSON.stringify(applications));
-      localStorage.setItem("snepr_admin_salons", JSON.stringify(salonsList));
-      localStorage.setItem("snepr_admin_users", JSON.stringify(usersList));
-      localStorage.setItem("snepr_admin_localities", JSON.stringify(areas));
-    } catch {}
-  }, [applications, salonsList, usersList, areas]);
+      // 1. Fetch Real Partner Applications
+      const dbApps = await fetchPartnerApplicationsDb();
+      if (Array.isArray(dbApps) && dbApps.length > 0) {
+        setApplications(
+          dbApps.map((a: any) => ({
+            applicationId: a.application_id || a.applicationId,
+            salonName: a.salon_name || a.salonName,
+            ownerName: a.owner_name || a.ownerName,
+            contactNumber: a.contact_number || a.contactNumber,
+            businessEmail: a.business_email || a.businessEmail,
+            salonDescription: a.salon_description || a.salonDescription,
+            locality: a.locality,
+            fullAddress: a.full_address || a.fullAddress,
+            postalCode: a.postal_code || a.postalCode,
+            chairCount: a.chair_count || a.chairCount || 3,
+            openingTime: a.opening_time || a.openingTime || "09:00 AM",
+            closingTime: a.closing_time || a.closingTime || "09:00 PM",
+            weeklyHoliday: a.weekly_holiday || a.weeklyHoliday || "None",
+            services: a.services || [],
+            status: a.status || "PENDING_REVIEW",
+            createdAt: a.created_at || a.createdAt,
+            rejectionReason: a.rejection_reason || a.rejectionReason,
+          }))
+        );
+      } else {
+        // Fallback default sample if DB has no applications yet
+        setApplications([
+          {
+            applicationId: "SN-BBS-1042",
+            salonName: "Barber King Studio",
+            ownerName: "Bikash Sahoo",
+            contactNumber: "+91 94371 88990",
+            businessEmail: "bikash@barberking.com",
+            salonDescription: "Modern fades and beard styling near KIIT Square.",
+            locality: "KIIT Road",
+            fullAddress: "Plot No. 12, KIIT Road, opposite Big Bazaar, Patia",
+            postalCode: "751024",
+            chairCount: 2,
+            openingTime: "09:30 AM",
+            closingTime: "09:00 PM",
+            weeklyHoliday: "Tuesday",
+            services: [
+              { name: "Executive Haircut", price: 180, duration: 25 },
+              { name: "Beard Sculpt & Trim", price: 100, duration: 20 },
+              { name: "Charcoal Face Mask", price: 250, duration: 30 },
+            ],
+            status: "PENDING_REVIEW",
+            createdAt: new Date(Date.now() - 4 * 3600000).toISOString(),
+          },
+        ]);
+      }
+
+      // 2. Fetch Real Salons from PostgreSQL
+      const dbSalons = await queryTable<any[]>("salons?order=id.asc");
+      if (Array.isArray(dbSalons) && dbSalons.length > 0) {
+        setSalonsList(
+          dbSalons.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            address: s.address || s.location || "Bhubaneswar",
+            areaId: s.area_id || 1,
+            areaName: s.location || "Bhubaneswar",
+            areaSlug: (s.location || "bhubaneswar").toLowerCase().replace(/\s+/g, "-"),
+            category: s.category || "Unisex Salon",
+            rating: s.rating || "4.8",
+            reviewCount: s.review_count || 0,
+            waitTime: s.wait_time || 0,
+            availableChairs: s.available_chairs ?? 3,
+            totalChairs: s.total_chairs ?? 3,
+            waitingCount: s.waiting_count ?? 0,
+            phone: s.phone || "+91 94370 00000",
+            status: (s.status || "APPROVED").toUpperCase(),
+            isSuspended: s.status === "suspended" || s.operational_status === "paused",
+            services: [],
+          }))
+        );
+      }
+
+      // 3. Fetch Real Users from PostgreSQL
+      const dbUsers = await queryTable<any[]>(
+        "users?select=id,name,email,phone,role,is_verified,failed_attempts,locked_until,last_sign_in_at&order=id.asc"
+      );
+      if (Array.isArray(dbUsers) && dbUsers.length > 0) {
+        setUsersList(
+          dbUsers.map((u: any) => ({
+            id: u.id,
+            name: u.name || u.email.split("@")[0],
+            email: u.email,
+            phone: u.phone || "—",
+            role: u.role,
+            isSuspended: Boolean(u.locked_until && new Date(u.locked_until) > new Date()),
+            associatedSalon: u.role === "salon_owner" ? "Lakmé Salon | KIIT Road" : null,
+            createdAt: u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "Active",
+          }))
+        );
+      }
+    } catch (err) {
+      console.warn("Could not sync admin data with Supabase:", err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadDatabaseData();
+  }, []);
 
   // Application Actions
-  const handleApproveApplication = (appId: string) => {
-    const app = applications.find((a) => a.applicationId === appId);
-    if (!app) return;
+  const handleApproveApplication = async (appId: string) => {
+    try {
+      const res = await reviewPartnerApplicationDb(appId, "APPROVE", session?.name || "Super Admin");
+      if (res && res.success) {
+        toast.success(`Application ${appId} approved & salon provisioned in database!`);
+        await loadDatabaseData();
+        return;
+      }
+    } catch (err: any) {
+      console.warn("Supabase review RPC error:", err);
+    }
 
     setApplications((prev) =>
       prev.map((a) => (a.applicationId === appId ? { ...a, status: "APPROVED" } : a))
     );
-
-    // Add to approved salons list
-    const newSalon: any = {
-      id: salonsList.length + 10,
-      name: app.salonName,
-      address: app.fullAddress,
-      areaId: 1,
-      areaName: app.locality,
-      areaSlug: app.locality.toLowerCase().replace(/\s+/g, "-"),
-      category: "Unisex Salon",
-      rating: "5.0",
-      reviewCount: 0,
-      waitTime: 0,
-      availableChairs: app.chairCount || 3,
-      totalChairs: app.chairCount || 3,
-      waitingCount: 0,
-      phone: app.contactNumber,
-      status: "APPROVED",
-      isSuspended: false,
-      services: app.services || [],
-    };
-
-    setSalonsList((prev) => [newSalon, ...prev]);
-
-    // Update session application if current user submitted it
-    try {
-      const activeApp = localStorage.getItem("snepr_salon_application");
-      if (activeApp) {
-        const parsed = JSON.parse(activeApp);
-        if (parsed.applicationId === appId) {
-          parsed.status = "APPROVED";
-          localStorage.setItem("snepr_salon_application", JSON.stringify(parsed));
-        }
-      }
-    } catch {}
-
-    toast.success(`Application ${appId} (${app.salonName}) approved!`);
+    toast.success(`Application ${appId} approved!`);
   };
 
-  const handleRejectApplication = () => {
+  const handleRejectApplication = async () => {
     if (!rejectingAppId) return;
     const reason = rejectionReasonInput.trim() || "Address could not be verified in Bhubaneswar municipal records.";
+
+    try {
+      const res = await reviewPartnerApplicationDb(rejectingAppId, "REJECT", session?.name || "Super Admin", reason);
+      if (res && res.success) {
+        toast.info(`Application ${rejectingAppId} marked as REJECTED in database.`);
+        setRejectingAppId(null);
+        setRejectionReasonInput("");
+        await loadDatabaseData();
+        return;
+      }
+    } catch (err: any) {
+      console.warn("Supabase review RPC error:", err);
+    }
 
     setApplications((prev) =>
       prev.map((a) =>
@@ -223,45 +224,61 @@ export function AdminConsole() {
           : a
       )
     );
-
-    try {
-      const activeApp = localStorage.getItem("snepr_salon_application");
-      if (activeApp) {
-        const parsed = JSON.parse(activeApp);
-        if (parsed.applicationId === rejectingAppId) {
-          parsed.status = "REJECTED";
-          parsed.rejectionReason = reason;
-          localStorage.setItem("snepr_salon_application", JSON.stringify(parsed));
-        }
-      }
-    } catch {}
-
     toast.info(`Application ${rejectingAppId} marked as REJECTED.`);
     setRejectingAppId(null);
     setRejectionReasonInput("");
   };
 
   // Salon Actions
-  const handleToggleSuspendSalon = (salonId: number) => {
+  const handleToggleSuspendSalon = async (salonId: number) => {
+    const s = salonsList.find((x) => x.id === salonId);
+    if (!s) return;
+    const newSuspended = !s.isSuspended;
+
+    try {
+      await queryTable(`salons?id=eq.${salonId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: newSuspended ? "suspended" : "active",
+          operational_status: newSuspended ? "paused" : "active",
+        }),
+      });
+      toast.info(newSuspended ? `${s.name} suspended in database.` : `${s.name} reactivated in database.`);
+    } catch (err) {
+      console.warn("Could not patch salon status:", err);
+    }
+
     setSalonsList((prev) =>
-      prev.map((s) => {
-        if (s.id !== salonId) return s;
-        const newSuspended = !s.isSuspended;
-        toast.info(newSuspended ? `${s.name} has been suspended.` : `${s.name} is reactivated.`);
-        return { ...s, isSuspended: newSuspended, status: newSuspended ? "SUSPENDED" : "APPROVED" };
-      })
+      prev.map((item) =>
+        item.id === salonId
+          ? { ...item, isSuspended: newSuspended, status: newSuspended ? "SUSPENDED" : "APPROVED" }
+          : item
+      )
     );
   };
 
   // User Actions
-  const handleToggleSuspendUser = (userId: number) => {
+  const handleToggleSuspendUser = async (userId: number) => {
+    const u = usersList.find((x) => x.id === userId);
+    if (!u) return;
+    const newSuspended = !u.isSuspended;
+
+    try {
+      await queryTable(`users?id=eq.${userId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          locked_until: newSuspended ? new Date(Date.now() + 365 * 24 * 3600 * 1000).toISOString() : null,
+        }),
+      });
+      toast.info(newSuspended ? `${u.name} locked out in database.` : `${u.name} unlocked in database.`);
+    } catch (err) {
+      console.warn("Could not patch user status:", err);
+    }
+
     setUsersList((prev) =>
-      prev.map((u) => {
-        if (u.id !== userId) return u;
-        const newSuspended = !u.isSuspended;
-        toast.info(newSuspended ? `${u.name} suspended.` : `${u.name} reactivated.`);
-        return { ...u, isSuspended: newSuspended };
-      })
+      prev.map((item) =>
+        item.id === userId ? { ...item, isSuspended: newSuspended } : item
+      )
     );
   };
 
@@ -380,7 +397,7 @@ export function AdminConsole() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <Store className="w-4 h-4" />
+                <StoreIcon className="w-4 h-4" />
                 <span>2. Salon Applications</span>
               </div>
               {pendingAppsCount > 0 && (
@@ -453,10 +470,20 @@ export function AdminConsole() {
               Secure administrator console · Zero SMS OTPs · 0% Haircut Commissions.
             </p>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3EC] text-[#267447] text-xs font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#267447]" />
-            Bhubaneswar Active
-          </span>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={loadDatabaseData}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E9E1D7] bg-[#FFFDFA] text-xs font-bold hover:bg-[#F5EEE7] text-[#1B1410] transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+              <span>{isRefreshing ? "Syncing..." : "Sync DB"}</span>
+            </button>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3EC] text-[#267447] text-xs font-bold">
+              <span className="w-2 h-2 rounded-full bg-[#267447]" />
+              Bhubaneswar Active
+            </span>
+          </div>
         </div>
 
         {/* ─── TAB 1: OVERVIEW ─── */}

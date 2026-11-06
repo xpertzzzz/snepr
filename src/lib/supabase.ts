@@ -123,3 +123,108 @@ export async function submitVerifiedReviewDirect(params: {
 
   return review;
 }
+
+/**
+ * Enterprise Secure Authentication
+ * Checks bcrypt hash, rate limits, lockouts, and verified email status.
+ */
+export async function authenticateUser(identifier: string, password: string) {
+  return await callRpc("authenticate_user", {
+    p_identifier: identifier,
+    p_password: password,
+  });
+}
+
+/**
+ * Request Password Reset (Anti-enumeration)
+ * Always returns identical success message whether email exists or not.
+ */
+export async function requestPasswordReset(email: string) {
+  // Generate random 32-byte hex token
+  const randomBytes = new Uint8Array(32);
+  crypto.getRandomValues(randomBytes);
+  const token = Array.from(randomBytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  // Create SHA-256 hash of token to store in database
+  const encoder = new TextEncoder();
+  const data = encoder.encode(token);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const tokenHash = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  const res = await callRpc("request_password_reset", {
+    p_email: email,
+    p_token_hash: tokenHash,
+  });
+
+  return { ...res, token };
+}
+
+/**
+ * Verify Single-Use Token Hash and Reset Password with Slow KDF
+ */
+export async function verifyAndResetPassword(tokenHash: string, newPassword: string) {
+  return await callRpc("verify_and_reset_password", {
+    p_token_hash: tokenHash,
+    p_new_password: newPassword,
+  });
+}
+
+/**
+ * Submit Partner Application directly to PostgreSQL database
+ */
+export async function submitPartnerApplicationDb(app: {
+  salonName: string;
+  ownerName: string;
+  contactNumber: string;
+  businessEmail: string;
+  salonDescription?: string;
+  locality: string;
+  fullAddress: string;
+  postalCode?: string;
+  chairCount?: number;
+  openingTime?: string;
+  closingTime?: string;
+  weeklyHoliday?: string;
+  services?: any[];
+}) {
+  return await callRpc("submit_partner_application_db", {
+    p_salon_name: app.salonName,
+    p_owner_name: app.ownerName,
+    p_contact_number: app.contactNumber,
+    p_business_email: app.businessEmail,
+    p_salon_description: app.salonDescription || "",
+    p_locality: app.locality,
+    p_full_address: app.fullAddress,
+    p_postal_code: app.postalCode || "751024",
+    p_chair_count: app.chairCount || 3,
+    p_opening_time: app.openingTime || "09:00 AM",
+    p_closing_time: app.closingTime || "09:00 PM",
+    p_weekly_holiday: app.weeklyHoliday || "None",
+    p_services: app.services || [],
+  });
+}
+
+/**
+ * Fetch all partner applications from PostgreSQL database
+ */
+export async function fetchPartnerApplicationsDb() {
+  return await queryTable<any[]>("partner_applications?order=created_at.desc");
+}
+
+/**
+ * Review (Approve or Reject) Partner Application in PostgreSQL database
+ */
+export async function reviewPartnerApplicationDb(
+  applicationId: string,
+  action: "APPROVE" | "REJECT",
+  reviewer: string = "Super Admin",
+  rejectionReason?: string
+) {
+  return await callRpc("review_partner_application_db", {
+    p_application_id: applicationId,
+    p_action: action,
+    p_reviewer: reviewer,
+    p_rejection_reason: rejectionReason || null,
+  });
+}

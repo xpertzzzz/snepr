@@ -5,6 +5,7 @@ import {
   Clock, CheckCircle2, XCircle, AlertCircle,
   Building2, Store, ChevronRight, Edit3, ShieldAlert
 } from "lucide-react";
+import { queryTable } from "@/lib/supabase";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/partner/application")({
@@ -26,22 +27,89 @@ export function PartnerApplicationStatusPage() {
   const [correctedAddress, setCorrectedAddress] = useState("");
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("snepr_salon_application");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setApp(parsed);
-        setCorrectedName(parsed.salonName || "");
-        setCorrectedAddress(parsed.fullAddress || "");
+    const fetchAppFromDb = async () => {
+      try {
+        let storedAppId = "";
+        let userEmail = "";
+        const stored = localStorage.getItem("snepr_salon_application");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          storedAppId = parsed.applicationId;
+          setApp(parsed);
+          setCorrectedName(parsed.salonName || "");
+          setCorrectedAddress(parsed.fullAddress || "");
+        }
+
+        const session = localStorage.getItem("snepr_session");
+        if (session) {
+          userEmail = JSON.parse(session).email;
+        }
+
+        let query = "";
+        if (storedAppId) {
+          query = `partner_applications?application_id=eq.${encodeURIComponent(storedAppId)}&limit=1`;
+        } else if (userEmail) {
+          query = `partner_applications?business_email=eq.${encodeURIComponent(userEmail)}&order=created_at.desc&limit=1`;
+        }
+
+        if (query) {
+          const rows = await queryTable<any[]>(query);
+          if (rows && rows.length > 0) {
+            const dbApp = rows[0];
+            const mapped = {
+              applicationId: dbApp.application_id,
+              salonName: dbApp.salon_name,
+              ownerName: dbApp.owner_name,
+              contactNumber: dbApp.contact_number,
+              businessEmail: dbApp.business_email,
+              salonDescription: dbApp.salon_description,
+              locality: dbApp.locality,
+              fullAddress: dbApp.full_address,
+              postalCode: dbApp.postal_code,
+              chairCount: dbApp.chair_count,
+              openingTime: dbApp.opening_time,
+              closingTime: dbApp.closing_time,
+              weeklyHoliday: dbApp.weekly_holiday,
+              services: dbApp.services || [],
+              status: dbApp.status,
+              rejectionReason: dbApp.rejection_reason,
+              createdAt: dbApp.created_at,
+            };
+            setApp(mapped);
+            setCorrectedName(mapped.salonName || "");
+            setCorrectedAddress(mapped.fullAddress || "");
+          }
+        }
+      } catch (err) {
+        console.warn("Could not query DB application status:", err);
       }
-    } catch {}
+    };
+
+    fetchAppFromDb();
   }, []);
 
-  const handleResubmit = () => {
+  const handleResubmit = async () => {
     if (!correctedName.trim() || !correctedAddress.trim()) {
       toast.error("Please provide updated salon details.");
       return;
     }
+
+    try {
+      if (app?.applicationId) {
+        await queryTable(`partner_applications?application_id=eq.${encodeURIComponent(app.applicationId)}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            salon_name: correctedName.trim(),
+            full_address: correctedAddress.trim(),
+            status: "PENDING_REVIEW",
+            rejection_reason: null,
+          }),
+        });
+      }
+    } catch (err) {
+      console.warn("Could not patch application in DB:", err);
+    }
+
     const updated = {
       ...app,
       salonName: correctedName.trim(),
@@ -52,14 +120,6 @@ export function PartnerApplicationStatusPage() {
     };
     try {
       localStorage.setItem("snepr_salon_application", JSON.stringify(updated));
-      const adminApps = JSON.parse(localStorage.getItem("snepr_admin_applications") || "[]");
-      const idx = adminApps.findIndex((a: any) => a.applicationId === app.applicationId);
-      if (idx !== -1) {
-        adminApps[idx] = updated;
-      } else {
-        adminApps.unshift(updated);
-      }
-      localStorage.setItem("snepr_admin_applications", JSON.stringify(adminApps));
     } catch {}
 
     setApp(updated);
