@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useParams, useSearch } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { getQueueStatus, cancelQueueToken } from "@/backend/functions/queues";
+import { getTokenDetailsAtomic, cancelQueueAtomic } from "@/lib/queue-client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -86,73 +86,52 @@ export function AppQueue() {
 
   const [lastSynced, setLastSynced] = useState("Just now");
 
-  // Poll backend and localStorage every 4 seconds for live salon updates
+  // Poll Supabase every 3 seconds for server-authoritative live status
   const { data: serverStatus, dataUpdatedAt } = useQuery({
     queryKey: ["queue-status", tokenString],
     queryFn: async () => {
-      // Check if salon owner in SalonOS updated active queues
       try {
-        const ownerQueues = localStorage.getItem("snepr_active_queues");
-        if (ownerQueues) {
-          const parsedArr = JSON.parse(ownerQueues);
-          const found = parsedArr.find(
-            (q: any) =>
-              String(q.tokenNumber) === tokenString.replace(/\D/g, "") ||
-              q.tokenCode === tokenString ||
-              `#${q.tokenNumber}` === tokenString
-          );
-          if (found) {
-            return {
-              status: found.status?.toLowerCase(),
-              chairAssigned: found.chairAssigned ? `Station 0${found.chairAssigned}` : "Station 02",
-              barberName: "Master Stylist",
-              position: found.position ?? 0,
-              waitTimeMins: found.waitTime ?? 0,
-            };
-          }
+        const details = await getTokenDetailsAtomic(tokenString);
+        if (details && details.success) {
+          return details;
         }
-      } catch {}
-
-      return await getQueueStatus({ data: tokenString });
+      } catch (err) {
+        console.warn("Could not fetch remote token status:", err);
+      }
+      return null;
     },
-    refetchInterval: 4000,
+    refetchInterval: 3000,
   });
 
   useEffect(() => {
     const d = new Date();
     setLastSynced(d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
 
-    if (serverStatus) {
-      setTokenData((prev: any) => {
-        const s = serverStatus.status || prev.status;
-        let newStage = prev.stage;
-        if (s === "completed" || s === "COMPLETED") newStage = 5;
-        else if (s === "serving" || s === "SERVING" || s === "in-progress") newStage = 4;
-        else if (serverStatus.position <= 1) newStage = 3;
-        else newStage = 2;
-
-        return {
-          ...prev,
-          status: s,
-          stage: newStage,
-          position: serverStatus.position ?? prev.position,
-          peopleAhead: serverStatus.peopleAhead ?? prev.peopleAhead,
-          waitTimeMins: serverStatus.estimatedWaitMins ?? prev.waitTimeMins,
-          chairAssigned: serverStatus.chairAssigned || prev.chairAssigned,
-          barberName: serverStatus.barberName || prev.barberName,
-        };
-      });
+    if (serverStatus && serverStatus.success) {
+      setTokenData((prev: any) => ({
+        ...prev,
+        ...serverStatus,
+        queueId: serverStatus.queue?.id || prev.queueId,
+      }));
     }
   }, [serverStatus, dataUpdatedAt]);
 
   const cancelMutation = useMutation({
-    mutationFn: () => cancelQueueToken({ data: { queueId: 101 } }),
+    mutationFn: async () => {
+      const qId = tokenData.queue?.id || tokenData.queueId;
+      if (qId) {
+        await cancelQueueAtomic(qId, "Customer cancelled via mobile pass", "customer");
+      }
+    },
     onSuccess: () => {
       try {
         localStorage.removeItem("snepr_active_queue");
       } catch {}
       toast.info("You have left the queue.");
       navigate({ to: "/live" });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to cancel queue entry.");
     },
   });
 

@@ -10,12 +10,15 @@ export function useQuery<T = any>(options: {
 }): {
   data: T | undefined;
   isLoading: boolean;
+  isFetching: boolean;
+  dataUpdatedAt: number;
   error: any;
   refetch: () => Promise<T | undefined>;
 } {
   const { queryFn, initialData, enabled = true, refetchInterval } = options || {};
   const [data, setData] = useState<T | undefined>(initialData);
   const [isLoading, setIsLoading] = useState<boolean>(!initialData && enabled);
+  const [dataUpdatedAt, setDataUpdatedAt] = useState<number>(Date.now());
   const [error, setError] = useState<any>(null);
 
   const refetch = useCallback(async () => {
@@ -24,6 +27,7 @@ export function useQuery<T = any>(options: {
     try {
       const res = await queryFn();
       setData(res);
+      setDataUpdatedAt(Date.now());
       setError(null);
       return res;
     } catch (err) {
@@ -45,7 +49,7 @@ export function useQuery<T = any>(options: {
     return () => clearInterval(interval);
   }, [refetchInterval, enabled, refetch]);
 
-  return { data, isLoading, error, refetch };
+  return { data, isLoading, isFetching: isLoading, dataUpdatedAt, error, refetch };
 }
 
 export function useMutation<TData = any, TVariables = any>(options: {

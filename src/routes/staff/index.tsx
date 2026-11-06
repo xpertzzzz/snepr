@@ -2,6 +2,12 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
+  advanceQueueAtomic,
+  completeQueueAtomic,
+  joinQueueAtomic,
+  fetchSalonLiveQueues,
+} from "@/lib/queue-client";
+import {
   Scissors,
   CheckCircle2,
   Play,
@@ -118,24 +124,82 @@ export function StaffDeskPage() {
     } catch {}
   }, []);
 
+  // Sync real queues from Supabase
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRemote = async () => {
+      try {
+        const remote = await fetchSalonLiveQueues(1);
+        if (isMounted && Array.isArray(remote) && remote.length > 0) {
+          const serving = remote.find((r: any) => r.status === "in_service" || r.status === "called");
+          if (serving) {
+            setServingToken({
+              id: String(serving.id),
+              tokenNumber: serving.token_code || `#${serving.token_number}`,
+              customerName: serving.customer_name || "Customer",
+              service: serving.service_name || "Haircut",
+              joinedTime: new Date(serving.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              status: "SERVING",
+            });
+          }
+          const waiting = remote.filter((r: any) => r.status === "waiting");
+          setQueueList(
+            waiting.map((w: any) => ({
+              id: String(w.id),
+              tokenNumber: w.token_code || `#${w.token_number}`,
+              customerName: w.customer_name || "Customer",
+              service: w.service_name || "Haircut",
+              joinedTime: new Date(w.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              status: "WAITING",
+            }))
+          );
+        }
+      } catch {}
+    };
+
+    fetchRemote();
+    const interval = setInterval(fetchRemote, 4000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   // Complete current service
-  const handleCompleteService = () => {
+  const handleCompleteService = async () => {
     if (!servingToken) {
       toast.info("No service currently in progress.");
       return;
+    }
+    const qId = parseInt(servingToken.id.replace(/\D/g, "") || "0", 10);
+    if (qId) {
+      try {
+        await completeQueueAtomic(qId, 10);
+      } catch (err) {
+        console.warn("Complete queue error:", err);
+      }
     }
     toast.success(`Service completed for ${servingToken.tokenNumber} (${servingToken.customerName})!`);
     setServingToken(null);
   };
 
   // Call next waiting customer
-  const handleCallNext = () => {
+  const handleCallNext = async () => {
     if (queueList.length === 0) {
       toast.info("Queue is empty. No customers waiting.");
       return;
     }
 
     const [nextCustomer, ...remaining] = queueList;
+    const qId = parseInt(nextCustomer.id.replace(/\D/g, "") || "0", 10);
+    if (qId) {
+      try {
+        await advanceQueueAtomic(qId, 2, staffInfo.name, "call");
+      } catch (err) {
+        console.warn("Advance queue error:", err);
+      }
+    }
+
     setServingToken({
       ...nextCustomer,
       status: "SERVING",
@@ -171,28 +235,40 @@ export function StaffDeskPage() {
   };
 
   // Add walk in customer
-  const handleAddWalkIn = (e?: React.FormEvent) => {
+  const handleAddWalkIn = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!walkinName.trim()) {
       toast.error("Please enter the customer name.");
       return;
     }
 
-    const nextNum = `#0${24 + queueList.length + (servingToken ? 1 : 0) + 1}`;
-    const newEntry: QueueToken = {
-      id: `snep-${Date.now()}`,
-      tokenNumber: nextNum,
-      customerName: walkinName.trim(),
-      service: walkinService,
-      joinedTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      status: "WAITING",
-    };
+    try {
+      const res = await joinQueueAtomic({
+        salonId: 1,
+        customerName: walkinName.trim(),
+        customerPhone: walkinPhone.trim() || undefined,
+        serviceName: walkinService,
+        joinType: "walk_in",
+      });
 
-    setQueueList((prev) => [...prev, newEntry]);
-    setWalkinName("");
-    setWalkinPhone("");
-    setActiveTab("queue");
-    toast.success(`Walk in added: Token ${nextNum} issued for ${newEntry.customerName}!`);
+      const nextNum = res.tokenCode || `#0${24 + queueList.length + (servingToken ? 1 : 0) + 1}`;
+      const newEntry: QueueToken = {
+        id: String(res.queue?.id || Date.now()),
+        tokenNumber: nextNum,
+        customerName: walkinName.trim(),
+        service: walkinService,
+        joinedTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        status: "WAITING",
+      };
+
+      setQueueList((prev) => [...prev, newEntry]);
+      setWalkinName("");
+      setWalkinPhone("");
+      setActiveTab("queue");
+      toast.success(`Walk in added: Token ${nextNum} issued for ${newEntry.customerName}!`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to add walk in.");
+    }
   };
 
   // Sign out

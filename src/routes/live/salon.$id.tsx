@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { getSalonDetails } from "@/backend/functions/salons";
-import { joinQueue } from "@/backend/functions/queues";
+import { joinQueueAtomic } from "@/lib/queue-client";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -62,23 +62,31 @@ export function PublicSalonDetailPage() {
   });
 
   const joinMutation = useMutation({
-    mutationFn: () =>
-      joinQueue({
-        data: {
-          salonId: salon?.id || 1,
-          serviceId: selectedServiceId ?? undefined,
-          staffId: selectedBarberId ?? undefined,
-        },
-      }),
-    onSuccess: (queueEntry: any) => {
-      const token = queueEntry.tokenCode || queueEntry.tokenNumber || "A07";
-      toast.success(`Joined queue! Your token is #${token}`);
+    mutationFn: () => {
+      const sId = selectedServiceId;
+      const bId = selectedBarberId;
+      const sObj = (salon?.services || []).find((s: any) => s.id === sId);
+      const bObj = (salon?.barbers || []).find((b: any) => b.id === bId);
+      return joinQueueAtomic({
+        salonId: salon?.id || 1,
+        serviceId: sId ?? undefined,
+        serviceName: sObj?.name || "Signature Haircut & Styling",
+        staffId: bId ?? undefined,
+        barberName: bObj?.name,
+        joinType: "remote",
+      });
+    },
+    onSuccess: (result: any) => {
+      const token = (result.tokenCode || `#${result.tokenNumber}`).replace("#", "");
+      if (result.already_active) {
+        toast.info(result.message || `Active queue token #${token} resumed.`);
+      } else {
+        toast.success(`Joined queue! Token #${token} reserved.`);
+      }
       navigate({ to: `/queue/${token}` });
     },
-    onError: () => {
-      const mockToken = "A07";
-      toast.success(`Joined queue! Your token is #${mockToken}`);
-      navigate({ to: `/queue/${mockToken}` });
+    onError: (err: any) => {
+      toast.error(err?.message || "Could not join queue. Please try again.");
     },
   });
 

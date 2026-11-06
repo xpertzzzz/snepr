@@ -1,9 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserPoints } from "@/backend/functions/points";
-import { submitVerifiedReview } from "@/backend/functions/reviews";
-import { cancelQueueToken } from "@/backend/functions/queues";
+import { fetchUserPoints, submitVerifiedReviewDirect } from "@/lib/supabase";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { toast } from "sonner";
@@ -96,19 +94,17 @@ export function CustomerDashboardPage() {
 
   const { data: pointsData } = useQuery({
     queryKey: ["user-points", userId],
-    queryFn: () => getUserPoints({ data: { userId } }),
+    queryFn: () => fetchUserPoints(userId),
   });
 
   const reviewMutation = useMutation({
     mutationFn: () =>
-      submitVerifiedReview({
-        data: {
-          customerId: userId,
-          salonId: reviewModalVisit?.salonId || 1,
-          queueId: reviewModalVisit?.queueId || 101,
-          rating: reviewRating,
-          comment: reviewComment,
-        },
+      submitVerifiedReviewDirect({
+        customerId: userId,
+        salonId: reviewModalVisit?.salonId || 1,
+        queueId: reviewModalVisit?.queueId || 101,
+        rating: reviewRating,
+        comment: reviewComment,
       }),
     onSuccess: () => {
       toast.success("Verified review submitted! Earned +15 Snepr Points.");
@@ -217,7 +213,7 @@ export function CustomerDashboardPage() {
     },
   ];
 
-  const totalPoints = pointsData?.points ?? 150;
+  const totalPoints = pointsData?.balance ?? 150;
 
   return (
     <div className="min-h-screen bg-[#f7f3ed] text-[#211914] flex flex-col justify-between">

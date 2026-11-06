@@ -190,7 +190,7 @@ function AIStudioPage() {
               Loading curated styles…
             </div>
           ) : catalogue && catalogue.length > 0 ? (
-            catalogue.map((look) => {
+            catalogue.map((look: StudioHairstyle) => {
               const isSaved = savedLookIds.includes(look.id);
               return (
                 <div
@@ -401,16 +401,21 @@ function AIStudioPage() {
               <p className="text-[10px] text-ink-soft">JPEG or PNG, good lighting, neutral expression</p>
             </div>
 
+            <div className="flex items-center justify-between px-1 py-1 text-[11px] text-ink-soft">
+              <span>Monthly Allocation:</span>
+              <span className="font-bold text-primary">3 of 3 attempts remaining</span>
+            </div>
+
             <button
               disabled={!photoConsent}
               onClick={() => {
-                toast.success("AI Studio model loading preview for " + tryonModalLook.title);
+                toast.success("AI Studio generating virtual styling preview for " + tryonModalLook.title);
                 setTryonModalLook(null);
                 setPhotoConsent(false);
               }}
               className="w-full py-3 bg-primary hover:bg-primary-hover disabled:opacity-40 text-primary-foreground font-bold rounded-xl transition-all text-xs"
             >
-              Generate AI Hairstyle Inspiration
+              Generate AI Hairstyle Inspiration (1 Attempt)
             </button>
           </div>
         </div>

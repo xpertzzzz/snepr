@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { getSalons } from "@/backend/functions/salons";
-import { joinQueue } from "@/backend/functions/queues";
+import { joinQueueAtomic } from "@/lib/queue-client";
 import { REAL_SALONS_DATA, BHUBANESWAR_AREAS } from "@/lib/real-salons";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -119,17 +119,19 @@ export function LivePageStrict() {
 
   const joinQuickMutation = useMutation({
     mutationFn: async (salonId: number) => {
-      return await joinQueue({ data: { salonId } });
+      return await joinQueueAtomic({ salonId, joinType: "remote" });
     },
-    onSuccess: (entry: any) => {
-      const token = entry.tokenCode || entry.tokenNumber || "A07";
-      toast.success(`Joined queue! Token #${token} reserved.`);
+    onSuccess: (result: any) => {
+      const token = (result.tokenCode || `#${result.tokenNumber}`).replace("#", "");
+      if (result.already_active) {
+        toast.info(result.message || `Active queue token #${token} resumed.`);
+      } else {
+        toast.success(`Joined queue! Token #${token} reserved.`);
+      }
       navigate({ to: `/queue/${token}` });
     },
-    onError: () => {
-      const mockToken = "A07";
-      toast.success(`Joined queue! Token #${mockToken} reserved.`);
-      navigate({ to: `/queue/${mockToken}` });
+    onError: (err: any) => {
+      toast.error(err?.message || "Could not join queue. Please try again.");
     },
   });
 

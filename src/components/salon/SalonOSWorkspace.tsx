@@ -29,6 +29,13 @@ import {
   Crown,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  advanceQueueAtomic,
+  completeQueueAtomic,
+  cancelQueueAtomic,
+  joinQueueAtomic,
+  fetchSalonLiveQueues,
+} from "@/lib/queue-client";
 
 export type SalonOSTab = "overview" | "queue" | "chairs" | "staff" | "services" | "customers" | "analytics" | "profile" | "settings";
 
@@ -292,12 +299,46 @@ export function SalonOSWorkspace({
     } catch {}
   }, [queues]);
 
+  // Periodic poll to fetch server-authoritative queue updates
+  useEffect(() => {
+    let isMounted = true;
+    const fetchRemote = async () => {
+      try {
+        const remoteQueues = await fetchSalonLiveQueues(1);
+        if (isMounted && Array.isArray(remoteQueues) && remoteQueues.length > 0) {
+          const mapped: QueueItem[] = remoteQueues.map((rq: any, idx: number) => ({
+            id: rq.id,
+            tokenNumber: rq.token_number || (rq.id + 100),
+            customerName: rq.customer_name || "Customer",
+            phone: rq.customer_phone || undefined,
+            serviceName: rq.service_name || "Haircut & Styling",
+            position: rq.status === "waiting" ? idx + 1 : 0,
+            waitTime: rq.estimated_wait_mins || (idx + 1) * 12,
+            status: rq.status === "in_service" || rq.status === "called" ? "SERVING" : (rq.status?.toUpperCase() as any || "WAITING"),
+            chairAssigned: rq.chair_assigned || undefined,
+            createdAt: rq.created_at || new Date().toISOString(),
+          }));
+          setQueues(mapped);
+        }
+      } catch (err) {
+        // Fallback to local state if offline
+      }
+    };
+
+    fetchRemote();
+    const interval = setInterval(fetchRemote, 4000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
   // Derived counts
   const waitingCustomers = queues.filter((q) => q.status === "WAITING");
   const servingCustomers = queues.filter((q) => q.status === "SERVING");
 
   // Queue Operations
-  const handleCallNext = () => {
+  const handleCallNext = async () => {
     const nextWaiting = queues.find((q) => q.status === "WAITING");
     if (!nextWaiting) {
       toast.info("No customers currently waiting in queue.");
@@ -306,6 +347,12 @@ export function SalonOSWorkspace({
 
     const freeChair = chairs.find((c) => c.status === "AVAILABLE");
     const chairNum = freeChair?.number || 2;
+
+    try {
+      await advanceQueueAtomic(nextWaiting.id, chairNum, "Master Stylist", "call");
+    } catch (e) {
+      console.warn("Server advance error:", e);
+    }
 
     setQueues((prev) =>
       prev.map((q) =>
@@ -334,8 +381,14 @@ export function SalonOSWorkspace({
     );
   };
 
-  const handleCompleteService = (queueId: number) => {
+  const handleCompleteService = async (queueId: number) => {
     const item = queues.find((q) => q.id === queueId);
+    try {
+      await completeQueueAtomic(queueId, 10);
+    } catch (e) {
+      console.warn("Server complete error:", e);
+    }
+
     setQueues((prev) =>
       prev.map((q) => (q.id === queueId ? { ...q, status: "COMPLETED" } : q))
     );
@@ -361,11 +414,17 @@ export function SalonOSWorkspace({
     );
   };
 
-  const handleAdvanceQueue = (queueId: number) => {
+  const handleAdvanceQueue = async (queueId: number) => {
     const item = queues.find((q) => q.id === queueId);
     if (!item) return;
     const freeChair = chairs.find((c) => c.status === "AVAILABLE");
     const chairNum = freeChair?.number || 1;
+
+    try {
+      await advanceQueueAtomic(queueId, chairNum, "Master Stylist", "start");
+    } catch (e) {
+      console.warn("Server advance error:", e);
+    }
 
     setQueues((prev) =>
       prev.map((q) =>
@@ -394,8 +453,14 @@ export function SalonOSWorkspace({
     handleCompleteService(queueId);
   };
 
-  const handleCancelQueue = (queueId: number) => {
+  const handleCancelQueue = async (queueId: number) => {
     const item = queues.find((q) => q.id === queueId);
+    try {
+      await cancelQueueAtomic(queueId, "Cancelled by salon desk", "staff");
+    } catch (e) {
+      console.warn("Server cancel error:", e);
+    }
+
     setQueues((prev) =>
       prev.map((q) => (q.id === queueId ? { ...q, status: "CANCELLED" } : q))
     );
@@ -419,38 +484,46 @@ export function SalonOSWorkspace({
     toast.info(`Token #${item?.tokenNumber || queueId} has been cancelled.`);
   };
 
-  const handleAddWalkIn = (e: React.FormEvent) => {
+  const handleAddWalkIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!walkInName.trim()) {
       toast.error("Please enter the customer name.");
       return;
     }
 
-    const maxToken = queues.reduce(
-      (max, q) => Math.max(max, q.tokenNumber),
-      100
-    );
-    const nextToken = maxToken + 1;
-    const position = waitingCustomers.length + 1;
-    const waitTime = position * 12;
+    try {
+      const res = await joinQueueAtomic({
+        salonId: 1,
+        customerName: walkInName.trim(),
+        customerPhone: walkInPhone.trim() || undefined,
+        serviceName: walkInService,
+        joinType: "walk_in",
+      });
 
-    const newQueueItem: QueueItem = {
-      id: Date.now(),
-      tokenNumber: nextToken,
-      customerName: walkInName.trim(),
-      phone: walkInPhone.trim() || undefined,
-      serviceName: walkInService,
-      position,
-      waitTime,
-      status: "WAITING",
-      createdAt: new Date().toISOString(),
-    };
+      const nextToken = res.tokenNumber || (queues.length + 101);
+      const position = waitingCustomers.length + 1;
+      const waitTime = position * 12;
 
-    setQueues([...queues, newQueueItem]);
-    setWalkInName("");
-    setWalkInPhone("");
-    setShowWalkInModal(false);
-    toast.success(`Walk in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
+      const newQueueItem: QueueItem = {
+        id: res.queue?.id || Date.now(),
+        tokenNumber: nextToken,
+        customerName: walkInName.trim(),
+        phone: walkInPhone.trim() || undefined,
+        serviceName: walkInService,
+        position,
+        waitTime,
+        status: "WAITING",
+        createdAt: new Date().toISOString(),
+      };
+
+      setQueues([...queues, newQueueItem]);
+      setWalkInName("");
+      setWalkInPhone("");
+      setShowWalkInModal(false);
+      toast.success(`Walk in added: Token #${nextToken} issued for ${newQueueItem.customerName}!`);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to add walk in.");
+    }
   };
 
   const handleAddService = (e: React.FormEvent) => {
