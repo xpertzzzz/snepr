@@ -61,6 +61,11 @@ A full audit and synchronization of the Snepr codebase, database, queue engine, 
 | **Subscriptions** | Plan Entitlement Matrix (Entry, Intermediate, Pro) | Sec 11, 11A | **Completed and tested** | Enforces Entry (no customer ETA), Intermediate (live ETA, 3 AI attempts), Pro (unlimited AI). |
 | **Reviews & Points** | Verified Review Submission | Sec 10 | **Completed and tested** | Review modal writes directly to Supabase `reviews` table and awards +15 points. |
 | **Reviews & Points** | Snepr Points Ledger (`/points`, `/dashboard`) | Sec 10 | **Completed and tested** | Real-time points balance read directly from `snepr_points_ledger`. |
+| **Mobile App (PWA & Android)** | Capacitor 8 Native Android Wrapper | Sec 2.2, 5.2 | **Completed and tested** | `capacitor.config.ts` configured for `dist` with `androidScheme: 'https'`; assets synchronized. |
+| **Mobile App (PWA & Android)** | Geolocation & Distance Calculation | Sec 5.2, 14 | **Completed and tested** | Haversine formula using `@capacitor/geolocation` with web fallback to compute live distance. |
+| **Mobile App (PWA & Android)** | Sticky Active Queue Banner | Sec 5.2 | **Completed and tested** | Displays active token code, wait time, position, and one-tap pass launcher at top of feed. |
+| **Mobile App (PWA & Android)** | Floating Bottom Dock Navigation | Sec 5.2 | **Completed and tested** | `DockNavbar` with Live, AI Studio, animated center Pass FAB, Points, and SalonOS tabs. |
+| **Mobile App (PWA & Android)** | PWA Manifests & Standalone Mode | Sec 2.2, 5.2 | **Completed and tested** | Updated `site.webmanifest` and `manifest.webmanifest` with `#FAF7F2` brand styling. |
 
 ---
 
@@ -73,4 +78,8 @@ A full audit and synchronization of the Snepr codebase, database, queue engine, 
   3. SalonOS Desk $\to$ Called to Station 2, updated queue status to `called`.
   4. Customer Mobile Pass $\to$ Synced in real-time to Stage 3 (`called`), Chair 02.
   5. SalonOS / Staff Desk $\to$ Completed service, freed Chair 2, credited user loyalty points.
-- **Production Build:** `npm run build` completed cleanly in 728ms with zero errors.
+- **Mobile App Synchronization:**
+  - `webDir` in `capacitor.config.ts` aligned to `dist`.
+  - Added Capacitor CLI scripts (`cap:sync`, `cap:build`, `cap:open`).
+  - Ran `npx cap sync android` — web assets, plugins, and configs synced cleanly into `android/app/src/main/assets/public`.
+- **Production Build:** `npm run build` completed cleanly in 716ms with zero errors.

@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { DockNavbar } from "@/components/layout/DockNavbar";
 
 export const Route = createFileRoute("/live/queue")({
   head: () => ({
@@ -342,6 +343,11 @@ export function AppQueue() {
       </main>
 
       <Footer />
+      {/* Curved Mobile Dock Navbar */}
+      <div className="h-20 sm:hidden" />
+      <div className="sm:hidden">
+        <DockNavbar activeTab="pass" />
+      </div>
     </div>
   );
 }

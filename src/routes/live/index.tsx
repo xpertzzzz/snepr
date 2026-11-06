@@ -6,6 +6,9 @@ import { joinQueueAtomic } from "@/lib/queue-client";
 import { REAL_SALONS_DATA, BHUBANESWAR_AREAS } from "@/lib/real-salons";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { DockNavbar } from "@/components/layout/DockNavbar";
+import { getCurrentCoordinates, getDistanceToSalon, UserCoordinates } from "@/lib/geolocation";
+import { fetchUserPoints } from "@/lib/supabase";
 import { toast } from "sonner";
 import {
   Search,
@@ -23,6 +26,8 @@ import {
   RefreshCw,
   LayoutGrid,
   List,
+  Ticket,
+  Award,
 } from "lucide-react";
 import "@/styles/live-page.css";
 
@@ -90,6 +95,34 @@ export function LivePageStrict() {
   const [search, setSearch] = useState<string>("");
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
+  const [userCoords, setUserCoords] = useState<UserCoordinates | null>(null);
+  const [userPoints, setUserPoints] = useState<number>(150);
+  const [activePass, setActivePass] = useState<any>(null);
+
+  // Load geolocation, active pass, and points balance
+  useEffect(() => {
+    getCurrentCoordinates().then(setUserCoords).catch(() => {});
+
+    try {
+      const stored = localStorage.getItem("snepr_active_queue");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.status !== "completed" && parsed.status !== "cancelled") {
+          setActivePass(parsed);
+        }
+      }
+    } catch {}
+
+    try {
+      const sessionStr = localStorage.getItem("snepr_session");
+      if (sessionStr) {
+        const u = JSON.parse(sessionStr);
+        if (u.id) {
+          fetchUserPoints(u.id).then((p) => setUserPoints(p.balance)).catch(() => {});
+        }
+      }
+    } catch {}
+  }, []);
 
   // Query backend database with polling fallback every 8 seconds
   const { data: salonsList, dataUpdatedAt, isFetching } = useQuery({
@@ -221,6 +254,60 @@ export function LivePageStrict() {
       <Navbar />
 
       <main className="flex-1 pt-28 sm:pt-32 pb-24 max-w-[1300px] mx-auto px-4 sm:px-6 w-full">
+        {/* ─── MOBILE GPS LOCATION & POINTS HEADER (SECTION 5.2) ─── */}
+        <div className="flex items-center justify-between gap-2 mb-4 p-3 rounded-2xl bg-white border border-[#eee4d8] shadow-xs">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#1d1b17] truncate">
+            <span className="w-2 h-2 rounded-full bg-[#267447] animate-pulse shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-[#80543a] shrink-0" />
+            <span className="truncate">
+              {userCoords && !userCoords.isDefault ? "Live GPS Location" : "Patia, Bhubaneswar"}
+            </span>
+          </div>
+
+          <Link
+            to="/live/activity"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FAF7F2] border border-[#eee4d8] text-[#80543a] text-xs font-extrabold shrink-0 hover:bg-[#eee4d8] transition-colors"
+          >
+            <Award className="w-3.5 h-3.5 text-[#C8993E]" />
+            <span>{userPoints} pts</span>
+          </Link>
+        </div>
+
+        {/* ─── STICKY ACTIVE TOKEN PASS BANNER (SECTION 5.2) ─── */}
+        {activePass && (
+          <div className="mb-6 p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-[#2B1A0F] to-[#452B19] text-white shadow-md border border-[#80543a]/30 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-[#FAF7F2]/10 border border-[#FAF7F2]/20 flex flex-col items-center justify-center shrink-0">
+                <span className="text-[9px] uppercase tracking-wider text-[#D4A373] font-bold">Pass</span>
+                <span className="text-base font-black font-serif text-white">
+                  {activePass.tokenCode || `#${activePass.tokenNumber}`}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-white truncate">
+                    {activePass.salonName || "Snepr Partner Salon"}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                    Position #{activePass.position || 1}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#A69F96] truncate mt-0.5">
+                  ~{activePass.waitTimeMins || 12}m wait · {activePass.serviceName || "Haircut & Style"}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              to={`/queue/${(activePass.tokenCode || `#${activePass.tokenNumber}`).replace("#", "")}`}
+              className="px-4 py-2 bg-[#C8993E] hover:bg-[#B5852C] text-[#1B1410] font-extrabold text-xs rounded-xl shadow-sm transition-all shrink-0 flex items-center gap-1.5"
+            >
+              <Ticket className="w-3.5 h-3.5 rotate-45" />
+              <span>Track Pass ↗</span>
+            </Link>
+          </div>
+        )}
+
         {/* ─── HERO HEADER & LIVE STATUS ─── */}
         <div className="bg-white border border-[#eee4d8] rounded-3xl p-6 sm:p-10 shadow-sm mb-8">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -503,9 +590,14 @@ export function LivePageStrict() {
                       >
                         {s.name}
                       </Link>
-                      <p className="text-xs text-[#6b5e52] mt-1 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-[#80543a] shrink-0" />
-                        <span className="truncate">{s.areaName} · {s.address}</span>
+                      <p className="text-xs text-[#6b5e52] mt-1 flex items-center justify-between">
+                        <span className="flex items-center gap-1 truncate">
+                          <MapPin className="w-3.5 h-3.5 text-[#80543a] shrink-0" />
+                          <span className="truncate">{s.areaName} · {s.address}</span>
+                        </span>
+                        <span className="text-[11px] font-bold text-[#80543a] shrink-0 ml-2">
+                          📍 {getDistanceToSalon(userCoords, s.lat, s.lng)}
+                        </span>
                       </p>
                     </div>
 
@@ -569,6 +661,12 @@ export function LivePageStrict() {
       </main>
 
       <Footer />
+
+      {/* Curved Mobile Dock Navbar */}
+      <div className="h-20 sm:hidden" />
+      <div className="sm:hidden">
+        <DockNavbar activeTab="explore" />
+      </div>
     </div>
   );
 }

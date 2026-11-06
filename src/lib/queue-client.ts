@@ -168,3 +168,4 @@ export async function fetchSalonLiveQueues(salonId: number) {
     `queues?salon_id=eq.${salonId}&status=in.(waiting,called,in_service)&order=id.asc`
   );
 }
+

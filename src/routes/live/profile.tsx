@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { SneprWordmark } from "@/components/SneprWordmark";
-import { LiquidBottomNav } from "@/components/navigation/LiquidBottomNav";
+import { DockNavbar } from "@/components/layout/DockNavbar";
 import {
   User, Store, ShieldCheck, Ticket, Award, Settings,
   LogOut, ChevronRight, PlusCircle, Building2, Clock, CheckCircle2, AlertCircle, Scissors
@@ -312,23 +312,9 @@ export function ProfilePageUnified() {
         )}
       </main>
 
-      {/* ─── LIQUID BOTTOM NAVIGATION ─── */}
+      {/* ─── MOBILE BOTTOM DOCK ─── */}
       <div className="h-20" />
-      <LiquidBottomNav
-        tabs={[
-          { id: "explore", label: "Live Queues", icon: "◷" },
-          { id: "queue", label: "My Queue", icon: "▱" },
-          { id: "studio", label: "AI Studio", icon: "✧" },
-          { id: "profile", label: "Profile", icon: "♙" },
-        ]}
-        activeTab="profile"
-        onTabChange={(tabId) => {
-          if (tabId === "explore") navigate({ to: "/live" });
-          if (tabId === "queue") navigate({ to: "/live/queue" });
-          if (tabId === "studio") navigate({ to: "/live/studio" });
-          if (tabId === "profile") navigate({ to: "/profile" });
-        }}
-      />
+      <DockNavbar activeTab="points" />
     </div>
   );
 }

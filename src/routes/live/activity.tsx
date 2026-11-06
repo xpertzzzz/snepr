@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUserPoints } from "../../backend/functions/points";
-import { submitVerifiedReview } from "../../backend/functions/reviews";
+import { fetchUserPoints, submitVerifiedReviewDirect } from "@/lib/supabase";
 import {
   Sparkles, Award, Star, Clock, CheckCircle2, ChevronLeft, MapPin,
   MessageSquare, ArrowRight, X, ShieldCheck
@@ -41,21 +40,19 @@ function AppActivity() {
 
   const { data: pointsData, isLoading: loadingPoints } = useQuery({
     queryKey: ["user-points", userId],
-    queryFn: () => getUserPoints({ data: { userId } }),
+    queryFn: () => fetchUserPoints(userId),
   });
 
   const reviewMutation = useMutation({
     mutationFn: () =>
-      submitVerifiedReview({
-        data: {
-          customerId: userId,
-          salonId: reviewModalVisit?.salonId || 1,
-          queueId: reviewModalVisit?.queueId || 101,
-          rating: reviewRating,
-          comment: reviewComment,
-        },
+      submitVerifiedReviewDirect({
+        customerId: userId,
+        salonId: reviewModalVisit?.salonId || 1,
+        queueId: reviewModalVisit?.queueId || 101,
+        rating: reviewRating,
+        comment: reviewComment,
       }),
-    onSuccess: (res) => {
+    onSuccess: () => {
       toast.success("Verified review submitted! Earned +10 Snepr Points");
       queryClient.invalidateQueries({ queryKey: ["user-points"] });
       setReviewModalVisit(null);

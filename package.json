@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "mobile-api": "tsx src/backend/mobile-api.ts"
+    "mobile-api": "tsx src/backend/mobile-api.ts",
+    "cap:sync": "cap sync android",
+    "cap:build": "vite build && cap sync android",
+    "cap:open": "cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

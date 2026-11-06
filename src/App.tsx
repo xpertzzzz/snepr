@@ -121,6 +121,7 @@ export function App() {
           <Route path="/saved-salons" element={<CustomerDashboardPage />} />
 
           {/* Mobile Continuity Redirect */}
+          <Route path="/app" element={<Navigate to="/live" replace />} />
           <Route path="/app/*" element={<Navigate to="/live" replace />} />
 
           {/* ─── 5. PARTNER REGISTRATION & ONBOARDING ─── */}
