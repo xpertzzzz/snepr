@@ -9,7 +9,7 @@ import {
 
 export const Route = createFileRoute("/salons")({
   head: () => ({
-    title: "For Salons — SalonOS | Snepr",
+    title: "For Salons | SalonOS | Snepr",
     meta: [
       {
         name: "description",
