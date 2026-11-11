@@ -441,10 +441,11 @@ export function LoginPageSplit() {
       {/* ─── LEFT PANEL: BRAND & PHOTOGRAPHY ─── */}
       <div className="relative hidden md:flex md:w-1/2 lg:w-5/12 bg-[#1B1410] flex-col justify-between p-10 lg:p-14 overflow-hidden select-none">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity filter saturate-50"
+          className="absolute inset-0 bg-cover bg-center opacity-25 pointer-events-none"
           style={{
             backgroundImage:
-              "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1400&q=80')",
+              "url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=75')",
+            transform: "translateZ(0)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1B1410] via-[#1B1410]/70 to-transparent" />
@@ -581,7 +582,7 @@ export function LoginPageSplit() {
 
           {/* Method Selector Tabs: Password vs OTP */}
           {mode === "signin" && (
-            <div className="flex rounded-xl bg-[#EFE9DF] p-1 mb-5">
+            <div className="flex rounded-xl bg-[#EFE9DF] p-1 mb-4">
               <button
                 type="button"
                 onClick={() => { setAuthMethod("password"); setErrorMsg(""); }}
@@ -606,6 +607,64 @@ export function LoginPageSplit() {
                 <Mail className="w-3.5 h-3.5" />
                 <span>Email OTP</span>
               </button>
+            </div>
+          )}
+
+          {/* Quick Fill Sample Role Credentials */}
+          {mode === "signin" && authMethod === "password" && (
+            <div className="mb-4 p-2.5 rounded-xl bg-[#F5EEE7] border border-[#E9E1D7]">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] uppercase font-bold text-[#7A4B29] tracking-wider">
+                  Test Credentials (Click to Fill)
+                </span>
+                <span className="text-[9px] text-[#9B8B7E]">Pw: Password@123</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("customer@snepr.com");
+                    setPassword("Password@123");
+                    setErrorMsg("");
+                  }}
+                  className="py-1 px-1.5 rounded-lg bg-white text-[11px] font-bold text-[#1B1410] border border-[#E9E1D7] hover:border-[#7A4B29] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-center"
+                >
+                  Customer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("staff@snepr.com");
+                    setPassword("Password@123");
+                    setErrorMsg("");
+                  }}
+                  className="py-1 px-1.5 rounded-lg bg-white text-[11px] font-bold text-[#1B1410] border border-[#E9E1D7] hover:border-[#7A4B29] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-center"
+                >
+                  Staff
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("owner@snepr.com");
+                    setPassword("Password@123");
+                    setErrorMsg("");
+                  }}
+                  className="py-1 px-1.5 rounded-lg bg-white text-[11px] font-bold text-[#1B1410] border border-[#E9E1D7] hover:border-[#7A4B29] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-center"
+                >
+                  Owner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail("admin@snepr.com");
+                    setPassword("Password@123");
+                    setErrorMsg("");
+                  }}
+                  className="py-1 px-1.5 rounded-lg bg-white text-[11px] font-bold text-[#7A4B29] border border-[#C8993E] hover:bg-[#FAF7F2] transition-colors cursor-pointer text-center"
+                >
+                  Admin
+                </button>
+              </div>
             </div>
           )}
 

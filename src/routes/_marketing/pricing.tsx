@@ -174,15 +174,15 @@ export function SneprPricingPage() {
 
               {/* Intermediate Plan (Most popular) */}
               <article className="plan popular">
-                <div className="plan-tag">Most popular | Up to 3 chairs</div>
-                <h3>Intermediate</h3>
-                <p style={{ fontSize: "14px", color: "#4a3e35", lineHeight: "1.6" }}>
+                <div className="plan-tag" style={{ color: "#e8b896", fontWeight: 800 }}>Most popular | Up to 3 chairs</div>
+                <h3 style={{ color: "#ffffff" }}>Intermediate</h3>
+                <p style={{ fontSize: "14px", color: "#e8dfd5", lineHeight: "1.6" }}>
                   For growing neighbourhood salons in Bhubaneswar.
                 </p>
-                <div className="plan-price" style={{ fontSize: "38px" }}>
-                  ₹400 <small style={{ fontSize: "14px" }}>/ month</small>
+                <div className="plan-price" style={{ fontSize: "38px", color: "#ffffff" }}>
+                  ₹400 <small style={{ fontSize: "14px", color: "#d0c8be" }}>/ month</small>
                 </div>
-                <ul style={{ fontSize: "14px", lineHeight: "1.8", color: "#2b211a" }}>
+                <ul style={{ fontSize: "14px", lineHeight: "1.8", color: "#f5eee6" }}>
                   <li>Everything in Base plan</li>
                   <li>Multiple staff and barber logins</li>
                   <li>Multi barber queue routing</li>
@@ -194,6 +194,7 @@ export function SneprPricingPage() {
                 </ul>
                 <button
                   className="btn fill"
+                  style={{ backgroundColor: "#c8993e", color: "#1B1410", borderColor: "#c8993e", fontWeight: 700 }}
                   onClick={() => notify("Intermediate plan selected. Redirecting to partner registration...")}
                 >
                   Choose Intermediate ↗
@@ -234,18 +235,18 @@ export function SneprPricingPage() {
 
             {/* ─── SALON ECONOMICS CALCULATOR ─── */}
             <div className="calc" id="calc" style={{ marginTop: "60px" }}>
-              <div className="eyebrow" style={{ color: "#d4a17b", fontWeight: 700 }}>
+              <div className="eyebrow" style={{ color: "#80543a", fontWeight: 800 }}>
                 Interactive ROI Calculator
               </div>
-              <h3>Salon economics</h3>
+              <h3 style={{ color: "#1d1b17" }}>Salon economics</h3>
               <p style={{ fontSize: "16px", color: "#4a3e35" }}>
                 Compare what 15 to 25 percent aggregator commission platforms cost you versus flat Snepr SalonOS.
               </p>
 
               <div className="calc-grid">
                 <div className="field">
-                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
-                    Average daily customers <b id="custVal">{customers}</b>
+                  <label style={{ fontSize: "14px", fontWeight: 700, color: "#211812" }}>
+                    Average daily customers <b id="custVal" style={{ color: "#80543a" }}>{customers}</b>
                   </label>
                   <input
                     id="customers"
@@ -258,8 +259,8 @@ export function SneprPricingPage() {
                   />
                 </div>
                 <div className="field">
-                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
-                    Average service ticket <b id="ticketVal">{money(ticket)}</b>
+                  <label style={{ fontSize: "14px", fontWeight: 700, color: "#211812" }}>
+                    Average service ticket <b id="ticketVal" style={{ color: "#80543a" }}>{money(ticket)}</b>
                   </label>
                   <input
                     id="ticket"
@@ -273,8 +274,8 @@ export function SneprPricingPage() {
                   />
                 </div>
                 <div className="field">
-                  <label style={{ fontSize: "14px", fontWeight: 700 }}>
-                    Working days per month <b id="daysVal">{days}</b>
+                  <label style={{ fontSize: "14px", fontWeight: 700, color: "#211812" }}>
+                    Working days per month <b id="daysVal" style={{ color: "#80543a" }}>{days}</b>
                   </label>
                   <input
                     id="days"
@@ -289,8 +290,8 @@ export function SneprPricingPage() {
               </div>
 
               <div className="field" style={{ marginTop: "24px" }}>
-                <label style={{ fontSize: "14px", fontWeight: 700 }}>
-                  Comparison commission rate <b id="rateVal">{rate}%</b>
+                <label style={{ fontSize: "14px", fontWeight: 700, color: "#211812" }}>
+                  Comparison commission rate <b id="rateVal" style={{ color: "#80543a" }}>{rate}%</b>
                 </label>
                 <input
                   id="rate"
@@ -303,20 +304,20 @@ export function SneprPricingPage() {
                 />
               </div>
 
-              <div className="result">
+              <div className="result" style={{ background: "#1c1917", color: "#ffffff", padding: "24px", borderRadius: "20px" }}>
                 <div>
-                  <small style={{ fontSize: "12px" }}>Estimated monthly revenue</small>
-                  <strong id="revenue" style={{ fontSize: "26px" }}>{money(revenue)}</strong>
+                  <small style={{ fontSize: "12px", color: "#d0c8be", fontWeight: 700 }}>Estimated monthly revenue</small>
+                  <strong id="revenue" style={{ fontSize: "28px", color: "#ffffff" }}>{money(revenue)}</strong>
                 </div>
                 <div>
-                  <small style={{ fontSize: "12px" }}>Modelled commission loss</small>
-                  <strong id="commission" style={{ fontSize: "26px", color: "#b95d52" }}>
+                  <small style={{ fontSize: "12px", color: "#fca5a5", fontWeight: 700 }}>Modelled commission loss</small>
+                  <strong id="commission" style={{ fontSize: "28px", color: "#f87171" }}>
                     {money(commission)}
                   </strong>
                 </div>
                 <div>
-                  <small style={{ fontSize: "12px" }}>Modelled difference retained</small>
-                  <strong id="saving" style={{ fontSize: "26px", color: "#4c805e" }}>
+                  <small style={{ fontSize: "12px", color: "#86efac", fontWeight: 700 }}>Modelled difference retained</small>
+                  <strong id="saving" style={{ fontSize: "28px", color: "#4ade80" }}>
                     {money(saving)}
                   </strong>
                 </div>

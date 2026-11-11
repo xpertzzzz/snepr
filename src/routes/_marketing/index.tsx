@@ -914,7 +914,7 @@ export function SneprLandingPage() {
                           <img src="/snepr-logo-square-transparent.png" alt="SalonOS" style={{ width: "24px", height: "24px" }} />
                           <div>
                             <div style={{ fontSize: "14px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>SalonOS Desk</div>
-                            <small style={{ fontSize: "10px", color: "#aaa" }}>{selectedSalon.name} | Saheed Nagar</small>
+                            <small style={{ fontSize: "10px", color: "#d5cdc4" }}>{selectedSalon.name} | Saheed Nagar</small>
                           </div>
                         </div>
                         <span style={{ fontSize: "10px", fontWeight: 700, padding: "3px 8px", background: "rgba(198, 154, 92, 0.2)", color: "#c69a5c", borderRadius: "99px" }}>
@@ -931,7 +931,7 @@ export function SneprLandingPage() {
                               <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 01</span>
                               <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                             </div>
-                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Rahul Sharma serving #S104</div>
+                            <div style={{ fontSize: "11px", color: "#e5ded5", marginTop: "2px" }}>Rahul Sharma serving #S104</div>
                           </div>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>14m in</span>
                         </div>
@@ -945,7 +945,7 @@ export function SneprLandingPage() {
                                 {deskChair2Status === "ready" ? "● Ready for Next Customer" : "● SERVING"}
                               </span>
                             </div>
-                            <div style={{ fontSize: "11px", color: "#ddd", marginTop: "2px" }}>{deskChair2Client}</div>
+                            <div style={{ fontSize: "11px", color: "#ffffff", marginTop: "2px" }}>{deskChair2Client}</div>
                           </div>
                           <button
                             style={{ background: "#c69a5c", color: "#191715", border: "none", padding: "5px 10px", borderRadius: "8px", fontSize: "10px", fontWeight: 800, cursor: "pointer" }}
@@ -962,7 +962,7 @@ export function SneprLandingPage() {
                               <span style={{ fontSize: "12px", fontWeight: 800, color: "#fff" }}>Chair 03</span>
                               <span style={{ fontSize: "9px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                             </div>
-                            <div style={{ fontSize: "11px", color: "#bbb", marginTop: "2px" }}>Amit Swain serving #S103</div>
+                            <div style={{ fontSize: "11px", color: "#e5ded5", marginTop: "2px" }}>Amit Swain serving #S103</div>
                           </div>
                           <span style={{ fontSize: "11px", fontWeight: 700, color: "#c69a5c" }}>8m in</span>
                         </div>
@@ -970,17 +970,17 @@ export function SneprLandingPage() {
 
                       {/* Live Queue Next Customers */}
                       <div style={{ marginTop: "14px" }}>
-                        <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#888", textTransform: "uppercase", marginBottom: "6px" }}>
+                        <div style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.1em", color: "#d5cdc4", textTransform: "uppercase", marginBottom: "6px" }}>
                           Queue Stream
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.03)", borderRadius: "8px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "#f5eee6" }}>
                             <span>#{deskNextToken} · Next in line</span>
                             <span style={{ color: "#c69a5c", fontWeight: 700 }}>Ready</span>
                           </div>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.03)", borderRadius: "8px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", padding: "6px 8px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", color: "#f5eee6" }}>
                             <span>#A09 · Rohan Dash</span>
-                            <span style={{ color: "#aaa" }}>8 min wait</span>
+                            <span style={{ color: "#d5cdc4" }}>8 min wait</span>
                           </div>
                         </div>
                       </div>
@@ -988,11 +988,11 @@ export function SneprLandingPage() {
                       {/* Desk Daily Summary Footer */}
                       <div style={{ marginTop: "auto", paddingTop: "12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
                         <div>
-                          <small style={{ fontSize: "9px", color: "#888" }}>Served Today</small>
+                          <small style={{ fontSize: "10px", color: "#c5bbb0", fontWeight: 600 }}>Served Today</small>
                           <div style={{ fontSize: "13px", fontWeight: 800, color: "#fff" }}>{deskServedCount} clients</div>
                         </div>
                         <div>
-                          <small style={{ fontSize: "9px", color: "#888" }}>Stylists Active</small>
+                          <small style={{ fontSize: "10px", color: "#c5bbb0", fontWeight: 600 }}>Stylists Active</small>
                           <div style={{ fontSize: "13px", fontWeight: 800, color: "#d4a17b" }}>3 Barbers</div>
                         </div>
                       </div>
@@ -1170,7 +1170,7 @@ export function SneprLandingPage() {
                     <span style={{ fontSize: "11px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                   </div>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#e8dfd5" }}>Stylist: Rahul Sharma</div>
-                  <div style={{ fontSize: "12px", color: "#aaa", marginTop: "4px" }}>Client: #S104 (Fade and Beard)</div>
+                  <div style={{ fontSize: "12px", color: "#d5cdc4", marginTop: "4px" }}>Client: #S104 (Fade and Beard)</div>
                   <div style={{ fontSize: "11px", color: "#d4a17b", fontWeight: 700, marginTop: "8px" }}>14 min elapsed | 11 min left</div>
                 </div>
 
@@ -1180,7 +1180,7 @@ export function SneprLandingPage() {
                     <span style={{ fontSize: "11px", color: "#c69a5c", fontWeight: 700 }}>● Ready for Next Customer</span>
                   </div>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#fff" }}>Stylist: Prakash Jena</div>
-                  <div style={{ fontSize: "12px", color: "#ddd", marginTop: "4px" }}>Available for next client</div>
+                  <div style={{ fontSize: "12px", color: "#f5eee6", marginTop: "4px" }}>Available for next client</div>
                   <button
                     className="btn fill"
                     style={{ width: "100%", marginTop: "10px", padding: "8px", fontSize: "11px" }}
@@ -1196,7 +1196,7 @@ export function SneprLandingPage() {
                     <span style={{ fontSize: "11px", color: "#4c805e", fontWeight: 700 }}>● SERVING</span>
                   </div>
                   <div style={{ fontSize: "13px", fontWeight: 600, color: "#e8dfd5" }}>Stylist: Amit Swain</div>
-                  <div style={{ fontSize: "12px", color: "#aaa", marginTop: "4px" }}>Client: #S103 (Hair Spa)</div>
+                  <div style={{ fontSize: "12px", color: "#d5cdc4", marginTop: "4px" }}>Client: #S103 (Hair Spa)</div>
                   <div style={{ fontSize: "11px", color: "#d4a17b", fontWeight: 700, marginTop: "8px" }}>8 min elapsed | 17 min left</div>
                 </div>
               </div>
@@ -1204,15 +1204,15 @@ export function SneprLandingPage() {
               {/* Desk Key Performance Metrics */}
               <div className="metrics" style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "18px" }}>
                 <div className="metric">
-                  <small style={{ fontSize: "11px", color: "#aaa" }}>Active Stylists</small>
+                  <small style={{ fontSize: "11px", color: "#c5bbb0", fontWeight: 600 }}>Active Stylists</small>
                   <strong style={{ fontSize: "22px", color: "#fff" }}>3</strong>
                 </div>
                 <div className="metric">
-                  <small style={{ fontSize: "11px", color: "#aaa" }}>Waiting in Queue</small>
+                  <small style={{ fontSize: "11px", color: "#c5bbb0", fontWeight: 600 }}>Waiting in Queue</small>
                   <strong style={{ fontSize: "22px", color: "#d4a17b" }}>3</strong>
                 </div>
                 <div className="metric">
-                  <small style={{ fontSize: "11px", color: "#aaa" }}>Completed Today</small>
+                  <small style={{ fontSize: "11px", color: "#c5bbb0", fontWeight: 600 }}>Completed Today</small>
                   <strong style={{ fontSize: "22px", color: "#4c805e" }}>28 clients</strong>
                 </div>
               </div>
