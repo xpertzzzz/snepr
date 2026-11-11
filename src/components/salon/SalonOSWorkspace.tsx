@@ -27,6 +27,7 @@ import {
   Shield,
   Layers,
   Crown,
+  Menu,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -665,19 +666,8 @@ export function SalonOSWorkspace({
       </header>
 
       {/* ─── WORKSPACE LAYOUT (SIDEBAR ON DESKTOP, MAIN AREA) ─── */}
-      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row">
-        {/* DESKTOP PERSISTENT COLLAPSIBLE SIDEBAR */}
-        <div className="hidden md:block">
-          <DashboardSidebar
-            role="owner"
-            activeId={activeTab === "profile" ? "settings" : activeTab === "chairs" ? "staff" : activeTab}
-            onSelect={(id) => setActiveTab(id as SalonOSTab)}
-            salonName={salonName}
-            currentPlan={currentPlan}
-          />
-        </div>
-
-        {/* MOBILE DRAWER SIDEBAR */}
+      <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col lg:flex-row">
+        {/* SIDEBAR (HANDLES BOTH DESKTOP PERSISTENT & MOBILE DRAWER) */}
         <DashboardSidebar
           role="owner"
           activeId={activeTab === "profile" ? "settings" : activeTab === "chairs" ? "staff" : activeTab}

@@ -748,19 +748,8 @@ export function AdminConsole() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col md:flex-row">
-      {/* ─── DESKTOP PERSISTENT COLLAPSIBLE SIDEBAR ─── */}
-      <div className="hidden md:block">
-        <DashboardSidebar
-          role="admin"
-          activeId={activeTab}
-          onSelect={(id) => setActiveTab(id as AdminTab)}
-          salonName="Snepr Platform Admin"
-          currentPlan="pro"
-        />
-      </div>
-
-      {/* ─── MOBILE DRAWER SIDEBAR ─── */}
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1B1410] flex flex-col lg:flex-row">
+      {/* ─── SIDEBAR (HANDLES BOTH DESKTOP PERSISTENT & MOBILE DRAWER) ─── */}
       <DashboardSidebar
         role="admin"
         activeId={activeTab}

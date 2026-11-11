@@ -395,3 +395,62 @@ export const emailOtps = pgTable("email_otps", {
   isVerified: boolean("is_verified").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+// ─── Customer AI Grooming Wallets & Ledger ──────────────────────────────────
+export const customerWallets = pgTable("customer_wallets", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull().unique(),
+  balanceTokens: integer("balance_tokens").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const customerTokenTransactions = pgTable("customer_token_transactions", {
+  id: serial("id").primaryKey(),
+  walletId: integer("wallet_id").references(() => customerWallets.id).notNull(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  amountTokens: integer("amount_tokens").notNull(), // +11000, -1000, etc.
+  type: text("type").notNull(), // purchase | reservation | capture | release | refund
+  status: text("status").default("completed").notNull(), // pending | completed | failed
+  referenceId: text("reference_id"),
+  costPaise: integer("cost_paise").default(0).notNull(), // 1700 for ₹17
+  razorpayOrderId: text("razorpay_order_id"),
+  razorpayPaymentId: text("razorpay_payment_id"),
+  metadata: json("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ─── AI Studio Generation Telemetry ──────────────────────────────────────────
+export const aiGenerationJobs = pgTable("ai_generation_jobs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  salonId: integer("salon_id").references(() => salons.id),
+  payerType: text("payer_type").notNull(), // customer | salon
+  tier: text("tier").notNull(), // base | intermediate | pro
+  styleType: text("style_type").notNull(), // hairstyle | haircut | beard | tattoo | piercing
+  status: text("status").default("pending").notNull(), // pending | processing | completed | failed
+  tokensUsed: integer("tokens_used").default(0).notNull(),
+  estimatedApiCostPaise: integer("estimated_api_cost_paise").default(0).notNull(),
+  providerModel: text("provider_model").default("gemini-1.5-flash").notNull(),
+  inputImageUrl: text("input_image_url"),
+  outputImageUrl: text("output_image_url"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  completedAt: timestamp("completed_at"),
+});
+
+// ─── Platform Immutable Audit Trail ──────────────────────────────────────────
+export const platformAuditLogs = pgTable("platform_audit_logs", {
+  id: serial("id").primaryKey(),
+  actorUserId: integer("actor_id").references(() => users.id),
+  actorEmail: text("actor_email").notNull(),
+  action: text("action").notNull(),
+  targetType: text("target_type").notNull(), // salon | customer | subscription | wallet | platform
+  targetId: text("target_id").notNull(),
+  previousState: json("previous_state"),
+  newState: json("new_state"),
+  ipAddress: text("ip_address"),
+  details: text("details"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+

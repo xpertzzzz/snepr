@@ -302,3 +302,71 @@ model PointTransaction {
   @@map("point_transactions")
 }
 
+model CustomerWallet {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  balanceTokens Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions CustomerTokenTransaction[]
+
+  @@map("customer_wallets")
+}
+
+model CustomerTokenTransaction {
+  id                String   @id @default(uuid())
+  walletId          String
+  userId            String
+  amountTokens      Int
+  type              String // "PURCHASE", "RESERVATION", "CAPTURE", "RELEASE", "REFUND"
+  status            String   @default("COMPLETED")
+  referenceId       String?
+  costPaise         Int      @default(0)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  metadata          Json?
+  createdAt         DateTime @default(now())
+
+  wallet CustomerWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@map("customer_token_transactions")
+}
+
+model AiGenerationJob {
+  id                    String    @id @default(uuid())
+  userId                String
+  salonId               String?
+  payerType             String // "CUSTOMER" or "SALON"
+  tier                  String // "BASE", "INTERMEDIATE", "PRO"
+  styleType             String // "HAIRSTYLE", "BEARD", "TATTOO", etc.
+  status                String    @default("PENDING")
+  tokensUsed            Int       @default(0)
+  estimatedApiCostPaise Int       @default(0)
+  providerModel         String    @default("gemini-1.5-flash")
+  inputImageUrl         String?
+  outputImageUrl        String?
+  errorMessage          String?
+  createdAt             DateTime  @default(now())
+  completedAt           DateTime?
+
+  @@map("ai_generation_jobs")
+}
+
+model PlatformAuditLog {
+  id            String   @id @default(uuid())
+  actorUserId   String?
+  actorEmail    String
+  action        String
+  targetType    String // "salon", "customer", "subscription", "wallet", "platform"
+  targetId      String
+  previousState Json?
+  newState      Json?
+  ipAddress     String?
+  details       String?
+  createdAt     DateTime @default(now())
+
+  @@map("platform_audit_logs")
+}
+
+

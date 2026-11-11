@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Sparkles, Search, Filter, Scissors, Clock, MapPin, Zap, ChevronLeft,
-  ShieldCheck, ArrowRight, Heart, Share2, AlertCircle, X, Camera, Eye
+  ShieldCheck, ArrowRight, Heart, Share2, AlertCircle, X, Camera, Eye, Coins, CheckCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -33,6 +33,24 @@ function AIStudioPage() {
   // Photo assisted try-on modal state
   const [tryonModalLook, setTryonModalLook] = useState<StudioHairstyle | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
+  const [payerType, setPayerType] = useState<"customer" | "salon">("customer");
+  const [tokenBalance, setTokenBalance] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem("snepr_token_balance");
+      return stored ? parseInt(stored, 10) : 11000;
+    } catch {
+      return 11000;
+    }
+  });
+
+  const handleBuyTokens = () => {
+    const updated = tokenBalance + 11000;
+    setTokenBalance(updated);
+    try {
+      localStorage.setItem("snepr_token_balance", String(updated));
+    } catch {}
+    toast.success("Added 11,000 Grooming Tokens (₹17 Pack)! New balance: " + updated.toLocaleString() + " tokens.");
+  };
 
   const { data: catalogue, isLoading } = useQuery({
     queryKey: ["studio-catalogue", selectedGender, selectedLength, selectedCategory, searchQuery],
@@ -401,21 +419,102 @@ function AIStudioPage() {
               <p className="text-[10px] text-ink-soft">JPEG or PNG, good lighting, neutral expression</p>
             </div>
 
-            <div className="flex items-center justify-between px-1 py-1 text-[11px] text-ink-soft">
-              <span>Monthly Allocation:</span>
-              <span className="font-bold text-primary">3 of 3 attempts remaining</span>
+            {/* Payer Selection & Token Wallet (Separation Guarantee) */}
+            <div className="p-3 bg-surface-2 border border-border rounded-xl space-y-2.5">
+              <div className="flex items-center justify-between text-ink font-semibold text-[11px]">
+                <span className="flex items-center gap-1.5">
+                  <Coins className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Funding Source</span>
+                </span>
+                <span className="text-[10px] text-ink-soft">
+                  Balance: <strong className="text-amber-600">{tokenBalance.toLocaleString()} tokens</strong>
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setPayerType("customer")}
+                  className={`p-2 rounded-lg border text-left cursor-pointer transition-all ${
+                    payerType === "customer"
+                      ? "bg-amber-50/50 border-amber-500/80 text-amber-950 font-semibold"
+                      : "border-border text-ink-soft hover:bg-surface-3"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>Personal Tokens</span>
+                    {payerType === "customer" && <CheckCircle className="w-3 h-3 text-amber-600" />}
+                  </div>
+                  <div className="text-[9px] text-ink-soft mt-0.5">
+                    1,000 tokens • Pro quality
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPayerType("salon")}
+                  className={`p-2 rounded-lg border text-left cursor-pointer transition-all ${
+                    payerType === "salon"
+                      ? "bg-emerald-50/50 border-emerald-500/80 text-emerald-950 font-semibold"
+                      : "border-border text-ink-soft hover:bg-surface-3"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span>Salon Sponsored</span>
+                    {payerType === "salon" && <CheckCircle className="w-3 h-3 text-emerald-600" />}
+                  </div>
+                  <div className="text-[9px] text-ink-soft mt-0.5">
+                    Free at partner salon
+                  </div>
+                </button>
+              </div>
+
+              {payerType === "customer" && tokenBalance < 1000 && (
+                <div className="flex items-center justify-between p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px]">
+                  <span className="text-amber-800 font-medium">Insufficient tokens for preview.</span>
+                  <button
+                    type="button"
+                    onClick={handleBuyTokens}
+                    className="px-2 py-1 bg-amber-600 text-white font-bold rounded hover:bg-amber-700 cursor-pointer"
+                  >
+                    Buy ₹17 Pack (11,000 Tokens)
+                  </button>
+                </div>
+              )}
+
+              {payerType === "customer" && tokenBalance >= 1000 && (
+                <div className="flex items-center justify-between text-[10px] text-ink-soft pt-0.5">
+                  <span>Pro-quality guarantee applied.</span>
+                  <button
+                    type="button"
+                    onClick={handleBuyTokens}
+                    className="text-amber-600 font-semibold hover:underline cursor-pointer"
+                  >
+                    + Add 11,000 Tokens (₹17)
+                  </button>
+                </div>
+              )}
             </div>
 
             <button
-              disabled={!photoConsent}
+              disabled={!photoConsent || (payerType === "customer" && tokenBalance < 1000)}
               onClick={() => {
-                toast.success("AI Studio generating virtual styling preview for " + tryonModalLook.title);
+                if (payerType === "customer") {
+                  const updated = Math.max(0, tokenBalance - 1000);
+                  setTokenBalance(updated);
+                  try {
+                    localStorage.setItem("snepr_token_balance", String(updated));
+                  } catch {}
+                  toast.success("AI Studio generating virtual styling preview for " + tryonModalLook.title + " (1,000 tokens deducted).");
+                } else {
+                  toast.success("AI Studio generating salon-sponsored preview for " + tryonModalLook.title + " (0 tokens deducted).");
+                }
                 setTryonModalLook(null);
                 setPhotoConsent(false);
               }}
-              className="w-full py-3 bg-primary hover:bg-primary-hover disabled:opacity-40 text-primary-foreground font-bold rounded-xl transition-all text-xs"
+              className="w-full py-3 bg-primary hover:bg-primary-hover disabled:opacity-40 text-primary-foreground font-bold rounded-xl transition-all text-xs cursor-pointer shadow-sm"
             >
-              Generate AI Hairstyle Inspiration (1 Attempt)
+              Generate AI Hairstyle Inspiration ({payerType === "customer" ? "1,000 Tokens • Pro Quality" : "Salon Sponsored"})
             </button>
           </div>
         </div>

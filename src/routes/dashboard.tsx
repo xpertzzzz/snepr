@@ -30,6 +30,7 @@ import {
   RefreshCw,
   LogOut,
   Calendar,
+  Coins,
 } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -76,6 +77,25 @@ export function CustomerDashboardPage() {
       createdAt: new Date().toISOString(),
     };
   });
+
+  // Customer Token Wallet State (₹17 = 11,000 Tokens Pack)
+  const [tokenBalance, setTokenBalance] = useState<number>(() => {
+    try {
+      const stored = localStorage.getItem("snepr_token_balance");
+      return stored ? parseInt(stored, 10) : 11000;
+    } catch {
+      return 11000;
+    }
+  });
+
+  const handleBuyTokens = () => {
+    const nextBalance = tokenBalance + 11000;
+    setTokenBalance(nextBalance);
+    try {
+      localStorage.setItem("snepr_token_balance", String(nextBalance));
+    } catch {}
+    toast.success("Purchased 11,000 Snepr Grooming Tokens (₹17 Pack)! Unlocking Pro-quality AI previews.");
+  };
 
   // Review Modal State
   const [reviewModalVisit, setReviewModalVisit] = useState<any | null>(null);
@@ -259,8 +279,8 @@ export function CustomerDashboardPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="bg-[#f7f3ed] border border-[#eee4d8] rounded-2xl p-3 sm:p-4 text-center min-w-[140px]">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="bg-[#f7f3ed] border border-[#eee4d8] rounded-2xl p-3 sm:p-4 text-center min-w-[130px]">
               <div className="text-[10px] font-bold text-[#8c8074] uppercase">Snepr Points</div>
               <div className="text-2xl font-serif font-bold text-[#80543a] mt-0.5">
                 {totalPoints} pts
@@ -270,7 +290,22 @@ export function CustomerDashboardPage() {
               </div>
             </div>
 
-            <div className="bg-[#f7f3ed] border border-[#eee4d8] rounded-2xl p-3 sm:p-4 text-center min-w-[140px]">
+            <div className="bg-[#f7f3ed] border border-[#eee4d8] rounded-2xl p-3 sm:p-4 text-center min-w-[130px]">
+              <div className="text-[10px] font-bold text-[#8c8074] uppercase">AI Tokens</div>
+              <div className="text-2xl font-serif font-bold text-amber-600 mt-0.5">
+                {tokenBalance.toLocaleString()}
+              </div>
+              <button
+                type="button"
+                onClick={handleBuyTokens}
+                className="text-[10px] text-amber-700 font-bold hover:underline cursor-pointer"
+                title="Purchase 11,000 Grooming Tokens for ₹17"
+              >
+                + ₹17 Pack (11k)
+              </button>
+            </div>
+
+            <div className="bg-[#f7f3ed] border border-[#eee4d8] rounded-2xl p-3 sm:p-4 text-center min-w-[130px]">
               <div className="text-[10px] font-bold text-[#8c8074] uppercase">Completed Visits</div>
               <div className="text-2xl font-serif font-bold text-[#1d1b17] mt-0.5">
                 {pastVisits.length}
