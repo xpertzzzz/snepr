@@ -9,6 +9,8 @@ import { Footer } from "@/components/layout/Footer";
 import { DockNavbar } from "@/components/layout/DockNavbar";
 import { getCurrentCoordinates, getDistanceToSalon, UserCoordinates } from "@/lib/geolocation";
 import { fetchUserPoints } from "@/lib/supabase";
+import { useDebounce } from "@/hooks/useDebounce";
+import { EmptyState } from "@/components/ui/empty-state";
 import { toast } from "sonner";
 import {
   Search,
@@ -168,10 +170,12 @@ export function LivePageStrict() {
     },
   });
 
+  const debouncedSearch = useDebounce(search, 300);
+
   // Filter and sort salons
   const filteredSalons = useMemo(() => {
     let list = Array.isArray(salonsList) && salonsList.length > 0 ? [...salonsList] : [...REAL_SALONS_DATA];
-    const q = search.trim().toLowerCase();
+    const q = debouncedSearch.trim().toLowerCase();
 
     // Locality Filter
     if (activeLocality !== "All Localities") {
@@ -637,25 +641,17 @@ export function LivePageStrict() {
           </div>
 
           {filteredSalons.length === 0 && (
-            <div className="bg-white border border-[#eee4d8] rounded-3xl p-12 text-center my-8">
-              <div className="w-14 h-14 rounded-2xl bg-[#f7f3ed] text-[#80543a] flex items-center justify-center text-2xl mx-auto mb-3">
-                🔍
-              </div>
-              <h3 className="text-lg font-bold text-[#1d1b17]">No salons match your search</h3>
-              <p className="text-xs text-[#6b5e52] mt-1 max-w-sm mx-auto">
-                Try searching for a different haircut, service, or switch locality to All Localities.
-              </p>
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setActiveLocality("All Localities");
-                  setActiveCategory("All Services");
-                }}
-                className="mt-4 px-5 py-2 rounded-xl bg-[#1d1b17] text-[#f5f1e9] text-xs font-bold hover:bg-[#3d322a]"
-              >
-                Reset All Filters
-              </button>
-            </div>
+            <EmptyState
+              type="no_results"
+              title="No salons match your search"
+              description="No Bhubaneswar partner salons found matching your current locality or search keywords. Try adjusting your query."
+              actionLabel="Reset All Filters"
+              onAction={() => {
+                setSearch("");
+                setActiveLocality("All Localities");
+                setActiveCategory("All Services");
+              }}
+            />
           )}
         </div>
       </main>

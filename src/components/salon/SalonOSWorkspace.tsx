@@ -36,8 +36,19 @@ import {
   joinQueueAtomic,
   fetchSalonLiveQueues,
 } from "@/lib/queue-client";
+import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
+import { DataTable, ColumnDef } from "@/components/ui/data-table";
+import { BulkActionBar } from "@/components/ui/bulk-action-bar";
+import { DestructiveConfirmModal } from "@/components/ui/destructive-confirm-modal";
+import { SubscriptionUpgradeModal } from "@/components/salon/SubscriptionUpgradeModal";
+import { TierBadge, TierLockedFeature } from "@/components/ui/tier-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useAutosave } from "@/hooks/useAutosave";
+import { AutosaveBadge } from "@/components/ui/autosave-badge";
+import { validateServicePrice, validateServiceDuration } from "@/lib/validation";
+import { SNEPR_PLANS, formatINR } from "@/config/subscriptions";
 
-export type SalonOSTab = "overview" | "queue" | "chairs" | "staff" | "services" | "customers" | "analytics" | "profile" | "settings";
+export type SalonOSTab = "overview" | "queue" | "chairs" | "staff" | "services" | "customers" | "analytics" | "studio" | "subscription" | "profile" | "settings";
 
 export interface QueueItem {
   id: number;
@@ -236,6 +247,7 @@ export function SalonOSWorkspace({
   const [currentPlan, setCurrentPlan] = useState<"base" | "intermediate" | "pro">(
     "intermediate"
   );
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Queues & Chairs state
   const [queues, setQueues] = useState<QueueItem[]>(() => {
@@ -271,6 +283,25 @@ export function SalonOSWorkspace({
   const [newServicePrice, setNewServicePrice] = useState("");
   const [newServiceDuration, setNewServiceDuration] = useState("30");
   const [newServiceCategory, setNewServiceCategory] = useState("Hair");
+
+  // Selected customers for bulk actions & modal states
+  const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showDeleteServiceModal, setShowDeleteServiceModal] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<any>(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Autosave for salon profile details
+  const { status: profileAutosaveStatus, lastSaved: profileLastSaved, retry: retryProfileAutosave } = useAutosave({
+    data: { salonName, locality, ownerPhone },
+    delay: 500,
+    onSave: async (data) => {
+      try {
+        localStorage.setItem("snepr_salon_profile", JSON.stringify(data));
+      } catch {}
+      return data;
+    },
+  });
 
   // Customers State
   const [customerSearch, setCustomerSearch] = useState("");
@@ -528,15 +559,25 @@ export function SalonOSWorkspace({
 
   const handleAddService = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newServiceName.trim() || !newServicePrice) {
-      toast.error("Please enter service name and price.");
+    if (!newServiceName.trim()) {
+      toast.error("Please enter a service name.");
+      return;
+    }
+    const priceVal = validateServicePrice(newServicePrice);
+    if (!priceVal.isValid) {
+      toast.error(priceVal.error);
+      return;
+    }
+    const durationVal = validateServiceDuration(newServiceDuration || 30);
+    if (!durationVal.isValid) {
+      toast.error(durationVal.error);
       return;
     }
     const newSvc = {
       id: Date.now(),
       name: newServiceName.trim(),
-      price: parseInt(newServicePrice, 10) || 200,
-      durationMins: parseInt(newServiceDuration, 10) || 30,
+      price: parseInt(newServicePrice, 10),
+      durationMins: parseInt(newServiceDuration || "30", 10),
       category: newServiceCategory,
       isActive: true,
     };
@@ -593,6 +634,13 @@ export function SalonOSWorkspace({
       <header className="sticky top-0 z-30 bg-[#F7F3ED]/90 backdrop-blur-md border-b border-[#EEE5DA] px-4 py-3 sm:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileNavOpen(true)}
+              className="md:hidden p-1.5 rounded-lg border border-[#EEE5DA] text-[#211912] hover:bg-[#EAD8BD]"
+              aria-label="Open Navigation Drawer"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <Link to="/" className="inline-block" aria-label="Snepr home">
               <SneprWordmark height={30} color="#211912" />
             </Link>
@@ -618,129 +666,30 @@ export function SalonOSWorkspace({
 
       {/* ─── WORKSPACE LAYOUT (SIDEBAR ON DESKTOP, MAIN AREA) ─── */}
       <div className="flex-1 max-w-7xl w-full mx-auto flex flex-col md:flex-row">
-        {/* DESKTOP SIDEBAR (EXACTLY 4 TABS: OVERVIEW, STAFF, ANALYTICS, PROFILE) */}
-        <aside className="hidden md:flex w-56 flex-col justify-between border-r border-[#EEE5DA] p-5 bg-[#F0E8DE]/60">
-          <div className="space-y-6">
-            <div className="px-2">
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
-                SALON WORKSPACE
-              </div>
-              <div className="text-sm font-serif font-bold text-[#70472F] mt-0.5 truncate">
-                {salonName}
-              </div>
-            </div>
+        {/* DESKTOP PERSISTENT COLLAPSIBLE SIDEBAR */}
+        <div className="hidden md:block">
+          <DashboardSidebar
+            role="owner"
+            activeId={activeTab === "profile" ? "settings" : activeTab === "chairs" ? "staff" : activeTab}
+            onSelect={(id) => setActiveTab(id as SalonOSTab)}
+            salonName={salonName}
+            currentPlan={currentPlan}
+          />
+        </div>
 
-            <nav className="space-y-1">
-              <button
-                onClick={() => { setActiveTab("overview"); navigate({ to: "/salonos/dashboard" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "overview"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <Armchair className="w-4 h-4 text-[#70472F]" />
-                <span>Dashboard</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("queue"); navigate({ to: "/salonos/queue" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "queue"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <Clock className="w-4 h-4 text-[#70472F]" />
-                <span>Live Queue</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("chairs"); navigate({ to: "/salonos/chairs" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "chairs" || activeTab === "staff"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <Users className="w-4 h-4 text-[#70472F]" />
-                <span>Chairs & Staff</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("services"); navigate({ to: "/salonos/services" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "services"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <Scissors className="w-4 h-4 text-[#70472F]" />
-                <span>Services</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("customers"); navigate({ to: "/salonos/customers" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "customers"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <UserPlus className="w-4 h-4 text-[#70472F]" />
-                <span>Customers</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("analytics"); navigate({ to: "/salonos/analytics" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "analytics"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <BarChart3 className="w-4 h-4 text-[#70472F]" />
-                <span>Analytics</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab("settings"); navigate({ to: "/salonos/settings" }); }}
-                className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activeTab === "settings" || activeTab === "profile"
-                    ? "bg-[#FFFDF9] text-[#70472F] shadow-sm border border-[#EEE5DA]"
-                    : "text-[#78695C] hover:bg-[#FFFDF9]/60 hover:text-[#211912]"
-                }`}
-              >
-                <Settings className="w-4 h-4 text-[#70472F]" />
-                <span>Settings & Plans</span>
-              </button>
-            </nav>
-          </div>
-
-          <div className="pt-4 border-t border-[#EEE5DA] space-y-2">
-            <Link
-              to="/staff"
-              className="w-full py-2 px-3 rounded-xl bg-white/60 hover:bg-white text-[11px] font-bold text-[#70472F] flex items-center justify-center gap-1.5 transition-colors border border-[#EEE5DA]"
-            >
-              <Scissors className="w-3.5 h-3.5" />
-              <span>Switch to Staff Desk</span>
-            </Link>
-
-            <button
-              onClick={() => {
-                try {
-                  localStorage.removeItem("snepr_session");
-                } catch {}
-                toast.info("Signed out of SalonOS.");
-                navigate({ to: "/login" });
-              }}
-              className="w-full py-2 px-3 text-[11px] font-semibold text-[#8C8074] hover:text-red-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </aside>
+        {/* MOBILE DRAWER SIDEBAR */}
+        <DashboardSidebar
+          role="owner"
+          activeId={activeTab === "profile" ? "settings" : activeTab === "chairs" ? "staff" : activeTab}
+          onSelect={(id) => {
+            setActiveTab(id as SalonOSTab);
+            setIsMobileNavOpen(false);
+          }}
+          salonName={salonName}
+          currentPlan={currentPlan}
+          isMobileOpen={isMobileNavOpen}
+          onMobileClose={() => setIsMobileNavOpen(false)}
+        />
 
         {/* ─── MAIN CONTENT AREA ─── */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
@@ -1681,60 +1630,226 @@ export function SalonOSWorkspace({
                 </div>
               </div>
 
-              <div className="bg-[#FFFDF9] border border-[#EEE5DA] rounded-3xl p-6 shadow-sm">
-                <div className="mb-4">
-                  <input
-                    type="text"
-                    placeholder="Search client by name or phone number..."
-                    value={customerSearch}
-                    onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="w-full px-4 py-2.5 rounded-xl border border-[#EEE5DA] bg-[#F7F3ED] text-xs font-semibold text-[#211912] focus:outline-none focus:border-[#70472F]"
-                  />
+              <DataTable
+                data={customersList}
+                columns={[
+                  { id: "name", header: "Customer", accessorKey: "name", sortable: true },
+                  { id: "phone", header: "Phone", accessorKey: "phone" },
+                  {
+                    id: "totalVisits",
+                    header: "Total Visits",
+                    accessorKey: "totalVisits",
+                    sortable: true,
+                    cell: (c) => <span className="font-semibold text-[#70472F]">{c.totalVisits} visits</span>,
+                  },
+                  { id: "lastVisit", header: "Last Visit", accessorKey: "lastVisit" },
+                  {
+                    id: "loyaltyPoints",
+                    header: "Snepr Points",
+                    accessorKey: "loyaltyPoints",
+                    sortable: true,
+                    cell: (c) => <span className="font-bold text-amber-700">+{c.loyaltyPoints} pts</span>,
+                  },
+                  { id: "favoriteService", header: "Preferred Service", accessorKey: "favoriteService" },
+                  {
+                    id: "action",
+                    header: "Action",
+                    align: "right",
+                    cell: (c) => (
+                      <button
+                        onClick={() => toast.success(`Priority token issued for ${c.name}!`)}
+                        className="px-3 py-1 rounded-lg bg-[#70472F] text-white text-[11px] font-bold hover:bg-[#583724] cursor-pointer"
+                      >
+                        Issue Token
+                      </button>
+                    ),
+                  },
+                ]}
+                searchable={true}
+                searchPlaceholder="Search client by name or phone number..."
+                searchKey="name"
+                selectable={true}
+                selectedIds={selectedCustomerIds}
+                onSelectionChange={setSelectedCustomerIds}
+                exportFileName="snepr-clients"
+                emptyTitle="No customer records found"
+                emptyDescription="Clients who join your queue or book a walk-in token will automatically appear in your directory."
+              />
+
+              <BulkActionBar
+                selectedCount={selectedCustomerIds.length}
+                onClearSelection={() => setSelectedCustomerIds([])}
+                actions={[
+                  {
+                    id: "tag_vip",
+                    label: "Tag as VIP",
+                    onExecute: () => {
+                      toast.success(`Tagged ${selectedCustomerIds.length} clients as VIP!`);
+                      setSelectedCustomerIds([]);
+                    },
+                  },
+                  {
+                    id: "export_csv",
+                    label: "Export Selected",
+                    onExecute: () => {
+                      toast.success(`Exported ${selectedCustomerIds.length} client records to CSV.`);
+                      setSelectedCustomerIds([]);
+                    },
+                  },
+                ]}
+              />
+            </div>
+          )}
+
+          {/* TAB: SNEPR STUDIO (AI GROOMING PREVIEWS) */}
+          {activeTab === "studio" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    AI GROOMING PREVIEW INTELLIGENCE
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Snepr Studio Operations</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Salon-sponsored AI visual styling for clients waiting in your chairs.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TierBadge tier={currentPlan} size="md" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="bg-white border border-[#EEE5DA] rounded-3xl p-6 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C8074]">
+                    AI Engine Quality
+                  </span>
+                  <div className="text-2xl font-bold font-serif text-[#1C1613]">
+                    {currentPlan === "pro"
+                      ? "Pro Ultra-Res (No Downscaling)"
+                      : currentPlan === "intermediate"
+                      ? "Enhanced AI Styling"
+                      : "Basic AI Generation"}
+                  </div>
+                  <p className="text-xs text-[#786D65]">
+                    {currentPlan === "intermediate"
+                      ? "Full texture, lighting, and hairstyle preservation with generous fair-use limits (arbitrary 3-attempt cap removed)."
+                      : currentPlan === "pro"
+                      ? "Highest fidelity identity preservation and multi-angle styling."
+                      : "Essential hairstyle & beard previews."}
+                  </p>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-[#EEE5DA] text-[#8C8074] font-bold text-[11px] uppercase tracking-wider">
-                        <th className="pb-3 pl-2">Customer</th>
-                        <th className="pb-3">Phone</th>
-                        <th className="pb-3">Total Visits</th>
-                        <th className="pb-3">Last Visit</th>
-                        <th className="pb-3">Snepr Points</th>
-                        <th className="pb-3">Preferred Service</th>
-                        <th className="pb-3 text-right pr-2">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#EEE5DA]/60">
-                      {customersList
-                        .filter(
-                          (c) =>
-                            c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-                            c.phone.includes(customerSearch)
-                        )
-                        .map((c) => (
-                          <tr key={c.id} className="hover:bg-[#F7F3ED]/40 transition-colors">
-                            <td className="py-3 pl-2 font-bold text-[#211912]">{c.name}</td>
-                            <td className="py-3 text-[#8C8074]">{c.phone}</td>
-                            <td className="py-3 font-semibold text-[#70472F]">{c.totalVisits} visits</td>
-                            <td className="py-3 text-[#8C8074]">{c.lastVisit}</td>
-                            <td className="py-3 font-bold text-amber-700">+{c.loyaltyPoints} pts</td>
-                            <td className="py-3 text-[#211912]">{c.favoriteService}</td>
-                            <td className="py-3 text-right pr-2">
-                              <button
-                                onClick={() => {
-                                  toast.success(`Priority token issued for ${c.name}!`);
-                                }}
-                                className="px-3 py-1 rounded-lg bg-[#70472F] text-white text-[11px] font-bold hover:bg-[#583724]"
-                              >
-                                Issue Token
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                <div className="bg-white border border-[#EEE5DA] rounded-3xl p-6 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C8074]">
+                    Client AI Wallet Token Packs
+                  </span>
+                  <div className="text-2xl font-bold font-serif text-[#1C1613]">
+                    ₹17 for 11,000 Tokens
+                  </div>
+                  <p className="text-xs text-[#786D65]">
+                    Clients can independently purchase token packs which automatically unlock default Pro-quality AI previews without downgrade.
+                  </p>
                 </div>
+
+                <div className="bg-white border border-[#EEE5DA] rounded-3xl p-6 space-y-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8C8074]">
+                    Interactive 3D/AR Preview
+                  </span>
+                  <div className="text-2xl font-bold font-serif text-[#7A4B29]">
+                    In Development
+                  </div>
+                  <p className="text-xs text-[#786D65]">
+                    Head-tracking 3D augmented reality virtual mirror preview is currently undergoing laboratory testing.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-[#FAF7F2] border border-[#E8E1D7] rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-base font-bold text-[#1C1613]">Launch Live Studio Simulator</h3>
+                  <p className="text-xs text-[#786D65] mt-1">
+                    Preview haircuts, beard trims, and color transformations for clients at your reception.
+                  </p>
+                </div>
+                <Link
+                  to="/live/studio"
+                  className="px-6 py-2.5 rounded-full bg-[#1C1613] hover:bg-[#3D2E24] text-white text-xs font-bold transition-all shadow-sm"
+                >
+                  Open AI Studio ↗
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: SUBSCRIPTION MANAGEMENT */}
+          {activeTab === "subscription" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EEE5DA]">
+                <div>
+                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-[#9A8069]">
+                    SOFTWARE PLANS &amp; COMMISSION GUARANTEE
+                  </div>
+                  <h1 className="text-2xl font-bold font-serif text-[#211912]">Subscription Management</h1>
+                  <p className="text-xs text-[#8C8074] mt-0.5">
+                    Transparent flat monthly plans. Keep 100% of your haircut earnings.
+                  </p>
+                </div>
+                <Button
+                  onClick={() => setShowUpgradeModal(true)}
+                  className="rounded-full bg-[#70472F] hover:bg-[#583724] text-white text-xs font-bold px-5 cursor-pointer shadow-sm"
+                >
+                  Change Plan
+                </Button>
+              </div>
+
+              {/* Active Plan Card */}
+              <div className="bg-white border-2 border-[#D4A17B] rounded-3xl p-6 sm:p-8 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                  <div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#7A4B29]">
+                      Current Active Plan
+                    </span>
+                    <h2 className="text-2xl font-bold font-serif text-[#1C1613] capitalize">
+                      {currentPlan} Tier
+                    </h2>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-2xl font-extrabold text-[#1C1613]">
+                      {currentPlan === "pro" ? "₹449" : currentPlan === "intermediate" ? "₹400" : "₹199"}
+                    </span>
+                    <span className="text-xs text-[#786D65]"> / month</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[#F0EAE2] text-xs text-[#786D65]">
+                  <div>
+                    <strong className="block text-[#1C1613] font-semibold">Active Station Chairs</strong>
+                    <span>
+                      {currentPlan === "pro"
+                        ? "Unlimited Chairs"
+                        : currentPlan === "intermediate"
+                        ? "Up to 3 Chairs"
+                        : "1 Chair"}
+                    </span>
+                  </div>
+                  <div>
+                    <strong className="block text-[#1C1613] font-semibold">Haircut Commission</strong>
+                    <span className="text-emerald-700 font-bold">0% (You keep 100%)</span>
+                  </div>
+                  <div>
+                    <strong className="block text-[#1C1613] font-semibold">Next Renewal Date</strong>
+                    <span>{new Date(Date.now() + 24 * 3600 * 1000 * 22).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Zero Customer Fees Guarantee Banner */}
+              <div className="bg-[#EFE7DC] border border-[#DDD3C5] rounded-2xl p-4 text-xs text-[#4A3F35] flex items-center gap-2.5">
+                <Shield className="w-4 h-4 text-[#7A4B29] shrink-0" />
+                <span>
+                  <strong>Free Customer Queue Guarantee:</strong> Customer discovery, taking digital queue tokens, and checking wait times are always 100% free across all salon tiers.
+                </span>
               </div>
             </div>
           )}
@@ -2013,6 +2128,16 @@ export function SalonOSWorkspace({
           </div>
         </div>
       )}
+      {/* ─── SUBSCRIPTION UPGRADE MODAL ─── */}
+      <SubscriptionUpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        currentPlanId={currentPlan}
+        onSelectPlan={(newPlan) => {
+          setCurrentPlan(newPlan);
+          toast.success(`Salon subscription upgraded to ${newPlan.toUpperCase()} tier!`);
+        }}
+      />
     </div>
   );
 }

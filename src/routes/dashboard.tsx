@@ -5,6 +5,11 @@ import { fetchUserPoints, submitVerifiedReviewDirect } from "@/lib/supabase";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/ui/empty-state";
+import { useAutosave } from "@/hooks/useAutosave";
+import { AutosaveBadge } from "@/components/ui/autosave-badge";
+import { DestructiveConfirmModal } from "@/components/ui/destructive-confirm-modal";
+import { formatDate } from "@/lib/formatters";
 import {
   Sparkles,
   Award,
@@ -80,6 +85,19 @@ export function CustomerDashboardPage() {
   // Notification Preferences State
   const [notifSms, setNotifSms] = useState(true);
   const [notifBrowser, setNotifBrowser] = useState(true);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+
+  // Autosave notification preferences
+  const { status: autosaveStatus, lastSaved, retry: retryAutosave } = useAutosave({
+    data: { notifSms, notifBrowser },
+    delay: 400,
+    onSave: async (prefs) => {
+      try {
+        localStorage.setItem("snepr_notif_prefs", JSON.stringify(prefs));
+      } catch {}
+      return prefs;
+    },
+  });
 
   useEffect(() => {
     try {
@@ -349,7 +367,7 @@ export function CustomerDashboardPage() {
                   Track Live Pass ↗
                 </Link>
                 <button
-                  onClick={handleLeaveQueue}
+                  onClick={() => setShowLeaveModal(true)}
                   className="px-4 py-2.5 rounded-xl border border-red-200 text-red-700 text-xs font-bold hover:bg-red-50 transition-all cursor-pointer"
                 >
                   Leave Queue
@@ -358,23 +376,13 @@ export function CustomerDashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-white border border-[#eee4d8] rounded-3xl p-8 text-center shadow-sm">
-            <div className="w-14 h-14 rounded-2xl bg-[#f7f3ed] text-[#80543a] flex items-center justify-center text-2xl mx-auto mb-3">
-              ✂️
-            </div>
-            <h2 className="text-xl font-bold font-serif text-[#1d1b17]">No Active Queue Pass</h2>
-            <p className="text-xs text-[#6b5e52] mt-1 max-w-sm mx-auto">
-              You do not have any active haircut tickets right now. Check live chair availability across Bhubaneswar salons and save your spot remotely.
-            </p>
-            <div className="mt-5">
-              <Link
-                to="/explore"
-                className="px-6 py-3 rounded-full bg-[#1d1b17] text-[#f5f1e9] text-xs font-bold hover:bg-[#3d322a] transition-all shadow-sm"
-              >
-                Find a Salon &amp; Join Queue ↗
-              </Link>
-            </div>
-          </div>
+          <EmptyState
+            type="no_queue"
+            title="No Active Queue Pass"
+            description="You do not have any active haircut tickets right now. Check live chair availability across Bhubaneswar salons and save your spot remotely."
+            actionLabel="Explore Salons & Join Queue"
+            onAction={() => navigate({ to: "/salons" })}
+          />
         )}
 
         {/* ─── DASHBOARD NAVIGATION TABS ─── */}
@@ -573,9 +581,12 @@ export function CustomerDashboardPage() {
         {/* ─── TAB 4: SETTINGS & PREFERENCES ─── */}
         {activeTab === "settings" && (
           <div className="bg-white border border-[#eee4d8] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-xl font-bold font-serif text-[#1d1b17]">Account &amp; Notification Settings</h3>
-              <p className="text-xs text-[#6b5e52] mt-0.5">Manage appointment alerts and your customer profile</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold font-serif text-[#1d1b17]">Account &amp; Notification Settings</h3>
+                <p className="text-xs text-[#6b5e52] mt-0.5">Manage appointment alerts and your customer profile</p>
+              </div>
+              <AutosaveBadge status={autosaveStatus} lastSaved={lastSaved} onRetry={retryAutosave} />
             </div>
 
             <div className="space-y-4 max-w-lg">
@@ -686,6 +697,18 @@ export function CustomerDashboardPage() {
             </div>
           </div>
         )}
+        <DestructiveConfirmModal
+          open={showLeaveModal}
+          onOpenChange={setShowLeaveModal}
+          title={`Leave queue at ${activeQueue?.salonName}?`}
+          description={`You will forfeit token ${activeQueue?.tokenCode} and give up your place in line.`}
+          consequences={[
+            "Your reserved chair countdown will be canceled immediately.",
+            "You will need to take a new token if you return.",
+          ]}
+          confirmButtonLabel="Confirm Leave Queue"
+          onConfirm={handleLeaveQueue}
+        />
       </main>
 
       <Footer />

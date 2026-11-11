@@ -146,6 +146,9 @@ function RootShell({ children }: { children: ReactNode }) {
 
 import { Capacitor } from "@capacitor/core";
 import { AppPromoManager } from "@/components/promo/AppPromoManager";
+import { CommandPalette } from "@/components/navigation/CommandPalette";
+import { KeyboardShortcutsModal } from "@/components/navigation/KeyboardShortcutsModal";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
@@ -177,10 +180,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppPromoManager />
+      <CommandPalette />
+      <KeyboardShortcutsModal />
 
       <div className="flex min-h-screen w-full flex-col bg-background font-sans text-ink selection:bg-primary/20">
         <main className="flex-1 w-full">
-          <Outlet />
+          <ErrorBoundary>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
 

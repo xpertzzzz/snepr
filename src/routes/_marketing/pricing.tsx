@@ -144,6 +144,26 @@ export function SneprPricingPage() {
               </p>
             </div>
 
+            {/* Zero Customer Fees Guarantee Banner */}
+            <div style={{
+              background: "#efe7dc",
+              border: "1px solid #ddd3c5",
+              borderRadius: "16px",
+              padding: "16px 22px",
+              marginBottom: "32px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontSize: "13px",
+              color: "#3d322a",
+              lineHeight: 1.5
+            }}>
+              <span style={{ fontSize: "20px" }}>🛡️</span>
+              <div>
+                <strong style={{ color: "#1c1613" }}>Customer Queue Access is 100% Free on All Plans:</strong> Customers browsing Bhubaneswar salons, viewing live chair availability, tracking wait times, and receiving turn alerts are never charged.
+              </div>
+            </div>
+
             <div className="pricing">
               {/* Base Plan */}
               <article className="plan">
@@ -232,6 +252,84 @@ export function SneprPricingPage() {
             <p className="sample-note" style={{ marginTop: "20px" }}>
               ALL PLANS INCLUDE: Free digital onboarding, custom QR standee, verified review badge, and zero haircut commission guarantees.
             </p>
+
+            {/* ─── CUSTOMER AI STUDIO TOKEN WALLET PACK ─── */}
+            <div style={{
+              background: "#1c1613",
+              color: "#ffffff",
+              borderRadius: "28px",
+              padding: "36px 32px",
+              marginTop: "48px",
+              border: "1px solid #382f28",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+              gap: "28px",
+              alignItems: "center"
+            }}>
+              <div>
+                <span style={{
+                  background: "#2c241f",
+                  color: "#d4a17b",
+                  fontSize: "11px",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                  padding: "4px 12px",
+                  borderRadius: "99px",
+                  display: "inline-block",
+                  marginBottom: "12px"
+                }}>
+                  Customer AI Studio Pack
+                </span>
+                <h3 style={{ fontSize: "28px", fontWeight: 700, color: "#ffffff", margin: "0 0 10px 0" }}>
+                  ₹17 for 11,000 Studio Tokens
+                </h3>
+                <p style={{ fontSize: "14px", color: "#d8cebf", lineHeight: 1.7, margin: 0, maxWidth: "480px" }}>
+                  Generate high-fidelity virtual hairstyle and beard trims with identity preservation. Tokens never expire and independently unlock full Pro-quality AI previews regardless of the salon plan.
+                </p>
+              </div>
+
+              <div style={{
+                background: "#28201a",
+                border: "1px solid #45372d",
+                borderRadius: "20px",
+                padding: "24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "14px"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#e8dfd5" }}>
+                  <span>Cost per style preview:</span>
+                  <strong style={{ color: "#d4a17b" }}>1,000 tokens (~₹1.50)</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#e8dfd5" }}>
+                  <span>AI Engine Tier:</span>
+                  <strong style={{ color: "#d4a17b" }}>Pro Ultra-Res (No Downscaling)</strong>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "#e8dfd5" }}>
+                  <span>Double-charge guarantee:</span>
+                  <strong style={{ color: "#68d391" }}>Never double-charged</strong>
+                </div>
+
+                <a
+                  href="/live/studio"
+                  style={{
+                    display: "inline-block",
+                    textAlign: "center",
+                    background: "#d4a17b",
+                    color: "#1c1613",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    padding: "12px 20px",
+                    borderRadius: "99px",
+                    textDecoration: "none",
+                    marginTop: "6px"
+                  }}
+                >
+                  Open Snepr AI Studio ↗
+                </a>
+              </div>
+            </div>
 
             {/* ─── SALON ECONOMICS CALCULATOR ─── */}
             <div className="calc" id="calc" style={{ marginTop: "60px" }}>

@@ -163,34 +163,76 @@ export function ErrorPage({
         {/* LEFT COPY */}
         <section className="max-w-[570px]">
           <div className="text-[11px] tracking-[1.6px] uppercase text-[#7a4b29] font-bold">
-            We couldn't load this page
+            {code === "404"
+              ? "Page Not Found"
+              : code === "403"
+              ? "Access Restricted"
+              : code === "503"
+              ? "Scheduled Maintenance"
+              : "Something went wrong"}
           </div>
           <h1 className="font-serif text-5xl sm:text-6xl font-medium tracking-tight leading-[1.05] my-4">
-            Oops! This page<br />
-            <span className="text-[#7a4b29]">isn't working.</span>
+            {code === "404" ? (
+              <>
+                Lost in the<br />
+                <span className="text-[#7a4b29]">salon queue?</span>
+              </>
+            ) : code === "403" ? (
+              <>
+                Access<br />
+                <span className="text-[#7a4b29]">restricted.</span>
+              </>
+            ) : code === "503" ? (
+              <>
+                Brief maintenance<br />
+                <span className="text-[#7a4b29]">in progress.</span>
+              </>
+            ) : (
+              <>
+                Oops! This page<br />
+                <span className="text-[#7a4b29]">isn't working.</span>
+              </>
+            )}
           </h1>
           <p className="text-base leading-relaxed text-[#75685e] max-w-[490px] m-0">
-            Something went wrong while opening this page. Please try again. If it still doesn't work, go back to Snepr and continue browsing.
+            {code === "404"
+              ? "The salon profile, queue ticket, or page you are looking for does not exist or has been relocated."
+              : code === "403"
+              ? "You do not have the required permissions to access this administrative or salon management portal."
+              : code === "503"
+              ? "Snepr is currently performing a quick routine infrastructure update. Queue sync will resume momentarily."
+              : "Something went wrong while opening this page. Please try again. If it still doesn't work, go back to Snepr and continue browsing."}
           </p>
           <div className="mt-5 text-xs text-[#918378] flex items-center gap-2">
             <strong className="text-[#7a4b29]">Error {code}</strong>
             <span>{message}</span>
           </div>
           <div className="flex gap-2.5 flex-wrap mt-7">
-            <button
-              onClick={() => {
-                if (onRetry) onRetry();
-                else window.location.reload();
-              }}
-              className="bg-[#7a4b29] text-white border-0 rounded-lg px-5 py-3 text-xs font-bold hover:bg-[#60391f] transition-colors cursor-pointer"
-            >
-              Try again
-            </button>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="bg-[#7a4b29] text-white border-0 rounded-lg px-5 py-3 text-xs font-bold hover:bg-[#60391f] transition-colors cursor-pointer"
+              >
+                Try again
+              </button>
+            )}
             <Link
-              to="/"
+              to="/salons"
+              className="bg-[#1C1613] text-white border border-[#1C1613] rounded-lg px-5 py-3 text-xs font-bold hover:bg-[#3D2E24] transition-colors"
+            >
+              Search Salons in Bhubaneswar
+            </Link>
+            <Link
+              to="/dashboard"
               className="bg-white text-[#1b1410] border border-[#e8e1d7] rounded-lg px-5 py-3 text-xs font-bold hover:bg-[#faf7f2] transition-colors"
             >
-              Go to Snepr home
+              My Dashboard
+            </Link>
+            <Link
+              to="/"
+              className="bg-white text-[#75685e] border border-[#e8e1d7] rounded-lg px-5 py-3 text-xs font-bold hover:bg-[#faf7f2] transition-colors"
+            >
+              Home
             </Link>
           </div>
         </section>

@@ -252,8 +252,10 @@ export function SneprLandingPage() {
         rafId = null;
         const rect = scene.getBoundingClientRect();
         const vh = window.innerHeight;
-        const range = rect.height - vh;
-        const rawP = range > 0 ? (0 - rect.top) / range : 0;
+        // Natural viewport-synchronized scroll progress (0 when entering, 1 when centered/scrolled)
+        const startY = vh * 0.85;
+        const endY = vh * 0.15;
+        const rawP = (startY - rect.top) / (startY - endY);
         const p = clamp(rawP, 0, 1);
 
         progress.style.width = `${p * 100}%`;
@@ -401,7 +403,6 @@ export function SneprLandingPage() {
       <section
         className="cut-scene"
         id="cutScene"
-        style={{ height: "150vh" }}
         ref={cutSceneRef}
         aria-label="A pair of scissors follows a curved strand of hair and cuts it as you scroll"
       >

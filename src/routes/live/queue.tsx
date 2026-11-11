@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { DockNavbar } from "@/components/layout/DockNavbar";
+import { DestructiveConfirmModal } from "@/components/ui/destructive-confirm-modal";
 
 export const Route = createFileRoute("/live/queue")({
   head: () => ({
@@ -86,6 +87,7 @@ export function AppQueue() {
   });
 
   const [lastSynced, setLastSynced] = useState("Just now");
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
 
   // Poll Supabase every 3 seconds for server-authoritative live status
   const { data: serverStatus, dataUpdatedAt } = useQuery({
@@ -300,7 +302,7 @@ export function AppQueue() {
               </Link>
             ) : (
               <button
-                onClick={() => cancelMutation.mutate()}
+                onClick={() => setShowLeaveModal(true)}
                 disabled={cancelMutation.isPending}
                 className="text-xs font-bold text-[#8c8074] hover:text-red-700 transition-colors cursor-pointer"
               >
@@ -309,6 +311,21 @@ export function AppQueue() {
             )}
           </div>
         </div>
+
+        <DestructiveConfirmModal
+          open={showLeaveModal}
+          onOpenChange={setShowLeaveModal}
+          title={`Leave queue at ${tokenData.salonName}?`}
+          description={`You will release token #${tokenData.tokenCode} and give up your position (${tokenData.position} in line).`}
+          consequences={[
+            "Your reserved chair countdown will be canceled immediately.",
+            "You will need to take a new token at the back of the queue if you return.",
+          ]}
+          confirmButtonLabel="Confirm Leave Queue"
+          onConfirm={async () => {
+            await cancelMutation.mutateAsync();
+          }}
+        />
 
         {/* ─── GPS ROUTE & SALON NAVIGATION CARD ─── */}
         <div className="bg-white border border-[#eee4d8] rounded-3xl p-6 shadow-sm space-y-4">
