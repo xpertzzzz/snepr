@@ -10,7 +10,8 @@ html,
 body {
   color-scheme: light !important;
   forced-color-adjust: none !important;
-  overflow-x: hidden !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
   max-width: 100vw !important;
 }
 
@@ -447,22 +448,39 @@ body {
 
 /* ─── Snepr Cut Scene & Discovery Section Spacing Tightening ─── */
 .cut-scene {
-  height: 160vh !important;
+  height: 150vh !important;
+  overflow: visible !important;
   border-radius: 0 0 36px 36px !important;
+}
+
+.cut-sticky {
+  overflow: hidden !important;
+  border-radius: 0 0 36px 36px !important;
+}
+
+.cut-copy {
+  bottom: 6% !important;
+}
+
+.cut-copy h2 {
+  color: #f7f3ed !important;
 }
 
 @media (max-width: 768px) {
   .cut-scene {
-    height: 145vh !important;
+    height: 135vh !important;
+    border-radius: 0 0 24px 24px !important;
+  }
+  .cut-sticky {
     border-radius: 0 0 24px 24px !important;
   }
 }
 
 #discover.section {
-  padding-top: 32px !important;
-  padding-bottom: 40px !important;
+  padding-top: 28px !important;
+  padding-bottom: 36px !important;
 }
 
 #discover .section-head {
-  margin-bottom: 22px !important;
+  margin-bottom: 18px !important;
 }

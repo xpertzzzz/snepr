@@ -401,7 +401,7 @@ export function SneprLandingPage() {
       <section
         className="cut-scene"
         id="cutScene"
-        style={{ height: "160vh", minHeight: "150vh" }}
+        style={{ height: "150vh" }}
         ref={cutSceneRef}
         aria-label="A pair of scissors follows a curved strand of hair and cuts it as you scroll"
       >
@@ -496,7 +496,7 @@ export function SneprLandingPage() {
 
       {/* ─── 4. CORE FEATURE: SALON DISCOVERY & LIVE QUEUES ─── */}
       <main>
-        <section className="section" id="discover" style={{ paddingTop: "32px", paddingBottom: "36px" }}>
+        <section className="section" id="discover" style={{ paddingTop: "24px", paddingBottom: "36px" }}>
           <div className="wrap">
             <div className="section-head">
               <div>

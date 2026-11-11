@@ -24,8 +24,8 @@ footer{background:#211f1b;color:#f5f1e9;padding:65px 0 25px;border-radius:7% 7% 
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
 
 /* Cinematic scroll sequence */
-.cut-scene{height:255vh;position:relative;background:#211f1b;color:#f5f1e9;overflow:clip;border-radius:0 0 9% 9%}
-.cut-sticky{height:100svh;min-height:560px;position:sticky;top:0;display:grid;place-items:center;overflow:hidden}
+.cut-scene{height:150vh;position:relative;background:#211f1b;color:#f5f1e9;overflow:visible;border-radius:0 0 36px 36px}
+.cut-sticky{height:100svh;min-height:560px;position:sticky;top:0;display:grid;place-items:center;overflow:hidden;border-radius:0 0 36px 36px}
 .cut-backdrop{position:absolute;width:78vw;height:78vw;max-width:1000px;max-height:1000px;border:1px solid #d1a27b28;border-radius:48% 52% 58% 42%;box-shadow:0 0 0 7vw #d1a27b08,0 0 0 14vw #d1a27b05;transform:rotate(-18deg)}
 .cut-label{position:absolute;z-index:4;top:11%;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.23em;text-transform:uppercase;color:#d4a17b}
 .cut-stage{position:relative;width:min(1000px,94vw);height:min(590px,72vh);z-index:2}
@@ -38,9 +38,9 @@ footer{background:#211f1b;color:#f5f1e9;padding:65px 0 25px;border-radius:7% 7% 
 .scissor-metal{fill:none;stroke:#e6d7c5;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
 .scissor-dark{fill:none;stroke:#a66d49;stroke-width:2}
 .blade-a,.blade-b{transform-box:view-box;transform-origin:96px 76px}
-.cut-copy{position:absolute;z-index:5;left:0;right:0;bottom:8%;text-align:center;padding:0 20px;pointer-events:none}
+.cut-copy{position:absolute;z-index:5;left:0;right:0;bottom:6%;text-align:center;padding:0 20px;pointer-events:none}
 .cut-copy .cut-kicker{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#d4a17b}
-.cut-copy h2{font:600 clamp(38px,6.5vw,82px)/.94 Manrope,sans-serif;letter-spacing:-.08em;margin:15px 0}
+.cut-copy h2{font:600 clamp(38px,6.5vw,82px)/.94 Manrope,sans-serif;letter-spacing:-.08em;margin:15px 0;color:#f7f3ed!important}
 .cut-copy h2 em{font-family:Georgia,serif;color:#d4a17b;font-weight:400}
 .cut-copy p{font-size:13px;line-height:1.8;color:#bcb3a8;max-width:430px;margin:0 auto}
 .cut-progress{position:absolute;right:28px;top:50%;height:100px;width:1px;background:#ffffff30;z-index:5}
